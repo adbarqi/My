@@ -2924,6 +2924,17 @@ window.addEventListener('scroll', () => $('#tip').classList.remove('show'), {pas
   setInterval(updateFreshness, 30000);
 })();
 </script>
-<script>if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(function(){});}</script>
+<script>
+/* تحديث تلقائي: إذا رُفعت نسخة أحدث من اللوحة على الموقع، تُحمَّل فوراً */
+var APP_VER = "202610201606";
+if("serviceWorker" in navigator){ navigator.serviceWorker.register("sw.js", {updateViaCache:"none"}).then(function(r){ r.update(); }).catch(function(){}); }
+fetch("version.txt?t=" + Date.now(), {cache:"no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
+  v = (v || "").trim();
+  if(v && v !== APP_VER && sessionStorage.getItem("pdc_reload") !== v){
+    sessionStorage.setItem("pdc_reload", v);
+    (window.caches ? caches.keys().then(function(ks){ return Promise.all(ks.map(function(k){ return caches.delete(k); })); }) : Promise.resolve()).then(function(){ location.reload(); });
+  }
+}).catch(function(){});
+</script>
 </body>
 </html>
