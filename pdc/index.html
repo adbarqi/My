@@ -2767,7 +2767,10 @@ const _loadSlotData = loadSlotData;
 loadSlotData = async function(key, file, parsed, timing){
   await _loadSlotData(key, file, parsed, timing);
   SLOT[key].meta.source = 'device';
-  IDB.set('cache', 'm_' + key, {meta:SLOT[key].meta, data:parsed});
+  try{ if(navigator.storage && navigator.storage.persist) await navigator.storage.persist(); }catch(e){}
+  await IDB.set('cache', 'm_' + key, {meta:SLOT[key].meta, data:parsed});
+  const chk = await IDB.get('cache', 'm_' + key);
+  log(chk && chk.data ? 'حُفظت نسخة على هذا الجوال' : 'تعذّر الحفظ على الجوال — ستحتاج اختيار الملف عند الفتح القادم', key, chk && chk.data ? 'ok' : 'err');
 };
 const _assignFiles = assignFiles;
 assignFiles = async function(list){
@@ -2925,8 +2928,7 @@ window.addEventListener('scroll', () => $('#tip').classList.remove('show'), {pas
 })();
 </script>
 <script>
-/* تحديث تلقائي: إذا رُفعت نسخة أحدث من اللوحة على الموقع، تُحمَّل فوراً */
-var APP_VER = "202610201606";
+var APP_VER = "202610201609";
 if("serviceWorker" in navigator){ navigator.serviceWorker.register("sw.js", {updateViaCache:"none"}).then(function(r){ r.update(); }).catch(function(){}); }
 fetch("version.txt?t=" + Date.now(), {cache:"no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
   v = (v || "").trim();
