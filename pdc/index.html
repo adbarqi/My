@@ -1152,6 +1152,9 @@ table.ops-table tr.ops-tot td{background:color-mix(in srgb,var(--brand-2) 12%,va
 .mlist button small{color:var(--muted); font-size:11px}
 .mlist button em{font-style:normal; background:var(--critical); color:#fff; border-radius:999px; padding:0 7px; font-size:11px; font-weight:800}
 
+.pop-open .map-legend{display:none}
+@media(max-width:600px){.map-legend{font-size:10.5px; padding:6px 8px}}
+
 /* ==================== نسخة الجوال ==================== */
 html,body{-webkit-text-size-adjust:100%; overscroll-behavior-y:contain}
 body{font-size:14px; padding-bottom:calc(70px + env(safe-area-inset-bottom))}
@@ -3352,6 +3355,8 @@ function renderMap(){
     MAP.legend = L.control({position:'bottomleft'});
     MAP.legend.onAdd = () => { const d = L.DomUtil.create('div', 'map-legend'); d.id = 'mapLegend'; L.DomEvent.disableClickPropagation(d); return d; };
     MAP.legend.addTo(MAP.m);
+    MAP.m.on('popupopen', () => MAP.m.getContainer().classList.add('pop-open'));
+    MAP.m.on('popupclose', () => MAP.m.getContainer().classList.remove('pop-open'));
     MAP.fitKey = '';
   }
   mapSetBase();
@@ -3769,7 +3774,7 @@ window.addEventListener('scroll', () => $('#tip').classList.remove('show'), {pas
 })();
 </script>
 <script>
-var APP_VER = "202610201620";
+var APP_VER = "202610201621";
 if("serviceWorker" in navigator){ navigator.serviceWorker.register("sw.js", {updateViaCache:"none"}).then(function(r){ r.update(); }).catch(function(){}); }
 fetch("version.txt?t=" + Date.now(), {cache:"no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
   v = (v || "").trim();
