@@ -3293,14 +3293,29 @@ const MAP = {m:null, base:null, baseDark:null, group:null, legend:null, color:sa
 try{ const s = JSON.parse(safeLS('pdc_map_show') || 'null'); if(s) MAP.show = s; }catch(e){}
 function cssVar(n){ return getComputedStyle(document.documentElement).getPropertyValue(n).trim() || '#888'; }
 function isDark(){ const t = document.documentElement.getAttribute('data-theme'); return t ? t === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches; }
+const MAP_BASES = {
+  map:{n:'خريطة', light:'Canvas/World_Light_Gray_Base', dark:'Canvas/World_Dark_Gray_Base', ref:true},
+  street:{n:'شوارع', light:'World_Street_Map', dark:'World_Street_Map'},
+  sat:{n:'قمر صناعي', light:'World_Imagery', dark:'World_Imagery', ref:true}
+};
+MAP.baseKind = safeLS('pdc_map_base') || 'map';
 function mapSetBase(){
   if(!MAP.m) return;
-  const want = isDark() ? 'dark_all' : 'light_all';
+  const B = MAP_BASES[MAP.baseKind] || MAP_BASES.map;
+  const svc = isDark() ? B.dark : B.light;
+  const want = MAP.baseKind + '|' + svc;
   if(MAP.base && MAP.base._pdc === want) return;
   if(MAP.base) MAP.m.removeLayer(MAP.base);
-  MAP.base = L.tileLayer('https://{s}.basemaps.cartocdn.com/' + want + '/{z}/{x}/{y}{r}.png', {subdomains:'abcd', maxZoom:19, attribution:'© OpenStreetMap © CARTO'});
+  if(MAP.ref){ MAP.m.removeLayer(MAP.ref); MAP.ref = null; }
+  const url = s => 'https://server.arcgisonline.com/ArcGIS/rest/services/' + s + '/MapServer/tile/{z}/{y}/{x}';
+  MAP.base = L.tileLayer(url(svc), {maxZoom:19, maxNativeZoom:MAP.baseKind === 'sat' ? 19 : 16, attribution:'Tiles © Esri'});
   MAP.base._pdc = want; MAP.base.addTo(MAP.m);
+  if(B.ref){
+    const refSvc = MAP.baseKind === 'sat' ? 'Reference/World_Boundaries_and_Places' : (isDark() ? 'Canvas/World_Dark_Gray_Reference' : 'Canvas/World_Light_Gray_Reference');
+    MAP.ref = L.tileLayer(url(refSvc), {maxZoom:19, maxNativeZoom:16, pane:'overlayPane', opacity:.9}).addTo(MAP.m);
+  }
 }
+function mapBase(k){ MAP.baseKind = k; safeLS('pdc_map_base', k); mapSetBase(); renderMap(); }
 function visitColor(v, pal){
   if(MAP.color === 'region') return pal.rg[v.r] || pal.mute;
   if(MAP.color === 'sector') return pal.sc[v.s] || pal.mute;
@@ -3363,12 +3378,15 @@ function renderMap(){
   const pal = mapPalette();
   const P = mapPoints();
   const noLL = V.filter(v => !v.ll).length;
-  $('#mapHead').innerHTML = head('الخريطة التفاعلية', `<span class="ctx">${fmt(P.vis.length + P.cons.length + P.mnt.length)} نقطة على الخريطة</span>`);
+  const stale = (V.length && !V.some(v => 'll' in v)) || (W.length && !W.some(x => 'll' in x));
+  $('#mapHead').innerHTML = head('الخريطة التفاعلية', `<span class="ctx">${fmt(P.vis.length + P.cons.length + P.mnt.length)} نقطة على الخريطة</span>`) +
+    (stale ? `<div class="alert" style="margin-bottom:12px;border-color:var(--warning)"><span class="ai">📍</span><span>البيانات المحفوظة حُمّلت قبل إضافة الإحداثيات — <b>اختر الملفات الستة مرة واحدة</b> لتظهر النقاط على الخريطة. <button class="btn sm pri" data-act="many">اختيار الملفات</button></span></div>` : '');
   const chip = (k, t, n) => `<button class="${MAP.show[k] ? 'on' : ''}" onclick="MAP.show.${k}=!MAP.show.${k};safeLS('pdc_map_show',JSON.stringify(MAP.show));renderMap()">${MAP.show[k] ? '✓ ' : ''}${t} <span class="num">(${fmt(n)})</span></button>`;
   $('#mapTools').innerHTML = `<div class="seg">${chip('v', 'الزيارات', V.filter(v => v.ll).length)}${chip('c', 'أوامر الإنشاءات', W.filter(x => x.ll && x.s === 'إنشاءات').length)}${chip('m', 'مهام الصيانة', W.filter(x => x.ll && x.s === 'صيانة').length)}</div>
     <label style="font-size:12.5px;display:flex;align-items:center;gap:6px"><input type="checkbox" ${MAP.onlyViol ? 'checked' : ''} onchange="MAP.onlyViol=this.checked;renderMap()"> الزيارات التي بها مخالفات فقط</label>
     <span style="font-size:12.5px;color:var(--text-2)">التلوين:</span>
     <div class="seg">${[['status','الحالة / المرحلة'],['region','المنطقة'],['sector','القطاع'],['cs','الاستشاري']].map(c => `<button class="${MAP.color === c[0] ? 'on' : ''}" onclick="MAP.color='${c[0]}';safeLS('pdc_map_color','${c[0]}');renderMap()">${c[1]}</button>`).join('')}</div>
+    <div class="seg">${Object.entries(MAP_BASES).map(([k, b]) => `<button class="${MAP.baseKind === k ? 'on' : ''}" onclick="mapBase('${k}')">${b.n}</button>`).join('')}</div>
     <span style="margin-inline-start:auto"></span>
     <button class="btn sm" onclick="mapZoom('جدة')">جدة</button><button class="btn sm" onclick="mapZoom('مكة')">مكة</button><button class="btn sm" onclick="mapZoom()">الكل</button>`;
   /* الطبقات: الأعمال أولاً (تحت) ثم الزيارات (فوق) */
@@ -3774,7 +3792,7 @@ window.addEventListener('scroll', () => $('#tip').classList.remove('show'), {pas
 })();
 </script>
 <script>
-var APP_VER = "202610201621";
+var APP_VER = "202610201625";
 if("serviceWorker" in navigator){ navigator.serviceWorker.register("sw.js", {updateViaCache:"none"}).then(function(r){ r.update(); }).catch(function(){}); }
 fetch("version.txt?t=" + Date.now(), {cache:"no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
   v = (v || "").trim();
