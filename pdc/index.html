@@ -1161,6 +1161,21 @@ table.ops-table tr.ops-tot td{background:color-mix(in srgb,var(--brand-2) 12%,va
 .map-legend i.ap{background:transparent !important; border:2px dashed var(--text-2)}
 .apnote{margin-top:6px; font-size:11.5px; color:var(--text-2); background:var(--surface-3); border-radius:8px; padding:4px 8px}
 
+/* ============ بطاقة الأداء المتوازن ============ */
+.wrow{display:flex; flex-wrap:wrap; gap:10px}
+.wbox{display:flex; align-items:center; gap:6px; border:1px solid var(--border); background:var(--surface-2); border-radius:10px; padding:6px 10px; font-size:12.5px; font-weight:700}
+.wbox span{display:flex; align-items:center; gap:6px}
+.wbox i{width:10px; height:10px; border-radius:3px; display:inline-block}
+.wbox input{width:58px; border:1px solid var(--border-2); border-radius:7px; padding:3px 6px; background:var(--surface); text-align:center}
+.sbar{display:inline-block; width:64px; height:7px; background:var(--surface-3); border-radius:4px; overflow:hidden; vertical-align:middle; margin-inline-end:6px}
+.sbar i{display:block; height:100%; border-radius:4px}
+.tot{display:inline-flex; align-items:center; gap:6px}
+.tot b{font-size:15px}
+.tot.big b{font-size:26px}
+.bsc-grid{display:grid; grid-template-columns:minmax(0,360px) minmax(0,1fr); gap:16px; align-items:start}
+@media(max-width:900px){.bsc-grid{grid-template-columns:1fr}}
+.pdot{width:8px; height:8px; border-radius:50%; display:inline-block; margin-inline-end:6px}
+
 /* ==================== نسخة الجوال ==================== */
 html,body{-webkit-text-size-adjust:100%; overscroll-behavior-y:contain}
 body{font-size:14px; padding-bottom:calc(70px + env(safe-area-inset-bottom))}
@@ -1318,6 +1333,7 @@ table.t td, table.t th{padding:7px 8px}
   <section class="page" id="pg-map"></section>
   <section class="page" id="pg-charts"></section>
   <section class="page" id="pg-perf"></section>
+  <section class="page" id="pg-eng"></section>
   <section class="page" id="pg-reports"></section>
   <section class="page" id="pg-builder"></section>
   <section class="page" id="pg-files"></section>
@@ -2585,6 +2601,7 @@ const TABS = [
   {k:'qs', t:'السلامة والجودة', i:'🦺'},
   {k:'map', t:'الخريطة', i:'🗺️'},
   {k:'perf', t:'المقاولون والاستشاريون', i:'🏆'},
+  {k:'eng', t:'أداء المهندسين', i:'🎯'},
   {k:'reports', t:'التقارير', i:'🧾'},
   {k:'builder', t:'منشئ الجداول والتصدير', i:'🧩'},
   {k:'charts', t:'اللوحة البصرية التنفيذية', i:'📈'}
@@ -2599,7 +2616,7 @@ function render(){
   applyFilters();
   renderFilterBar();
   for(const k in CARD_DATA) delete CARD_DATA[k];
-  const fn = {exec:renderExec, ops:renderOps, cons:renderCons, maint:renderMaint, qs:renderQS, map:renderMap, perf:renderPerf, reports:renderReports, builder:renderBuilder, charts:renderCharts, help:renderHelp}[CUR];
+  const fn = {exec:renderExec, ops:renderOps, cons:renderCons, maint:renderMaint, qs:renderQS, map:renderMap, perf:renderPerf, eng:renderEng, reports:renderReports, builder:renderBuilder, charts:renderCharts, help:renderHelp}[CUR];
   if(!ALL.work.length && !ALL.visits.length && CUR !== 'help'){ $('#pg-' + CUR).innerHTML = onboarding(); return; }
   if(fn) fn();
 }
@@ -3295,7 +3312,7 @@ function renderCharts(){
 }
 
 /* ==================== الخريطة التفاعلية (الزيارات + مواقع الأعمال) ==================== */
-const MAP = {m:null, base:null, baseDark:null, group:null, legend:null, color:safeLS('pdc_map_color') || 'status', show:{v:true, c:false, m:false}, vf:'all', allV:false, fitKey:'', idx:{}};
+const MAP = {m:null, base:null, baseDark:null, group:null, legend:null, color:safeLS('pdc_map_color') || 'status', show:{v:true, c:false, m:false}, vf:'all', allV:false, en:'', fitKey:'', idx:{}};
 try{ const s = JSON.parse(safeLS('pdc_map_show') || 'null'); if(s) MAP.show = s; }catch(e){}
 function cssVar(n){ return getComputedStyle(document.documentElement).getPropertyValue(n).trim() || '#888'; }
 function isDark(){ const t = document.documentElement.getAttribute('data-theme'); return t ? t === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches; }
@@ -3378,7 +3395,8 @@ function workPopup(x){
     <div class="mpl"><a href="#" onclick="event.preventDefault();showRecord(${esc(JSON.stringify(x.id))})">التفاصيل</a><a href="${gmaps(x.ll)}" target="_blank" rel="noopener">خرائط قوقل ↗</a></div></div>`;
 }
 /* الزيارات: كلها ضمن الفلاتر، أو كلها بلا فلاتر عند اختيار «كل الزيارات» */
-function mapVisitsBase(){ return MAP.allV ? ALL.visits : V; }
+function mapVisitsBaseAll(){ return MAP.allV ? ALL.visits : V; }
+function mapVisitsBase(){ const b = mapVisitsBaseAll(); return MAP.en ? b.filter(v => engKey(v.en) === MAP.en) : b; }
 /* موقع تقريبي للزيارات بلا إحداثيات: متوسط مواقع نفس الحي، ثم نفس الدائرة، ثم مركز المنطقة */
 let APX = {key:'', loc:null, unit:null};
 function approxIndex(){
@@ -3445,6 +3463,8 @@ function renderMap(){
   const chip = (k, t, n) => `<button class="${MAP.show[k] ? 'on' : ''}" onclick="MAP.show.${k}=!MAP.show.${k};safeLS('pdc_map_show',JSON.stringify(MAP.show));renderMap()">${MAP.show[k] ? '✓ ' : ''}${t} <span class="num">(${fmt(n)})</span></button>`;
   $('#mapTools').innerHTML = `<div class="seg">${chip('v', 'الزيارات', VB.length)}${chip('c', 'أوامر الإنشاءات', W.filter(x => x.ll && x.s === 'إنشاءات').length)}${chip('m', 'مهام الصيانة', W.filter(x => x.ll && x.s === 'صيانة').length)}</div>
     <div class="seg">${[['all','كل الزيارات'],['clean',VST.clean],['obs',VST.obs],['viol',VST.viol],['stop',VST.stop]].map(([k, t]) => `<button class="${MAP.vf === k ? 'on' : ''}" onclick="MAP.vf='${k}';renderMap()">${t} <span class="num">(${fmt(stCount[k] || 0)})</span></button>`).join('')}</div>
+    <label style="font-size:12.5px;display:flex;align-items:center;gap:6px">المهندس / الراصد:
+      <select class="inp" onchange="MAP.en=this.value;renderMap()"><option value="">كل المهندسين</option>${(() => { const m = new Map(); mapVisitsBaseAll().forEach(v => { if(!v.en) return; const k = engKey(v.en); const r = m.get(k) || {n:0, name:engStrip(v.en)}; r.n++; m.set(k, r); }); if(MAP.en && !m.has(MAP.en)) m.set(MAP.en, {n:0, name:MAP.en}); return Array.from(m.entries()).sort((a, b) => b[1].n - a[1].n).map(([k, r]) => `<option value="${esc(k)}" ${MAP.en === k ? 'selected' : ''}>${esc(r.name)} (${r.n})</option>`).join(''); })()}</select></label>
     <label style="font-size:12.5px;display:flex;align-items:center;gap:6px" title="يعرض كل الزيارات في الملفين بغض النظر عن فلاتر الشريط العلوي"><input type="checkbox" ${MAP.allV ? 'checked' : ''} onchange="MAP.allV=this.checked;renderMap()"> كل الزيارات بدون فلاتر (${fmt(ALL.visits.length)})</label>
     <span style="font-size:12.5px;color:var(--text-2)">التلوين:</span>
     <div class="seg">${[['status','الحالة / المرحلة'],['region','المنطقة'],['sector','القطاع'],['cs','الاستشاري']].map(c => `<button class="${MAP.color === c[0] ? 'on' : ''}" onclick="MAP.color='${c[0]}';safeLS('pdc_map_color','${c[0]}');renderMap()">${c[1]}</button>`).join('')}</div>
@@ -3488,7 +3508,7 @@ function renderMap(){
     <div class="lt2">أكثر الدوائر زيارات</div>${hbars(byUnit.map(([k, n]) => ({label:k, value:n, color:'var(--s1)'})), {noPct:true})}
     <div class="lt2" style="margin-top:12px">الزيارات — الأحدث وذات المخالفات أولاً</div>
     <div class="mlist">${list.map(v => `<button onclick="mapFocus(${esc(JSON.stringify(v.r + '|' + v.id))})"><i style="background:${visitColor(v, pal)}"></i><span><b>${esc(v.ct)}</b><small>${esc(v.r)} — ${esc(v.u)} • <span class="num">${dayStr(v.d)}</span>${v.ll ? '' : ' • تقريبي'}</small></span>${v.vc ? `<em class="num">${fmt(v.vc)}</em>` : ''}</button>`).join('') || emptyBox('لا توجد زيارات')}</div>`;
-  const key = JSON.stringify([F, MAP.show, MAP.vf, MAP.allV]);
+  const key = JSON.stringify([F, MAP.show, MAP.vf, MAP.allV, MAP.en]);
   if(key !== MAP.fitKey && all.length){ MAP.fitKey = key; MAP.m.fitBounds(L.latLngBounds(all).pad(0.08), {maxZoom:14}); }
   setTimeout(() => MAP.m && MAP.m.invalidateSize(), 60);
 }
@@ -3497,6 +3517,187 @@ function mapZoom(r){
   const P = mapPoints();
   const pts = P.vis.concat(P.cons, P.mnt).filter(x => !r || x.r === r).map(x => x.ll || x.ap);
   if(pts.length) MAP.m.flyToBounds(L.latLngBounds(pts).pad(0.08), {maxZoom:14, duration:.6});
+}
+
+/* ==================== بطاقة الأداء المتوازن للمهندسين ==================== */
+function engStrip(s){ return String(s || '').trim().replace(/^(المهندس|مهندس)\s+/, '').replace(/^م\s*[./]\s*/, '').replace(/^م\s+(?=\S)/, '').trim(); }
+function engKey(s){ return normKey(engStrip(s)); }
+function engTokens(s){ return engStrip(s).replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').split(/\s+/).filter(Boolean); }
+/* ربط اسم مهندس الزيارات باسم «مهندس PDC» في الصيانة (الاسم الأقصر محتوى في الأطول وبنفس الاسم الأول) */
+function engMatchPE(name, peNames){
+  const a = engTokens(name); if(a.length < 2) return null;
+  const hits = peNames.filter(p => { const b = engTokens(p); if(b[0] !== a[0]) return false; const [s, l] = a.length <= b.length ? [a, b] : [b, a]; return s.every(t => l.indexOf(t) > -1); });
+  return hits.length === 1 ? hits[0] : null;
+}
+const BSC_P = [
+  {k:'p1', n:'الإنتاجية والانتظام', w:30, c:'var(--s1)', kpis:[
+    {k:'visits', n:'عدد الزيارات', dir:1, f:fmt},
+    {k:'days', n:'أيام العمل الميداني', dir:1, f:fmt},
+    {k:'perDay', n:'متوسط الزيارات في اليوم النشط', dir:1, f:fmt1},
+    {k:'weeks', n:'انتظام النشاط الأسبوعي', dir:1, f:v => Math.round(v) + '%'}]},
+  {k:'p2', n:'جودة الرقابة والرصد', w:25, c:'var(--critical)', kpis:[
+    {k:'detect', n:'نسبة الزيارات التي رُصد فيها ملاحظات أو مخالفات', dir:1, f:v => Math.round(v) + '%'},
+    {k:'viol', n:'المخالفات المرصودة', dir:1, f:fmt},
+    {k:'obs', n:'الملاحظات المرصودة', dir:1, f:fmt},
+    {k:'counted', n:'نسبة المخالفات المحتسبة', dir:1, f:v => Math.round(v) + '%', opt:1}]},
+  {k:'p3', n:'المتابعة والإغلاق', w:25, c:'var(--good)', kpis:[
+    {k:'closeRate', n:'نسبة إغلاق البنود', dir:1, f:v => Math.round(v) + '%', opt:1},
+    {k:'closeDays', n:'متوسط مدة التصحيح (يوم)', dir:-1, f:fmt1, opt:1},
+    {k:'openOld', n:'بنود مفتوحة أقدم من 7 أيام', dir:-1, f:fmt, opt:1}]},
+  {k:'p4', n:'التوثيق والتغطية', w:20, c:'var(--s7)', kpis:[
+    {k:'docRate', n:'نسبة الزيارات الموثّقة بتقرير', dir:1, f:v => Math.round(v) + '%'},
+    {k:'geoRate', n:'نسبة الزيارات بإحداثيات', dir:1, f:v => Math.round(v) + '%'},
+    {k:'ctN', n:'عدد المقاولين المزارين', dir:1, f:fmt},
+    {k:'locN', n:'عدد المواقع المزارة', dir:1, f:fmt}]},
+  {k:'p5', n:'الأعمال المسندة (صيانة)', w:0, c:'var(--s4)', kpis:[
+    {k:'tasks', n:'المهام المسندة كمهندس PDC', dir:1, f:fmt, opt:1},
+    {k:'doneRate', n:'نسبة الإنجاز', dir:1, f:v => Math.round(v) + '%', opt:1},
+    {k:'lateRate', n:'نسبة المتأخر (لم يبدأ >5 أيام)', dir:-1, f:v => Math.round(v * 10) / 10 + '%', opt:1},
+    {k:'archRate', n:'نسبة الأرشفة', dir:1, f:v => Math.round(v) + '%', opt:1}]}
+];
+const BSC = {minV:Number(safeLS('pdc_bsc_min') || 3), sel:null, w:{}};
+BSC_P.forEach(p => BSC.w[p.k] = p.w);
+try{ const w = JSON.parse(safeLS('pdc_bsc_w') || 'null'); if(w) Object.assign(BSC.w, w); }catch(e){}
+
+function bscData(){
+  /* أسماء موحّدة لمهندسي الزيارات */
+  const disp = new Map(), recs = new Map();
+  V.forEach(v => { if(!v.en) return; const k = engKey(v.en); if(!k) return; const m = disp.get(k) || new Map(); m.set(engStrip(v.en), (m.get(engStrip(v.en)) || 0) + 1); disp.set(k, m); });
+  const peAll = Array.from(new Set(ALL.work.filter(x => x.s === 'صيانة' && x.pe).map(x => x.pe)));
+  const ds = V.map(v => v.d).filter(d => d != null);
+  const span = ds.length ? Math.max(1, Math.floor(Math.max(...ds) / 7) - Math.floor(Math.min(...ds) / 7) + 1) : 1;
+  const vmap = new Map(); V.forEach(v => vmap.set(v.r + '|' + v.id, v));
+  const get = k => { let r = recs.get(k); if(!r){ r = {k, visits:0, dayset:new Set(), wkset:new Set(), det:0, viol:0, obs:0, cv:0, items:0, closed:0, cdays:0, cdn:0, openOld:0, doc:0, geo:0, cts:new Set(), locs:new Set(), regs:new Set(), units:new Set(), fines:0, stops:0, vlist:[]}; recs.set(k, r); } return r; };
+  const cnt = visitCounts();
+  V.forEach(v => {
+    if(!v.en) return; const k = engKey(v.en); if(!k) return; const r = get(k);
+    r.visits++; if(v.d != null){ r.dayset.add(v.d); r.wkset.add(Math.floor(v.d / 7)); }
+    const c = cnt[v.id] || {o:0, v:0};
+    if(c.o || c.v || v.hv || v.vc) r.det++;
+    if(v.lk) r.doc++; if(v.ll) r.geo++;
+    if(v.ct && v.ct !== 'غير محدد') r.cts.add(v.ct); if(v.loc) r.locs.add(normKey(v.loc));
+    r.regs.add(v.r); r.units.add(v.u); r.fines += v.f || 0; r.stops += v.sw || 0; r.vlist.push(v);
+  });
+  I.forEach(x => {
+    if(x.empty) return; const v = vmap.get(x.r + '|' + x.vid); if(!v || !v.en) return; const r = recs.get(engKey(v.en)); if(!r) return;
+    if(x.ty === 'مخالفة'){ r.viol++; if(x.cv) r.cv++; } else r.obs++;
+    r.items++;
+    if(x.stt === 'مغلقة'){ r.closed++; if(x.cdays != null){ r.cdays += x.cdays; r.cdn++; } }
+    else if(x.d != null && TODAY - x.d > 7) r.openOld++;
+  });
+  const rows = [];
+  recs.forEach(r => {
+    const m = disp.get(r.k); let name = r.k, bc = -1; m.forEach((c, n) => { if(c > bc){ bc = c; name = n; } });
+    const pe = engMatchPE(name, peAll);
+    const tasks = pe ? W.filter(x => x.s === 'صيانة' && x.pe === pe) : [];
+    const M = {
+      visits:r.visits, days:r.dayset.size, perDay:r.dayset.size ? r.visits / r.dayset.size : 0, weeks:pct(r.wkset.size, span),
+      detect:pct(r.det, r.visits), viol:r.viol, obs:r.obs, counted:r.viol ? pct(r.cv, r.viol) : null,
+      closeRate:r.items ? pct(r.closed, r.items) : null, closeDays:r.cdn ? r.cdays / r.cdn : null, openOld:r.items ? r.openOld : null,
+      docRate:pct(r.doc, r.visits), geoRate:pct(r.geo, r.visits), ctN:r.cts.size, locN:r.locs.size,
+      tasks:tasks.length || null, doneRate:tasks.length ? pct(tasks.filter(x => x.ds === 'منجز').length, tasks.length) : null,
+      lateRate:tasks.length ? pct(tasks.filter(x => x.late).length, tasks.length) : null,
+      archRate:tasks.length ? pct(tasks.filter(x => x.ar === 'مؤرشفة' || x.ar === 'تم الرفع للصيانة').length, tasks.length) : null
+    };
+    rows.push({k:r.k, name, pe, reg:Array.from(r.regs).join('، '), units:Array.from(r.units), M, fines:r.fines, stops:r.stops, vlist:r.vlist, items:r.items, cts:r.cts});
+  });
+  const pop = rows.filter(r => r.M.visits >= BSC.minV);
+  /* تطبيع كل مؤشر بين أدنى وأعلى قيمة في الفريق (0–100) مع عكس المؤشرات التي يكون الأقل فيها أفضل */
+  const allK = BSC_P.flatMap(p => p.kpis);
+  const range = {};
+  allK.forEach(K => { const vals = pop.map(r => r.M[K.k]).filter(v => v != null); range[K.k] = vals.length ? [Math.min(...vals), Math.max(...vals)] : null; });
+  const score = (K, v) => { if(v == null || !range[K.k]) return null; const [a, b] = range[K.k]; if(b === a) return 100; const s = (v - a) / (b - a) * 100; return K.dir > 0 ? s : 100 - s; };
+  pop.forEach(r => {
+    r.S = {}; r.P = {};
+    allK.forEach(K => r.S[K.k] = score(K, r.M[K.k]));
+    BSC_P.forEach(p => { const ss = p.kpis.map(K => r.S[K.k]).filter(v => v != null); r.P[p.k] = ss.length ? ss.reduce((a, b) => a + b, 0) / ss.length : null; });
+    let tw = 0, tot = 0; BSC_P.forEach(p => { const w = Number(BSC.w[p.k]) || 0; if(w > 0 && r.P[p.k] != null){ tw += w; tot += w * r.P[p.k]; } });
+    r.total = tw ? tot / tw : 0;
+  });
+  pop.sort((a, b) => b.total - a.total);
+  pop.forEach((r, i) => r.rank = i + 1);
+  const avg = {}; allK.forEach(K => { const vals = pop.map(r => r.M[K.k]).filter(v => v != null); avg[K.k] = vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null; });
+  const avgP = {}; BSC_P.forEach(p => { const vals = pop.map(r => r.P[p.k]).filter(v => v != null); avgP[p.k] = vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null; });
+  return {pop, rows, avg, avgP, span};
+}
+function grade(s){ return s >= 85 ? ['ممتاز', 'b-ok'] : s >= 70 ? ['جيد جداً', 'b-run'] : s >= 55 ? ['جيد', 'b-warn'] : ['يحتاج تحسين', 'b-err']; }
+function sbar(v, c){ return v == null ? '<span style="color:var(--muted)">—</span>' : `<span class="sbar"><i style="width:${Math.max(2, v)}%;background:${c}"></i></span><span class="num" style="font-size:11.5px">${Math.round(v)}</span>`; }
+
+/* رسم عنكبوتي (Radar) */
+function radar(axes, series, size){
+  size = size || 340; const cx = size / 2, cy = size / 2 + 4, R = size / 2 - 86, n = axes.length;
+  const P = (i, v) => { const a = -Math.PI / 2 + i * 2 * Math.PI / n; return [cx + Math.cos(a) * R * v / 100, cy + Math.sin(a) * R * v / 100]; };
+  let g = '';
+  [25, 50, 75, 100].forEach(l => { g += `<polygon points="${axes.map((_, i) => P(i, l).join(',')).join(' ')}" fill="none" stroke="var(--grid)"/>`; });
+  axes.forEach((a, i) => { const [x, y] = P(i, 100), [lx, ly] = P(i, 122); g += `<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="var(--grid)"/><text x="${lx}" y="${ly}" text-anchor="middle" dominant-baseline="middle" style="font-size:10.5px;fill:var(--text-2);font-weight:700">${esc(a)}</text>`; });
+  series.forEach(s => {
+    const pts = s.values.map((v, i) => P(i, v == null ? 0 : v));
+    g += `<polygon points="${pts.map(p => p.join(',')).join(' ')}" fill="${s.color}" fill-opacity="${s.fill || .18}" stroke="${s.color}" stroke-width="2" ${s.dash ? 'stroke-dasharray="4 3"' : ''}/>`;
+    if(!s.dash) pts.forEach((p, i) => g += `<circle cx="${p[0]}" cy="${p[1]}" r="3.5" fill="${s.color}" stroke="var(--surface)" stroke-width="1.5"${tipAttr(axes[i], [[s.color, s.name, s.values[i] == null ? '—' : Math.round(s.values[i])]])}/>`);
+  });
+  return `<div class="legend">${series.map(s => `<span><i style="background:${s.color}"></i>${esc(s.name)}</span>`).join('')}</div><svg viewBox="0 0 ${size} ${size + 8}" class="svgc" style="max-width:${size + 40}px;margin:0 auto">${g}</svg>`;
+}
+
+function renderEng(){
+  const pg = $('#pg-eng');
+  const D = bscData();
+  if(!D.rows.length){ pg.innerHTML = head('بطاقة الأداء المتوازن للمهندسين') + emptyBox('لا توجد زيارات ضمن الفلاتر الحالية'); return; }
+  if(!BSC.sel || !D.pop.some(r => r.k === BSC.sel)) BSC.sel = D.pop.length ? D.pop[0].k : null;
+  const sel = D.pop.find(r => r.k === BSC.sel);
+  const wInputs = BSC_P.map(p => `<label class="wbox"><span><i style="background:${p.c}"></i>${p.n}</span><input type="number" min="0" max="100" step="5" value="${BSC.w[p.k]}" onchange="BSC.w['${p.k}']=Math.max(0,Number(this.value)||0);safeLS('pdc_bsc_w',JSON.stringify(BSC.w));renderEng()">%</label>`).join('');
+  const rowsT = D.pop.map(r => {
+    const g = grade(r.total);
+    return {click:null, v:[r.rank, r.name, r.reg, r.total, ...BSC_P.map(p => r.P[p.k] == null ? -1 : r.P[p.k]), r.M.visits, r.M.days, r.M.detect, r.M.viol, r.M.closeRate == null ? -1 : r.M.closeRate, r.M.tasks || 0],
+      h:[`<b class="num">${r.rank}</b>`, `<a href="#" onclick="event.preventDefault();BSC.sel=${esc(JSON.stringify(r.k))};renderEng();document.getElementById('bscDetail').scrollIntoView({behavior:'smooth'})"><b>${esc(r.name)}</b></a>${r.pe ? ' <span class="badge b-mute" title="مرتبط بمهام الصيانة باسم: ' + esc(r.pe) + '">PDC</span>' : ''}`, esc(r.reg),
+        `<span class="tot"><b class="num">${Math.round(r.total)}</b><span class="badge ${g[1]}">${g[0]}</span></span>`, ...BSC_P.map(p => sbar(r.P[p.k], p.c)),
+        fmt(r.M.visits), fmt(r.M.days), Math.round(r.M.detect) + '%', fmt(r.M.viol), r.M.closeRate == null ? '—' : Math.round(r.M.closeRate) + '%', r.M.tasks ? fmt(r.M.tasks) : '—']};
+  });
+  const cols = [{t:'#', n:1}, {t:'المهندس'}, {t:'المنطقة'}, {t:'الدرجة الكلية', n:1}, ...BSC_P.map(p => ({t:p.n, n:1})), {t:'الزيارات', n:1}, {t:'أيام العمل', n:1}, {t:'نسبة الرصد', n:1}, {t:'المخالفات', n:1}, {t:'نسبة الإغلاق', n:1}, {t:'مهام الصيانة', n:1}];
+  const excel = {cols:['الترتيب', 'المهندس', 'المنطقة', 'الدرجة الكلية', 'التقدير', ...BSC_P.map(p => p.n), ...BSC_P.flatMap(p => p.kpis.map(K => K.n))],
+    rows:D.pop.map(r => [r.rank, r.name, r.reg, Math.round(r.total), grade(r.total)[0], ...BSC_P.map(p => r.P[p.k] == null ? '' : Math.round(r.P[p.k])), ...BSC_P.flatMap(p => p.kpis.map(K => r.M[K.k] == null ? '' : Math.round(r.M[K.k] * 10) / 10))])};
+  const others = D.rows.filter(r => r.M.visits < BSC.minV);
+  /* تفاصيل المهندس المختار */
+  let detail = '';
+  if(sel){
+    const g = grade(sel.total);
+    const activeP = BSC_P.filter(p => (Number(BSC.w[p.k]) || 0) > 0 || p.k !== 'p5');
+    const wk = 12, wE = Math.floor(TODAY / 7), wS = wE - wk + 1, vw = new Array(wk).fill(0), vv = new Array(wk).fill(0);
+    sel.vlist.forEach(v => { if(v.d == null) return; const i = Math.floor(v.d / 7) - wS; if(i >= 0 && i < wk){ vw[i]++; if(visitStatus(v) === 'viol' || visitStatus(v) === 'stop') vv[i]++; } });
+    const kpiRows = BSC_P.flatMap(p => p.kpis.map(K => {
+      const v = sel.M[K.k], a = D.avg[K.k], s = sel.S[K.k];
+      if(v == null && K.opt) return '';
+      const better = v == null || a == null ? '' : ((K.dir > 0 ? v >= a : v <= a) ? '<span style="color:var(--good)">▲ أفضل من المتوسط</span>' : '<span style="color:var(--critical)">▼ أقل من المتوسط</span>');
+      return `<tr><td><i class="pdot" style="background:${p.c}"></i>${esc(K.n)}</td><td class="n num"><b>${v == null ? '—' : K.f(v)}</b></td><td class="n num">${a == null ? '—' : K.f(a)}</td><td>${sbar(s, p.c)}</td><td style="font-size:11.5px">${better}</td></tr>`;
+    })).join('');
+    detail = `<div class="card c12" id="bscDetail">
+      <div class="card-h"><div class="t"><h3>${esc(sel.name)} — الترتيب ${sel.rank} من ${D.pop.length}</h3><div class="sub">${esc(sel.reg)} • ${esc(sel.units.join('، '))}${sel.pe ? ' • مرتبط بمهام الصيانة باسم «' + esc(sel.pe) + '»' : ''}</div></div>
+        <span class="tot big"><b class="num">${Math.round(sel.total)}</b><span class="badge ${g[1]}">${g[0]}</span></span>
+        <button class="btn sm pri" onclick="MAP.en=${esc(JSON.stringify(sel.k))};MAP.vf='all';goTab('map')">🗺️ زياراته على الخريطة</button></div>
+      <div class="bsc-grid">
+        <div>${radar(activeP.map(p => p.n), [{name:sel.name, color:'var(--s1)', values:activeP.map(p => sel.P[p.k])}, {name:'متوسط الفريق', color:'var(--muted)', dash:1, fill:.04, values:activeP.map(p => D.avgP[p.k])}])}</div>
+        <div><div class="tbl-wrap" style="max-height:none"><table class="t"><thead><tr><th>المؤشر</th><th class="n">القيمة</th><th class="n">متوسط الفريق</th><th>الدرجة</th><th>المقارنة</th></tr></thead><tbody>${kpiRows}</tbody></table></div></div>
+      </div>
+      <div class="grid" style="margin:14px 0 0">
+        ${card({cls:'c7', title:'زياراته أسبوعياً — آخر 12 أسبوعاً', body:columns(Array.from({length:wk}, (_, i) => ({label:weekLabel(wS + i + 1)})), [{name:'بدون مخالفات', color:'var(--good)', values:vw.map((x, i) => x - vv[i])}, {name:'بها مخالفات أو إيقاف', color:'var(--critical)', values:vv}], {h:220})})}
+        ${card({cls:'c5', title:'المقاولون الذين زارهم', body:hbars(mapToBars(countBy(sel.vlist, v => v.ct), 8, {color:'var(--s1)'}))})}
+      </div></div>`;
+  }
+  const scoreBars = D.pop.map(r => ({label:r.name, value:Math.round(r.total), color:r.k === BSC.sel ? 'var(--s1)' : 'var(--axis)', extra:[['الترتيب', String(r.rank)], ['التقدير', grade(r.total)[0]]]}));
+  const avgTot = D.pop.length ? D.pop.reduce((a, r) => a + r.total, 0) / D.pop.length : 0;
+  pg.innerHTML = head('بطاقة الأداء المتوازن للمهندسين', `<button class="btn pri" onclick='exportSheets("بطاقة الأداء المتوازن للمهندسين",[{name:"البطاقة",cols:${esc(JSON.stringify(excel.cols))},rows:${esc(JSON.stringify(excel.rows))}}])'>⤓ تصدير إكسل</button>`) +
+    `<div class="kpis">
+      ${kpi({label:'مهندسون مقيَّمون', icon:'👷', value:fmt(D.pop.length), sub:others.length ? fmt(others.length) + ' دون الحد الأدنى للزيارات' : 'جميع المهندسين', color:'var(--brand-2)'})}
+      ${kpi({label:'زياراتهم', icon:'📍', value:fmt(D.pop.reduce((a, r) => a + r.M.visits, 0)), color:'var(--s1)'})}
+      ${kpi({label:'متوسط الدرجة', icon:'📊', value:fmt(avgTot), sub:grade(avgTot)[0], color:'var(--s7)'})}
+      ${kpi({label:'الأعلى أداءً', icon:'🏆', value:D.pop[0] ? esc(D.pop[0].name) : '—', sub:D.pop[0] ? 'الدرجة ' + Math.round(D.pop[0].total) : '', color:'var(--good)'})}
+      ${kpi({label:'يحتاجون متابعة', icon:'⚠️', value:fmt(D.pop.filter(r => r.total < 55).length), sub:'درجة أقل من 55', color:'var(--critical)'})}
+    </div>
+    <div class="card" style="margin-bottom:14px"><div class="card-h"><div class="t"><h3>أوزان المحاور</h3><div class="sub">كل مؤشر يُحوَّل إلى درجة من 0 إلى 100 مقارنةً بأدنى وأعلى قيمة في الفريق، ثم يُحسب متوسط كل محور، ثم الدرجة الكلية بالأوزان. المحور الذي لا تتوفر له بيانات لمهندس يُستبعد من حسابه وتُوزَّع أوزانه على البقية.</div></div></div>
+      <div class="wrow">${wInputs}<label class="wbox"><span>الحد الأدنى للزيارات</span><select class="inp" onchange="BSC.minV=Number(this.value);safeLS('pdc_bsc_min',this.value);renderEng()">${[1, 3, 5, 10].map(n => `<option value="${n}" ${BSC.minV === n ? 'selected' : ''}>${n}</option>`).join('')}</select></label></div></div>
+    <div class="grid">${card({cls:'c12', title:'ترتيب المهندسين', sub:'انقر اسم المهندس لعرض بطاقته التفصيلية — التقدير نسبي مقارنةً بالفريق ضمن الفلاتر الحالية', body:table('bscT', cols, rowsT, {sort:0, dir:1, maxh:560}), data:excel})}</div>
+    <div class="grid">${detail}</div>
+    <div class="grid">${card({cls:'c12', title:'الدرجة الكلية لكل مهندس', body:hbars(scoreBars, {noPct:true, max:100, vlabel:'الدرجة'})})}</div>
+    ${others.length ? `<div class="note">دون الحد الأدنى (${BSC.minV} زيارات): ${others.map(r => esc(r.name) + ' (' + r.M.visits + ')').join('، ')}</div>` : ''}`;
 }
 
 /* ==================== ٦) صفحة التقارير ==================== */
@@ -3661,6 +3862,7 @@ const M_TABS = [
 const M_MORE = [
   {k:'map', t:'الخريطة التفاعلية', d:'مواقع الزيارات والأعمال على الخريطة', i:'🗺️'},
   {k:'charts', t:'اللوحة البصرية التنفيذية', d:'رسومات وأرقام تنفيذية فقط', i:'📈'},
+  {k:'eng', t:'أداء المهندسين', d:'بطاقة الأداء المتوازن للمهندسين', i:'🎯'},
   {k:'perf', t:'المقاولون والاستشاريون', d:'بطاقات الأداء والخريطة الحرارية', i:'🏆'},
   {k:'reports', t:'التقارير', d:'تقارير جاهزة للتصدير', i:'🧾'},
   {k:'builder', t:'منشئ الجداول والتصدير', d:'اختر الأعمدة وصدّر إلى إكسل', i:'🧩'},
@@ -3670,7 +3872,7 @@ const M_MORE = [
   {k:'help', t:'الدليل', d:'المراحل الأربع وطريقة التحديث', i:'❔'}
 ];
 CUR = safeLS('pdc_m_tab') || 'exec';
-if(['exec','ops','cons','maint','qs','map','charts','perf','reports','builder','files','help'].indexOf(CUR) < 0) CUR = 'exec';
+if(['exec','ops','cons','maint','qs','map','eng','charts','perf','reports','builder','files','help'].indexOf(CUR) < 0) CUR = 'exec';
 
 const _render = render;
 render = function(){
@@ -3857,7 +4059,7 @@ window.addEventListener('scroll', () => $('#tip').classList.remove('show'), {pas
 })();
 </script>
 <script>
-var APP_VER = "202610211136";
+var APP_VER = "202610211147";
 if("serviceWorker" in navigator){ navigator.serviceWorker.register("sw.js", {updateViaCache:"none"}).then(function(r){ r.update(); }).catch(function(){}); }
 fetch("version.txt?t=" + Date.now(), {cache:"no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
   v = (v || "").trim();
