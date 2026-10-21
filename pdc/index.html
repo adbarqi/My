@@ -1155,6 +1155,12 @@ table.ops-table tr.ops-tot td{background:color-mix(in srgb,var(--brand-2) 12%,va
 .pop-open .map-legend{display:none}
 @media(max-width:600px){.map-legend{font-size:10.5px; padding:6px 8px}}
 
+/* حصر طبقات الخريطة داخل إطارها حتى لا تغطي الترويسة والفلاتر */
+.map-box{position:relative; z-index:0; isolation:isolate; contain:paint}
+#mapEl{position:relative; z-index:0}
+.map-legend i.ap{background:transparent !important; border:2px dashed var(--text-2)}
+.apnote{margin-top:6px; font-size:11.5px; color:var(--text-2); background:var(--surface-3); border-radius:8px; padding:4px 8px}
+
 /* ==================== نسخة الجوال ==================== */
 html,body{-webkit-text-size-adjust:100%; overscroll-behavior-y:contain}
 body{font-size:14px; padding-bottom:calc(70px + env(safe-area-inset-bottom))}
@@ -3289,7 +3295,7 @@ function renderCharts(){
 }
 
 /* ==================== الخريطة التفاعلية (الزيارات + مواقع الأعمال) ==================== */
-const MAP = {m:null, base:null, baseDark:null, group:null, legend:null, color:safeLS('pdc_map_color') || 'status', show:{v:true, c:false, m:false}, onlyViol:false, fitKey:'', idx:{}};
+const MAP = {m:null, base:null, baseDark:null, group:null, legend:null, color:safeLS('pdc_map_color') || 'status', show:{v:true, c:false, m:false}, vf:'all', allV:false, fitKey:'', idx:{}};
 try{ const s = JSON.parse(safeLS('pdc_map_show') || 'null'); if(s) MAP.show = s; }catch(e){}
 function cssVar(n){ return getComputedStyle(document.documentElement).getPropertyValue(n).trim() || '#888'; }
 function isDark(){ const t = document.documentElement.getAttribute('data-theme'); return t ? t === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches; }
@@ -3316,11 +3322,28 @@ function mapSetBase(){
   }
 }
 function mapBase(k){ MAP.baseKind = k; safeLS('pdc_map_base', k); mapSetBase(); renderMap(); }
+/* حالة الزيارة: إيقاف عمل > مخالفات > ملاحظات > بدون ملاحظات (من بنود ورقة المخالفات الفعلية) */
+const VST = {clean:'بدون ملاحظات', obs:'ملاحظات فقط', viol:'بها مخالفات', stop:'إيقاف عمل'};
+let VCNT = {key:'', m:{}};
+function visitCounts(){
+  const key = ALL.items.length + '|' + ALL.visits.length;
+  if(VCNT.key === key) return VCNT.m;
+  const m = {};
+  ALL.items.forEach(x => { if(x.empty) return; const r = m[x.vid] || (m[x.vid] = {o:0, v:0}); if(x.ty === 'مخالفة') r.v++; else if(x.ty === 'ملاحظة') r.o++; });
+  VCNT = {key, m}; return m;
+}
+function visitStatus(v){
+  const c = visitCounts()[v.id] || {o:0, v:0};
+  if(v.sw) return 'stop';
+  if(v.hv || c.v || v.vc) return 'viol';
+  if(c.o) return 'obs';
+  return 'clean';
+}
 function visitColor(v, pal){
   if(MAP.color === 'region') return pal.rg[v.r] || pal.mute;
   if(MAP.color === 'sector') return pal.sc[v.s] || pal.mute;
   if(MAP.color === 'cs') return pal.cs[v.cs] || pal.mute;
-  return v.sw ? pal.stop : (v.hv ? pal.viol : pal.ok);
+  return pal.vs[visitStatus(v)];
 }
 function workColor(x, pal){
   if(MAP.color === 'region') return pal.rg[x.r] || pal.mute;
@@ -3330,20 +3353,22 @@ function workColor(x, pal){
 }
 function mapPalette(){
   const cats = ['--s1','--s2','--s3','--s4','--s5','--s6','--s7'].map(cssVar);
-  const topCs = sortedEntries(countBy(V.concat(W), x => x.cs), 7).map(e => e[0]);
+  const topCs = sortedEntries(countBy(mapVisitsBase().concat(W), x => x.cs), 7).map(e => e[0]);
   const cs = {}; topCs.forEach((k, i) => cs[k] = cats[i]);
-  return {ok:cssVar('--good'), viol:cssVar('--critical'), stop:cssVar('--s7'), mute:cssVar('--axis'),
+  return {vs:{clean:cssVar('--good'), obs:cssVar('--s4'), viol:cssVar('--critical'), stop:cssVar('--s7')}, mute:cssVar('--axis'),
     rg:{'جدة':cssVar('--rg-j'), 'مكة':cssVar('--rg-m')}, sc:{'إنشاءات':cssVar('--sc-c'), 'صيانة':cssVar('--sc-m')},
     st:{U:cssVar('--st-u'), A:cssVar('--st-a'), T:cssVar('--st-t'), C:cssVar('--st-c')}, cs, topCs};
 }
 function gmaps(ll){ return 'https://maps.google.com/?q=' + ll[0] + ',' + ll[1]; }
 function visitPopup(v){
-  return `<div class="mpop"><b>${esc(v.id)}</b><span class="badge ${v.sw ? 'b-err' : (v.hv ? 'b-warn' : 'b-ok')}">${v.sw ? 'إيقاف عمل' : (v.hv ? 'بها مخالفات' : 'بدون مخالفات')}</span>
+  const st = visitStatus(v), c = visitCounts()[v.id] || {o:0, v:0}, ll = v.ll || v.ap;
+  return `<div class="mpop"><b>${esc(v.id)}</b><span class="badge ${({clean:'b-ok', obs:'b-warn', viol:'b-err', stop:'b-err'})[st]}">${VST[st]}</span>
+    ${v.ll ? '' : `<div class="apnote">📍 موقع تقريبي حسب ${esc(v.apHow)} — لا توجد إحداثيات مسجّلة لهذه الزيارة</div>`}
     <table><tr><td>التاريخ</td><td class="num">${dayStr(v.d)}</td></tr><tr><td>المنطقة / الدائرة</td><td>${esc(v.r)} — ${esc(v.u)}</td></tr>
     <tr><td>الموقع</td><td>${esc(v.loc)}</td></tr><tr><td>المقاول</td><td>${esc(v.ct)}</td></tr><tr><td>الاستشاري</td><td>${esc(v.cs)}</td></tr>
     <tr><td>الراصد</td><td>${esc(v.en)}</td></tr><tr><td>رقم أمر العمل</td><td class="num">${esc(v.no)}</td></tr>
-    <tr><td>المخالفات / الملاحظات</td><td class="num">${fmt(v.vc)} / ${fmt(v.oc)}</td></tr><tr><td>الغرامات</td><td class="num">${fmt(v.f)} ر.س</td></tr></table>
-    <div class="mpl">${v.lk ? `<a href="${esc(v.lk)}" target="_blank" rel="noopener">تقرير الزيارة ↗</a>` : ''}<a href="${gmaps(v.ll)}" target="_blank" rel="noopener">خرائط قوقل ↗</a></div></div>`;
+    <tr><td>المخالفات / الملاحظات</td><td class="num">${fmt(Math.max(c.v, v.vc || 0))} / ${fmt(c.o)}</td></tr><tr><td>الغرامات</td><td class="num">${fmt(v.f)} ر.س</td></tr></table>
+    <div class="mpl">${v.lk ? `<a href="${esc(v.lk)}" target="_blank" rel="noopener">تقرير الزيارة ↗</a>` : ''}<a href="${gmaps(ll)}" target="_blank" rel="noopener">خرائط قوقل ↗</a></div></div>`;
 }
 function workPopup(x){
   return `<div class="mpop"><b>${x.s === 'إنشاءات' ? '🏗️' : '🛠️'} ${esc(x.no)}</b><span class="badge" style="background:color-mix(in srgb,${STAGE_COLOR[x.st]} 22%,transparent)">${STAGE_NAME[x.st]}</span>
@@ -3352,8 +3377,39 @@ function workPopup(x){
     <tr><td>الحالة</td><td>${esc(x.ex || x.ds || '')}</td></tr></table>
     <div class="mpl"><a href="#" onclick="event.preventDefault();showRecord(${esc(JSON.stringify(x.id))})">التفاصيل</a><a href="${gmaps(x.ll)}" target="_blank" rel="noopener">خرائط قوقل ↗</a></div></div>`;
 }
+/* الزيارات: كلها ضمن الفلاتر، أو كلها بلا فلاتر عند اختيار «كل الزيارات» */
+function mapVisitsBase(){ return MAP.allV ? ALL.visits : V; }
+/* موقع تقريبي للزيارات بلا إحداثيات: متوسط مواقع نفس الحي، ثم نفس الدائرة، ثم مركز المنطقة */
+let APX = {key:'', loc:null, unit:null};
+function approxIndex(){
+  const key = ALL.visits.length + '|' + ALL.work.length;
+  if(APX.key === key) return APX;
+  const loc = new Map(), unit = new Map();
+  const add = (m, k, ll) => { if(!k || !ll) return; k = normKey(k); if(!k) return; let r = m.get(k); if(!r){ r = {a:0, b:0, n:0}; m.set(k, r); } r.a += ll[0]; r.b += ll[1]; r.n++; };
+  ALL.visits.forEach(v => { add(loc, v.r + v.loc, v.ll); add(unit, v.r + v.u, v.ll); });
+  ALL.work.concat(ALL.cancelled).forEach(x => { add(loc, x.r + (x.dt || ''), x.ll); add(loc, x.r + (x.area || ''), x.ll); add(unit, x.r + x.u, x.ll); });
+  APX = {key, loc, unit}; return APX;
+}
+const REGION_CENTER = {'جدة':[21.5433, 39.1728], 'مكة':[21.4225, 39.8262]};
+function jitter(id, ll, amt){
+  let h = 0; for(const ch of String(id)) h = (h * 31 + ch.charCodeAt(0)) | 0;
+  const a = ((h & 0xffff) / 0xffff) * Math.PI * 2, r = (((h >>> 16) & 0xff) / 255) * amt;
+  return [ll[0] + Math.sin(a) * r, ll[1] + Math.cos(a) * r];
+}
+function placeVisit(v){
+  if(v.ll) return v.ll;
+  const X = approxIndex();
+  let r = X.loc.get(normKey(v.r + v.loc)), how = 'الحي';
+  if(!r){ r = X.unit.get(normKey(v.r + v.u)); how = 'الدائرة'; }
+  let ll;
+  if(r) ll = [r.a / r.n, r.b / r.n];
+  else { ll = REGION_CENTER[v.r] || REGION_CENTER['جدة']; how = 'المنطقة'; }
+  v.ap = jitter(v.id, ll, how === 'الحي' ? 0.003 : 0.012); v.apHow = how;
+  return v.ap;
+}
 function mapPoints(){
-  const vis = MAP.show.v ? V.filter(v => v.ll && (!MAP.onlyViol || v.hv)) : [];
+  const vis = MAP.show.v ? mapVisitsBase().filter(v => MAP.vf === 'all' || visitStatus(v) === MAP.vf) : [];
+  vis.forEach(placeVisit);
   const cons = MAP.show.c ? W.filter(x => x.ll && x.s === 'إنشاءات') : [];
   const mnt = MAP.show.m ? W.filter(x => x.ll && x.s === 'صيانة') : [];
   return {vis, cons, mnt};
@@ -3365,7 +3421,10 @@ function renderMap(){
     if(MAP.m){ try{ MAP.m.remove(); }catch(e){} MAP.m = null; MAP.base = null; }
     pg.innerHTML = `<div id="mapHead"></div><div class="card" style="padding:10px 12px;margin-bottom:12px"><div id="mapTools" class="rep-tools" style="margin:0"></div></div>
       <div class="map-wrap"><div class="map-box"><div id="mapEl"></div></div><aside class="card map-side" id="mapSide"></aside></div>`;
-    MAP.m = L.map('mapEl', {preferCanvas:true, zoomControl:true, attributionControl:true}).setView([21.6, 39.6], 9);
+    MAP.m = L.map('mapEl', {preferCanvas:true, zoomControl:true, attributionControl:true, scrollWheelZoom:false}).setView([21.6, 39.6], 9);
+    /* التكبير بعجلة الفأرة بعد النقر على الخريطة فقط — حتى لا تعلق الصفحة أثناء التمرير */
+    MAP.m.on('click focus', () => MAP.m.scrollWheelZoom.enable());
+    MAP.m.getContainer().addEventListener('mouseleave', () => MAP.m.scrollWheelZoom.disable());
     MAP.group = L.layerGroup().addTo(MAP.m);
     MAP.legend = L.control({position:'bottomleft'});
     MAP.legend.onAdd = () => { const d = L.DomUtil.create('div', 'map-legend'); d.id = 'mapLegend'; L.DomEvent.disableClickPropagation(d); return d; };
@@ -3377,13 +3436,16 @@ function renderMap(){
   mapSetBase();
   const pal = mapPalette();
   const P = mapPoints();
-  const noLL = V.filter(v => !v.ll).length;
+  const VB = mapVisitsBase();
+  const exact = P.vis.filter(v => v.ll).length, approx = P.vis.length - exact;
+  const stCount = {all:VB.length}; VB.forEach(v => { const k = visitStatus(v); stCount[k] = (stCount[k] || 0) + 1; });
   const stale = (V.length && !V.some(v => 'll' in v)) || (W.length && !W.some(x => 'll' in x));
   $('#mapHead').innerHTML = head('الخريطة التفاعلية', `<span class="ctx">${fmt(P.vis.length + P.cons.length + P.mnt.length)} نقطة على الخريطة</span>`) +
     (stale ? `<div class="alert" style="margin-bottom:12px;border-color:var(--warning)"><span class="ai">📍</span><span>البيانات المحفوظة حُمّلت قبل إضافة الإحداثيات — <b>اختر الملفات الستة مرة واحدة</b> لتظهر النقاط على الخريطة. <button class="btn sm pri" data-act="many">اختيار الملفات</button></span></div>` : '');
   const chip = (k, t, n) => `<button class="${MAP.show[k] ? 'on' : ''}" onclick="MAP.show.${k}=!MAP.show.${k};safeLS('pdc_map_show',JSON.stringify(MAP.show));renderMap()">${MAP.show[k] ? '✓ ' : ''}${t} <span class="num">(${fmt(n)})</span></button>`;
-  $('#mapTools').innerHTML = `<div class="seg">${chip('v', 'الزيارات', V.filter(v => v.ll).length)}${chip('c', 'أوامر الإنشاءات', W.filter(x => x.ll && x.s === 'إنشاءات').length)}${chip('m', 'مهام الصيانة', W.filter(x => x.ll && x.s === 'صيانة').length)}</div>
-    <label style="font-size:12.5px;display:flex;align-items:center;gap:6px"><input type="checkbox" ${MAP.onlyViol ? 'checked' : ''} onchange="MAP.onlyViol=this.checked;renderMap()"> الزيارات التي بها مخالفات فقط</label>
+  $('#mapTools').innerHTML = `<div class="seg">${chip('v', 'الزيارات', VB.length)}${chip('c', 'أوامر الإنشاءات', W.filter(x => x.ll && x.s === 'إنشاءات').length)}${chip('m', 'مهام الصيانة', W.filter(x => x.ll && x.s === 'صيانة').length)}</div>
+    <div class="seg">${[['all','كل الزيارات'],['clean',VST.clean],['obs',VST.obs],['viol',VST.viol],['stop',VST.stop]].map(([k, t]) => `<button class="${MAP.vf === k ? 'on' : ''}" onclick="MAP.vf='${k}';renderMap()">${t} <span class="num">(${fmt(stCount[k] || 0)})</span></button>`).join('')}</div>
+    <label style="font-size:12.5px;display:flex;align-items:center;gap:6px" title="يعرض كل الزيارات في الملفين بغض النظر عن فلاتر الشريط العلوي"><input type="checkbox" ${MAP.allV ? 'checked' : ''} onchange="MAP.allV=this.checked;renderMap()"> كل الزيارات بدون فلاتر (${fmt(ALL.visits.length)})</label>
     <span style="font-size:12.5px;color:var(--text-2)">التلوين:</span>
     <div class="seg">${[['status','الحالة / المرحلة'],['region','المنطقة'],['sector','القطاع'],['cs','الاستشاري']].map(c => `<button class="${MAP.color === c[0] ? 'on' : ''}" onclick="MAP.color='${c[0]}';safeLS('pdc_map_color','${c[0]}');renderMap()">${c[1]}</button>`).join('')}</div>
     <div class="seg">${Object.entries(MAP_BASES).map(([k, b]) => `<button class="${MAP.baseKind === k ? 'on' : ''}" onclick="mapBase('${k}')">${b.n}</button>`).join('')}</div>
@@ -3397,40 +3459,43 @@ function renderMap(){
     const mk = L.circleMarker(x.ll, {radius:4, stroke:false, fillColor:c, fillOpacity:.75});
     mk.bindPopup(() => workPopup(x), {maxWidth:280}); mk.addTo(MAP.group); all.push(x.ll);
   });
-  P.vis.slice().sort((a, b) => a.hv - b.hv).forEach(v => {
-    const c = visitColor(v, pal);
-    const mk = L.circleMarker(v.ll, {radius:v.hv ? 8 : 6.5, color:cssVar('--surface'), weight:2, fillColor:c, fillOpacity:.95});
-    mk.bindPopup(() => visitPopup(v), {maxWidth:290}); mk.bindTooltip(esc(v.ct) + ' — ' + dayStr(v.d), {direction:'top'});
-    mk.addTo(MAP.group); MAP.idx[v.id] = mk; all.push(v.ll);
+  const rank = {clean:0, obs:1, viol:2, stop:3};
+  P.vis.slice().sort((a, b) => rank[visitStatus(a)] - rank[visitStatus(b)]).forEach(v => {
+    const c = visitColor(v, pal), st = visitStatus(v), ll = v.ll || v.ap;
+    const mk = v.ll ? L.circleMarker(ll, {radius:st === 'clean' ? 6.5 : 8, color:cssVar('--surface'), weight:2, fillColor:c, fillOpacity:.95})
+      : L.circleMarker(ll, {radius:7, color:c, weight:2.5, dashArray:'3 3', fillColor:c, fillOpacity:.25});
+    mk.bindPopup(() => visitPopup(v), {maxWidth:290}); mk.bindTooltip(esc(v.ct) + ' — ' + dayStr(v.d) + (v.ll ? '' : ' (موقع تقريبي)'), {direction:'top'});
+    mk.addTo(MAP.group); MAP.idx[v.r + '|' + v.id] = mk; all.push(ll);
   });
   /* مفتاح الألوان */
   let leg = '';
   if(MAP.color === 'status'){
-    if(MAP.show.v) leg += `<div class="lt">الزيارات</div><span><i style="background:${pal.ok}"></i>بدون مخالفات</span><span><i style="background:${pal.viol}"></i>بها مخالفات</span><span><i style="background:${pal.stop}"></i>إيقاف عمل</span>`;
+    if(MAP.show.v) leg += `<div class="lt">الزيارات</div>` + Object.keys(VST).map(k => `<span><i style="background:${pal.vs[k]}"></i>${VST[k]}</span>`).join('') + (approx ? `<span><i class="ap"></i>موقع تقريبي</span>` : '');
     if(MAP.show.c || MAP.show.m) leg += `<div class="lt">الأعمال (المرحلة)</div>` + STAGE_KEYS.map(k => `<span><i class="sm" style="background:${pal.st[k]}"></i>${STAGE_NAME[k]}</span>`).join('');
   } else if(MAP.color === 'region') leg = Object.entries(pal.rg).map(([k, c]) => `<span><i style="background:${c}"></i>${k}</span>`).join('');
   else if(MAP.color === 'sector') leg = Object.entries(pal.sc).map(([k, c]) => `<span><i style="background:${c}"></i>${k}</span>`).join('');
   else leg = pal.topCs.map(k => `<span><i style="background:${pal.cs[k]}"></i>${esc(k)}</span>`).join('') + `<span><i style="background:${pal.mute}"></i>أخرى</span>`;
   $('#mapLegend').innerHTML = leg || '<span>لا توجد طبقات ظاهرة</span>';
   /* اللوحة الجانبية */
-  const list = P.vis.slice().sort((a, b) => (b.hv - a.hv) || ((b.d || 0) - (a.d || 0))).slice(0, 80);
+  const list = P.vis.slice().sort((a, b) => (rank[visitStatus(b)] - rank[visitStatus(a)]) || ((b.d || 0) - (a.d || 0))).slice(0, 150);
   const byUnit = sortedEntries(countBy(P.vis, v => v.r + ' — ' + v.u), 6);
   $('#mapSide').innerHTML = `<div class="kpis" style="grid-template-columns:1fr 1fr;margin-bottom:10px">
       ${kpi({label:'زيارات على الخريطة', value:fmt(P.vis.length), color:'var(--s1)'})}
-      ${kpi({label:'بها مخالفات', value:fmt(P.vis.filter(v => v.hv).length), color:'var(--critical)'})}
+      ${kpi({label:'بها مخالفات أو إيقاف', value:fmt(P.vis.filter(v => rank[visitStatus(v)] >= 2).length), color:'var(--critical)'})}
+      ${kpi({label:'بإحداثيات مسجّلة', value:fmt(exact), color:'var(--good)'})}
+      ${kpi({label:'بموقع تقريبي', value:fmt(approx), sub:'حسب الحي أو الدائرة', color:'var(--s4)'})}
     </div>
-    ${noLL ? `<div class="note" style="margin:0 0 8px">${fmt(noLL)} زيارة بدون إحداثيات لا تظهر على الخريطة</div>` : ''}
     <div class="lt2">أكثر الدوائر زيارات</div>${hbars(byUnit.map(([k, n]) => ({label:k, value:n, color:'var(--s1)'})), {noPct:true})}
     <div class="lt2" style="margin-top:12px">الزيارات — الأحدث وذات المخالفات أولاً</div>
-    <div class="mlist">${list.map(v => `<button onclick="mapFocus(${esc(JSON.stringify(v.id))})"><i style="background:${visitColor(v, pal)}"></i><span><b>${esc(v.ct)}</b><small>${esc(v.r)} — ${esc(v.u)} • <span class="num">${dayStr(v.d)}</span></small></span>${v.vc ? `<em class="num">${fmt(v.vc)}</em>` : ''}</button>`).join('') || emptyBox('لا توجد زيارات بإحداثيات')}</div>`;
-  const key = JSON.stringify([F, MAP.show, MAP.onlyViol]);
+    <div class="mlist">${list.map(v => `<button onclick="mapFocus(${esc(JSON.stringify(v.r + '|' + v.id))})"><i style="background:${visitColor(v, pal)}"></i><span><b>${esc(v.ct)}</b><small>${esc(v.r)} — ${esc(v.u)} • <span class="num">${dayStr(v.d)}</span>${v.ll ? '' : ' • تقريبي'}</small></span>${v.vc ? `<em class="num">${fmt(v.vc)}</em>` : ''}</button>`).join('') || emptyBox('لا توجد زيارات')}</div>`;
+  const key = JSON.stringify([F, MAP.show, MAP.vf, MAP.allV]);
   if(key !== MAP.fitKey && all.length){ MAP.fitKey = key; MAP.m.fitBounds(L.latLngBounds(all).pad(0.08), {maxZoom:14}); }
   setTimeout(() => MAP.m && MAP.m.invalidateSize(), 60);
 }
 function mapFocus(id){ const mk = MAP.idx[id]; if(!mk) return; MAP.m.flyTo(mk.getLatLng(), 16, {duration:.6}); setTimeout(() => mk.openPopup(), 650); if(innerWidth < 900) $('#mapEl').scrollIntoView({behavior:'smooth', block:'center'}); }
 function mapZoom(r){
   const P = mapPoints();
-  const pts = P.vis.concat(P.cons, P.mnt).filter(x => !r || x.r === r).map(x => x.ll);
+  const pts = P.vis.concat(P.cons, P.mnt).filter(x => !r || x.r === r).map(x => x.ll || x.ap);
   if(pts.length) MAP.m.flyToBounds(L.latLngBounds(pts).pad(0.08), {maxZoom:14, duration:.6});
 }
 
@@ -3792,7 +3857,7 @@ window.addEventListener('scroll', () => $('#tip').classList.remove('show'), {pas
 })();
 </script>
 <script>
-var APP_VER = "202610201625";
+var APP_VER = "202610211136";
 if("serviceWorker" in navigator){ navigator.serviceWorker.register("sw.js", {updateViaCache:"none"}).then(function(r){ r.update(); }).catch(function(){}); }
 fetch("version.txt?t=" + Date.now(), {cache:"no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
   v = (v || "").trim();
