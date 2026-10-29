@@ -13,7 +13,7 @@
 <link rel="icon" type="image/png" href="icon-192.png">
 <title>لوحة PDC</title>
 <script>
-var APP_VER = "202610291400";
+var APP_VER = "202610291415";
 if("serviceWorker" in navigator){ navigator.serviceWorker.register("sw.js", {updateViaCache:"none"}).then(function(r){ r.update(); }).catch(function(){}); }
 fetch("version.txt?t=" + Date.now(), {cache:"no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
   v = (v || "").trim();
@@ -1244,6 +1244,7 @@ table.ops-table tr.ops-tot td{background:color-mix(in srgb,var(--brand-2) 12%,va
   <section class="page" id="pg-qs"></section>
   <section class="page" id="pg-map"></section>
   <section class="page" id="pg-plan"></section>
+  <section class="page" id="pg-fin"></section>
   <section class="page" id="pg-perf"></section>
   <section class="page" id="pg-eng"></section>
   <section class="page" id="pg-reports"></section>
@@ -1295,6 +1296,14 @@ var PDCEngine = (function(){
     if(v === null || v === undefined) return null;
     if(typeof v === 'string'){ var t = v.replace(/\s+/g,' ').trim(); return t === '' ? null : t; }
     return v;
+  }
+  function numN(v){
+    if(v === null || v === undefined || v === '') return null;
+    if(typeof v === 'number') return isFinite(v) ? v : null;
+    var t = String(v).replace(/[,\s\u200e\u200f]/g, '').replace(/\.$/, '');
+    if(t === '') return null;
+    var n = parseFloat(t);
+    return isFinite(n) ? n : null;
   }
   function str(v){ v = clean(v); return v === null ? '' : String(v); }
   function num(v){
@@ -1444,7 +1453,8 @@ var PDCEngine = (function(){
         ca: str(o['رمز إجراء الاستشاري']), cc: str(o['رمز إجراء المقاول']), cct: str(o['مسمى إجراء المقاول']),
         gT: num(o['الحفر المستهدف (م)']), gD: num(o['الحفر المنفذ (م)']),
         xT: num(o['التمديد المستهدف (م)']), xD: num(o['التمديد المنفذ (م)']),
-        nt: str(o['ملاحظات مشرف الموقع']), ll: parseLL(o['الاحداثيات'])
+        nt: str(o['ملاحظات مشرف الموقع']), ll: parseLL(o['الاحداثيات']),
+        f1: numN(o['تكلفة المقاول (ر.س)']), f2: numN(o['تكلفة PDC (ر.س)']), f3r: numN(o['تكلفة CMS (ر.س)'])
       });
     });
     return recs;
@@ -1478,7 +1488,8 @@ var PDCEngine = (function(){
         ds: done, em: str(o['مجدول/طارئ']), ar: str(o['ارشفة المستندات']),
         pe: str(o['مهندس PDC']), tp: str(o['النوع']), stn: str(o['رقم المحطة / المغذي']),
         wo: str(o['رقم امر العمل']), po: str(o['رقم PO']), wsx: str(o['حالة امر العمل']),
-        desc: str(o['وصف العمل']), nt: str(o['ملاحظات']), eng: str(o['اسم الاستشاري']), ll: parseLL(o['الاحداثيات'])
+        desc: str(o['وصف العمل']), nt: str(o['ملاحظات']), eng: str(o['اسم الاستشاري']), ll: parseLL(o['الاحداثيات']),
+        f1: numN(o['مبلغ PO للمقاول']), f2: numN(o['قيمة البنود PDC']), f3r: numN(o['قيمة البنود للاستشاري'])
       });
     });
     return recs;
@@ -1824,7 +1835,7 @@ async function loadSlotData(key, file, parsedResult, timing){
     readMs:timing.readMs, parseMs:timing.parseMs, totalMs:timing.totalMs, loadedAt:Date.now(), checkedAt:Date.now(), source:'live'
   };
   S.status = 'ok'; S.msg = '';
-  IDB.set('cache', key, {data:parsedResult, meta:S.meta, v:2});
+  IDB.set('cache', key, {data:parsedResult, meta:S.meta, v:3});
 }
 
 /* قراءة ملف من رابطه المباشر على ون درايف (يتطلب أن يسمح المتصفح بالطلب — انظر الدليل) */
@@ -2618,6 +2629,7 @@ function closeModal(){ const m = $('#modalBg'); if(m) m.remove(); }
 /* ==================== التبويبات والعرض ==================== */
 const TABS = [
   {k:'exec', t:'الملخص التنفيذي', i:'📊'},
+  {k:'fin', t:'المؤشرات المالية', i:'💰'},
   {k:'ops', t:'البيانات التشغيلية للإدارة', i:'📋'},
   {k:'cons', t:'الإنشاءات', i:'🏗️'},
   {k:'maint', t:'العمليات والصيانة', i:'🛠️'},
@@ -2640,7 +2652,7 @@ function render(){
   applyFilters();
   renderFilterBar();
   for(const k in CARD_DATA) delete CARD_DATA[k];
-  const fn = {exec:renderExec, ops:renderOps, cons:renderCons, maint:renderMaint, qs:renderQS, map:renderMap, perf:renderPerf, eng:renderEng, reports:renderReports, builder:renderBuilder, charts:renderCharts, help:renderHelp, plan:renderPlan}[CUR];
+  const fn = {exec:renderExec, ops:renderOps, cons:renderCons, maint:renderMaint, qs:renderQS, map:renderMap, perf:renderPerf, eng:renderEng, reports:renderReports, builder:renderBuilder, charts:renderCharts, help:renderHelp, plan:renderPlan, fin:renderFin}[CUR];
   document.body.classList.toggle('on-plan', CUR === 'plan');
   if(CUR === 'plan'){ fn(); return; }
   if(!ALL.work.length && !ALL.visits.length && CUR !== 'help'){ $('#pg-' + CUR).innerHTML = onboarding(); return; }
@@ -3919,7 +3931,7 @@ function exportReport(){
   /* آخر نسخة مقروءة محفوظة في المتصفح — تظهر فوراً عند الفتح (مهم للجوال) ثم تُستبدل بالقراءة الحية */
   for(const s of SLOTS){
     const c = await IDB.get('cache', s.key);
-    if(c && c.data && c.v === 2){ const S = SLOT[s.key]; S.data = c.data; S.meta = Object.assign({}, c.meta, {source:'cache'}); S.status = 'cached'; S.msg = 'آخر نسخة مقروءة ' + ago(c.meta.loadedAt) + ' — حدّث لقراءة الأحدث'; }
+    if(c && c.data && c.v === 3){ const S = SLOT[s.key]; S.data = c.data; S.meta = Object.assign({}, c.meta, {source:'cache'}); S.status = 'cached'; S.msg = 'آخر نسخة مقروءة ' + ago(c.meta.loadedAt) + ' — حدّث لقراءة الأحدث'; }
   }
   rebuild();
   updateFreshness();
@@ -4251,6 +4263,169 @@ document.addEventListener('click', e => {
   if(t.id === 'plExport'){ plExport(); return; }
 });
 document.addEventListener('change', e => { if(e.target.id === 'plCo'){ PL.co = e.target.value; safeLS('pdc_pl_co', PL.co); renderPlan(); } });
+
+
+/* ==================== المؤشرات المالية (منقولة من النظام السابق بنفس قواعد الحساب) ====================
+   المقاول: رقم مرجعي — PDC: الدخل — الاستشاري الفرعي: المصروف — تكلفة الموظفين PMSS: مصروف.
+   الربح المتوقع = PDC − الاستشاري − PMSS.
+   قيمة الاستشاري: القيمة المسجَّلة إن وُجدت وغير صفرية، وإلا تقدير بنسبة من قيمة المقاول (جدة 6.53% ، مكة 6.93%).
+   تكلفة PMSS: شهرية + التأمين العائلي ÷ 12، تُحسب شهراً بشهر من تاريخ المباشرة (أو 2026-05-01 إن كان قبله)،
+   وتُوزَّع: جدة/مكة 100% لمدينتها والمقر والتخطيط 50/50 — وحسب المجال: إنشاءات 100% للإنشاءات، عمليات 100% للصيانة، وغيرها 50/50. */
+const FIN_RATIO = {'جدة':0.0653, 'مكة':0.0693};
+const FIN_FLOOR = Math.floor(Date.UTC(2026, 4, 1) / 86400000);
+const FIN_ROLES = [['f1','المقاول (مرجعي)','var(--s1)'], ['f2','PDC (الدخل)','var(--s3)'], ['f3','الاستشاري (المصروف)','var(--s2)']];
+const FIN_WO_STAGES = ['قيد التنفيذ','انتهاء التنفيذ','استلام المستندات (155)','إصدار شهادة الإنجاز','تأكيد شهادة الإنجاز','منجز ومقفل (300)'];
+const FIN_OM_STAGES = ['لم يتم البدء','جاري التنفيذ','مكتمل'];
+
+function finConsultant(x){
+  if(x.f3 !== undefined && x._f3k === x.f1) return x.f3;
+  let v;
+  if(x.f3r !== null && x.f3r !== undefined && x.f3r !== 0){ v = x.f3r; x.f3e = 0; }
+  else if(x.f1 !== null && x.f1 !== undefined && FIN_RATIO[x.r] !== undefined){ v = x.f1 * FIN_RATIO[x.r]; x.f3e = 1; }
+  else { v = (x.f3r === undefined ? null : x.f3r); x.f3e = 0; }
+  x.f3 = v; x._f3k = x.f1;
+  return v;
+}
+function finWoStage(s){
+  s = String(s || '');
+  if(!s) return 'غير محدد';
+  if(s.indexOf('قيد التنفيذ') === 0) return 'قيد التنفيذ';
+  if(s.indexOf('انتهاء التنفيذ') === 0) return 'انتهاء التنفيذ';
+  if(s.indexOf('استلام المستندات') === 0) return 'استلام المستندات (155)';
+  if(s.indexOf('إصدار') === 0 || s.indexOf('قبول') === 0) return 'إصدار شهادة الإنجاز';
+  if(s.indexOf('اعتماد') === 0 || s.indexOf('تأكيد') === 0) return 'تأكيد شهادة الإنجاز';
+  if(s.indexOf('منجز') === 0) return 'منجز ومقفل (300)';
+  return 'مرحلة أخرى: ' + s;
+}
+function finOmStatus(s){
+  s = String(s || '').trim(); const up = s.toUpperCase();
+  if(!s) return 'غير محدد (لم تُسجَّل الحالة بعد)';
+  if(up === 'COMPLETED' || s === 'مكتمل' || s === 'منجز') return 'مكتمل';
+  if(up === 'IN PROCESS' || s === 'جاري التنفيذ' || s === 'قيد التنفيذ') return 'جاري التنفيذ';
+  if(up === 'NOT STARTED' || s === 'لم يتم البدء') return 'لم يتم البدء';
+  return 'حالة أخرى: ' + s;
+}
+/* حصص الموظف: المدينة والقطاع */
+function finStaffCity(x){
+  if(x.loc === 'جدة') return [['جدة', 1]];
+  if(x.loc === 'مكة') return [['مكة', 1]];
+  if(x.loc === 'المقر الرئيسي' || x.loc === 'دائرة التخطيط') return [['جدة', .5], ['مكة', .5]];
+  return [];
+}
+function finStaffType(x){ const d = String(x.fld || '').trim(); if(d === 'إنشاءات') return {wo:1, om:0}; if(d === 'عمليات') return {wo:0, om:1}; return {wo:.5, om:.5}; }
+function finStaffCostInRange(x, from, to){
+  const monthly = (x.mc || 0) + (x.ins || 0) / 12;
+  if(!monthly) return 0;
+  let start = x.sd !== null && x.sd !== undefined ? Math.max(x.sd, FIN_FLOOR) : from;
+  const eff = Math.max(start, from);
+  if(eff > to) return 0;
+  let total = 0, d = new Date(eff * 86400000), y = d.getUTCFullYear(), m = d.getUTCMonth();
+  for(let guard = 0; guard < 600; guard++){
+    const ms = Math.floor(Date.UTC(y, m, 1) / 86400000), dim = new Date(Date.UTC(y, m + 1, 0)).getUTCDate(), me = ms + dim - 1;
+    const segs = Math.min(to, me) - Math.max(eff, ms) + 1;
+    if(segs > 0) total += monthly * segs / dim;
+    if(me >= to) break;
+    m++; if(m > 11){ m = 0; y++; }
+  }
+  return total;
+}
+function finRange(){
+  const from = F.from !== null ? F.from : FIN_FLOOR, to = F.to !== null ? F.to : TODAY;
+  return {from, to, isTotal:F.from === null && F.to === null};
+}
+function finStaff(){
+  const out = {wo:{'جدة':0,'مكة':0}, om:{'جدة':0,'مكة':0}, n:0, loaded:!!ALL.plan};
+  if(!ALL.plan) return out;
+  const R = finRange();
+  ALL.plan.staff.forEach(x => {
+    if(x.st === 'شاغر') return;
+    const c = finStaffCostInRange(x, R.from, R.to); if(!c) return;
+    out.n++;
+    const t = finStaffType(x);
+    finStaffCity(x).forEach(([city, sh]) => { out.wo[city] += c * sh * t.wo; out.om[city] += c * sh * t.om; });
+  });
+  return out;
+}
+function finSel(){
+  const cities = F.r.length ? F.r.filter(c => c === 'جدة' || c === 'مكة') : ['جدة', 'مكة'];
+  const useWo = !F.s.length || F.s.indexOf('إنشاءات') > -1, useOm = !F.s.length || F.s.indexOf('صيانة') > -1;
+  return {cities, useWo, useOm};
+}
+function finSum(arr, k){ let s = 0; for(const x of arr){ const v = k === 'f3' ? finConsultant(x) : x[k]; if(v !== null && v !== undefined && !isNaN(v)) s += v; } return s; }
+function finAvg(arr, k){ const v = arr.map(x => k === 'f3' ? finConsultant(x) : x[k]).filter(v => v !== null && v !== undefined && !isNaN(v)); return v.length ? {avg:v.reduce((a, b) => a + b, 0) / v.length, n:v.length} : {avg:null, n:0}; }
+const nfm = n => fmt(n) + ' ر.س';
+
+function renderFin(){
+  const pg = $('#pg-fin');
+  const rows = W.concat(XC);
+  const sel = finSel();
+  const wo = rows.filter(x => x.s === 'إنشاءات'), om = rows.filter(x => x.s === 'صيانة');
+  if(!rows.length){ pg.innerHTML = head('💰 المؤشرات المالية') + emptyBox('لا توجد أعمال ضمن الفلاتر الحالية'); return; }
+  const st = finStaff(), R = finRange();
+  const staffBy = c => (sel.useWo ? st.wo[c] : 0) + (sel.useOm ? st.om[c] : 0);
+  const staffAmt = sel.cities.reduce((s, c) => s + staffBy(c), 0);
+  const byCity = (k, c) => finSum(rows.filter(x => x.r === c), k);
+  const T = {f1:finSum(rows, 'f1'), f2:finSum(rows, 'f2'), f3:finSum(rows, 'f3')};
+  const profit = T.f2 - T.f3 - staffAmt;
+  const cityLine = fn => sel.cities.map(c => `${c}: <b class="num">${fmt(fn(c))}</b>`).join(' • ');
+  const pc = a => T.f1 ? ' — <span class="num">' + fpct(a, T.f1) + '</span> من مبلغ المقاول' : '';
+  const estN = rows.filter(x => { finConsultant(x); return x.f3e; }).length;
+  const rangeLbl = R.isTotal ? 'الإجمالي من ١ مايو ٢٠٢٦ حتى اليوم' : `للفترة المحدَّدة (${fmt(R.to - R.from + 1)} يوماً)`;
+
+  /* المتوسطات */
+  const avgBlock = (arr, unit, lbl, staffShare) => {
+    const a1 = finAvg(arr, 'f1'), a2 = finAvg(arr, 'f2'), a3 = finAvg(arr, 'f3');
+    const sAvg = st.loaded && arr.length ? staffShare / arr.length : null;
+    const pAvg = (a2.avg !== null || a3.avg !== null) ? (a2.avg || 0) - (a3.avg || 0) - (sAvg || 0) : null;
+    const sub = a => a.n ? `من <span class="num">${fmt(a.n)}</span> ${unit} بقيمة مسجَّلة` : 'لا توجد قيم مسجَّلة';
+    return `<h4 style="margin:6px 0 8px;font-size:14px">${lbl}</h4><div class="kpis">
+      ${kpi({label:'متوسط ' + unit + ' للمقاول (مرجعي)', value:a1.avg === null ? '—' : fmt(a1.avg), sub:sub(a1), color:'var(--s1)'})}
+      ${kpi({label:'متوسط ' + unit + ' PDC (الدخل)', value:a2.avg === null ? '—' : fmt(a2.avg), sub:sub(a2), color:'var(--s3)'})}
+      ${kpi({label:'متوسط ' + unit + ' للاستشاري (المصروف)', value:a3.avg === null ? '—' : fmt(a3.avg), sub:sub(a3), color:'var(--s2)'})}
+      ${kpi({label:'متوسط تكلفة الموظفين PMSS', value:sAvg === null ? '—' : fmt(sAvg), sub:sAvg === null ? 'ملف دائرة التخطيط غير مقروء' : 'حصة ' + lbl + ' ÷ <span class="num">' + fmt(arr.length) + '</span> ' + unit, color:'var(--s2)'})}
+      ${kpi({label:'متوسط الربح المتوقع', value:pAvg === null ? '—' : fmt(pAvg), sub:'متوسط PDC − الاستشاري − PMSS', color:pAvg !== null && pAvg < 0 ? 'var(--critical)' : 'var(--good)'})}
+    </div>`;
+  };
+  /* التوزيع حسب المرحلة */
+  const distrib = (arr, catFn, order) => {
+    const m = new Map();
+    arr.forEach(x => { const c = catFn(x); let b = m.get(c); if(!b){ b = {f1:0, f2:0, f3:0}; m.set(c, b); } FIN_ROLES.forEach(([k]) => { const v = k === 'f3' ? finConsultant(x) : x[k]; if(v !== null && v !== undefined && !isNaN(v)) b[k] += v; }); });
+    const cats = order.filter(c => m.has(c)).concat(Array.from(m.keys()).filter(c => order.indexOf(c) < 0));
+    const items = cats.map(c => ({label:c, b:m.get(c), t:m.get(c).f1 + m.get(c).f2 + m.get(c).f3})).filter(i => i.t > 0);
+    const max = Math.max(1, ...items.flatMap(i => FIN_ROLES.map(([k]) => i.b[k])));
+    const html = items.length ? items.map(i => `<div style="margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border)">
+        <div style="font-weight:800;font-size:13px;margin-bottom:6px">${esc(i.label)} <span style="color:var(--muted);font-weight:600">• الإجمالي <span class="num">${fmt(i.t)}</span> ر.س</span></div>
+        ${FIN_ROLES.map(([k, l, c]) => `<div class="hb-row"${tipAttr(i.label + ' — ' + l, [[c, 'المبلغ', fmt(i.b[k]) + ' ر.س']])}><span class="hb-l">${l}</span><span class="hb-t"><span class="hb-f" style="width:${i.b[k] / max * 100}%;background:${c}"></span></span><span class="hb-v num">${fmt(i.b[k])}</span></div>`).join('')}</div>`).join('') : emptyBox('لا توجد قيم مالية مسجَّلة');
+    return {html, data:{cols:['الفئة', ...FIN_ROLES.map(r => r[1]), 'الإجمالي'], rows:items.map(i => [i.label, Math.round(i.b.f1), Math.round(i.b.f2), Math.round(i.b.f3), Math.round(i.t)])}};
+  };
+  const dWo = distrib(wo, x => finWoStage(x.ls), FIN_WO_STAGES), dOm = distrib(om, x => finOmStatus(x.wsx), FIN_OM_STAGES);
+  /* حسب المنطقة والقطاع (جدول) */
+  const tRows = [];
+  sel.cities.forEach(c => [['إنشاءات', 'wo', wo], ['صيانة', 'om', om]].forEach(([s, k, arr]) => {
+    if((k === 'wo' && !sel.useWo) || (k === 'om' && !sel.useOm)) return;
+    const a = arr.filter(x => x.r === c), f1 = finSum(a, 'f1'), f2 = finSum(a, 'f2'), f3 = finSum(a, 'f3'), sf = st[k][c];
+    tRows.push([c, s, a.length, Math.round(f1), Math.round(f2), Math.round(f3), Math.round(sf), Math.round(f2 - f3 - sf), f1 ? Math.round((f2 - f3 - sf) / f1 * 1000) / 10 : 0]);
+  }));
+
+  pg.innerHTML = head('💰 المؤشرات المالية', `<span class="ctx">تسري فلاتر المنطقة والقطاع والمقاول والاستشاري والفترة من الشريط العلوي</span>`) +
+    (st.loaded ? '' : `<div class="alert" style="margin-bottom:12px;border-color:var(--warning)"><span class="ai">⚠️</span><span>ملف دائرة التخطيط غير مقروء بعد — تكلفة الموظفين PMSS غير مطروحة من الربح. <button class="btn sm pri" data-act="link" data-k="pl_الكل">اختيار الملف</button></span></div>`) +
+    `<div class="kpis">
+      ${kpi({label:'قيمة الأعمال للمقاول (مرجعي)', icon:'🏗️', value:nfm(T.f1), sub:cityLine(c => byCity('f1', c)), color:'var(--s1)'})}
+      ${kpi({label:'قيمة الأعمال PDC (الدخل)', icon:'📥', value:nfm(T.f2), sub:cityLine(c => byCity('f2', c)) + pc(T.f2), color:'var(--s3)'})}
+      ${kpi({label:'قيمة الأعمال للاستشاري (المصروف)', icon:'📤', value:nfm(T.f3), sub:cityLine(c => byCity('f3', c)) + pc(T.f3) + (estN ? `<br><span style="color:var(--muted)">منها <span class="num">${fmt(estN)}</span> قيمة تقديرية بنسبة من قيمة المقاول</span>` : ''), color:'var(--s2)'})}
+      ${kpi({label:'تكلفة الموظفين (PMSS)', icon:'👥', value:st.loaded ? nfm(staffAmt) : '—', sub:st.loaded ? cityLine(staffBy) + pc(staffAmt) + '<br><span style="color:var(--muted)">' + rangeLbl + '</span>' : 'ملف دائرة التخطيط غير مقروء', color:'var(--s5)'})}
+      ${kpi({label:'الربح المتوقع (PDC − الاستشاري − PMSS)', icon:'💹', value:nfm(profit), sub:cityLine(c => byCity('f2', c) - byCity('f3', c) - staffBy(c)) + pc(profit), color:profit >= 0 ? 'var(--good)' : 'var(--critical)'})}
+    </div>` +
+    `<div class="grid">${card({cls:'c12', title:'الملخص المالي حسب المنطقة والقطاع', sub:'ر.س — الربح = PDC − الاستشاري − حصة الموظفين', body:simpleTable(['المنطقة','القطاع','عدد الأعمال','المقاول','PDC','الاستشاري','الموظفون PMSS','الربح المتوقع','الربح من قيمة المقاول %'], tRows), data:{cols:['المنطقة','القطاع','عدد الأعمال','المقاول','PDC','الاستشاري','الموظفون PMSS','الربح المتوقع','الربح %'], rows:tRows}})}</div>` +
+    `<div class="card" style="margin-bottom:14px"><div class="card-h"><div class="t"><h3>متوسط قيمة أمر العمل / المهمة</h3><div class="sub">محسوبة من الأعمال التي لها قيمة مسجَّلة فقط. حصة الموظفين مقسومة بين الإنشاءات والصيانة حسب عمود «المجال» (والمجالات المساندة 50/50) فلا يوجد ازدواج عند الجمع</div></div></div>
+      ${sel.useWo ? (wo.length ? avgBlock(wo, 'أمر العمل', 'الإنشاءات', sel.cities.reduce((s, c) => s + st.wo[c], 0)) : emptyBox('لا توجد أوامر إنشاءات ضمن الفلاتر')) : ''}
+      ${sel.useOm ? (om.length ? avgBlock(om, 'المهمة', 'الصيانة', sel.cities.reduce((s, c) => s + st.om[c], 0)) : emptyBox('لا توجد مهام صيانة ضمن الفلاتر')) : ''}</div>` +
+    `<div class="grid">
+      ${sel.useWo ? card({cls:sel.useOm ? 'c6' : 'c12', title:'توزيع المبالغ حسب مرحلة التنفيذ — الإنشاءات', sub:'ست مراحل رئيسية — تُدمج المراحل الفرعية مع أقرب مرحلة لها', body:dWo.html, data:dWo.data}) : ''}
+      ${sel.useOm ? card({cls:sel.useWo ? 'c6' : 'c12', title:'توزيع المبالغ حسب حالة أمر العمل — الصيانة', sub:'لم يتم البدء / جاري التنفيذ / مكتمل — وما لم تُسجَّل حالته يظهر منفصلاً', body:dOm.html, data:dOm.data}) : ''}
+    </div>` +
+    `<div class="note">قواعد الحساب: قيمة الاستشاري هي القيمة المسجَّلة في الملف إن وُجدت، وإلا تُقدَّر بنسبة من قيمة المقاول (<span class="num">6.53%</span> لجدة و<span class="num">6.93%</span> لمكة). تكلفة الموظفين = التكلفة الشهرية + التأمين العائلي ÷ 12، تُحسب يومياً من تاريخ المباشرة (ومن ١ مايو ٢٠٢٦ لمن باشر قبله)؛ موظفو المقر والتخطيط مقسومون 50/50 بين المدينتين.</div>`;
+}
 
 </script>
 </body>
