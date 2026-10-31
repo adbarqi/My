@@ -1,0 +1,1101 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#0A0C22">
+<title>ليلة التحدي</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lalezar&family=Tajawal:wght@400;500;700;800&display=swap">
+<style>
+:root{
+  color-scheme:dark;
+  --stage:#0A0C22;--panel:#161B44;--panel2:#1E2458;--line:#2C3470;
+  --ink:#F4F1FF;--mute:#A5A9D6;--gold:#FFC940;--gold2:#FF9F1C;--ok:#35E08A;--bad:#FF5A4E;
+  --o0:#FF4F6D;--o1:#3D8BFF;--o2:#F5B700;--o3:#22C47A;
+  --display:"Lalezar","Tajawal","Segoe UI",Tahoma,sans-serif;
+  --body:"Tajawal","Segoe UI",Tahoma,Arial,sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%}
+body{
+  direction:rtl;font-family:var(--body);color:var(--ink);font-size:16px;
+  background:
+    radial-gradient(60% 45% at 18% 0%,rgba(255,201,64,.14),transparent 70%),
+    radial-gradient(55% 40% at 85% 0%,rgba(46,230,200,.10),transparent 70%),
+    radial-gradient(80% 60% at 50% 110%,rgba(255,107,138,.12),transparent 70%),
+    var(--stage);
+  background-attachment:fixed;
+}
+button{font-family:inherit;cursor:pointer;border:0;color:inherit;touch-action:manipulation}
+button:disabled{opacity:.4;cursor:default}
+input{font-family:inherit}
+[hidden]{display:none!important}
+.disp{font-family:var(--display);font-weight:400}
+.mute{color:var(--mute)}
+.brand{font-family:var(--display);color:var(--gold);text-shadow:0 0 14px rgba(255,201,64,.5),0 3px 0 #8A5A00;font-size:clamp(34px,5vw,58px);line-height:1.1}
+.brand small{display:block;font-family:var(--body);font-weight:700;font-size:.3em;color:var(--mute);text-shadow:none;letter-spacing:.5px}
+.btn{background:linear-gradient(180deg,var(--gold),var(--gold2));color:#241800;font-weight:800;font-size:20px;padding:14px 26px;border-radius:16px;box-shadow:0 6px 0 #8A5A00,0 10px 30px rgba(255,201,64,.25)}
+.btn:active:not(:disabled){transform:translateY(3px);box-shadow:0 3px 0 #8A5A00}
+.btn.alt{background:var(--panel2);color:var(--ink);box-shadow:0 5px 0 #0B0E2A;border:1.5px solid var(--line)}
+.ghost{background:transparent;border:1.5px solid var(--line);padding:9px 14px;border-radius:999px;color:var(--mute);font-weight:700;font-size:15px}
+.ghost:hover{border-color:var(--gold);color:var(--ink)}
+.av{display:inline-grid;place-items:center;border-radius:50%;background:var(--c,#444);width:1.9em;height:1.9em;font-size:1em;box-shadow:inset 0 -3px 0 rgba(0,0,0,.25);flex:none}
+.av.off{filter:grayscale(1);opacity:.45}
+.tag{display:inline-flex;align-items:center;gap:6px;background:rgba(255,201,64,.12);color:var(--gold);border:1px solid rgba(255,201,64,.4);border-radius:999px;padding:4px 12px;font-weight:800;font-size:14px}
+
+/* ============ landing ============ */
+.land{min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:24px 16px;text-align:center}
+.land .cards{display:grid;gap:14px;width:min(520px,100%)}
+.land .card{background:linear-gradient(180deg,var(--panel2),var(--panel));border:2px solid var(--line);border-radius:22px;padding:20px;display:flex;flex-direction:column;gap:12px;align-items:stretch;text-align:right}
+.land .card h2{margin:0;font-family:var(--display);font-weight:400;font-size:26px}
+.land .card p{margin:0;color:var(--mute);line-height:1.7}
+.codein{display:flex;gap:8px}
+.codein input{flex:1;min-width:0;font-size:24px;text-align:center;letter-spacing:6px;text-transform:uppercase;background:#0E1234;border:2px solid var(--line);border-radius:14px;color:var(--ink);padding:10px}
+
+/* ============ host ============ */
+.host{min-height:100%;display:flex;flex-direction:column;gap:14px;padding:14px clamp(14px,2.5vw,32px) 90px;max-width:1500px;margin:0 auto}
+.lobby{display:grid;grid-template-columns:minmax(280px,420px) 1fr;gap:26px;align-items:start;margin-top:10px}
+@media (max-width:820px){.lobby{grid-template-columns:1fr}}
+.joincard{background:#fff;color:#0A0C22;border-radius:26px;padding:22px;text-align:center;box-shadow:0 0 0 6px var(--gold),0 20px 60px rgba(0,0,0,.5)}
+.joincard .qr svg{width:100%;height:auto;display:block}
+.joincard .how{font-weight:800;font-size:20px;margin-top:8px}
+.joincard .code{font-size:16px;color:#555;margin-top:6px}
+.joincard .code b{font-family:var(--display);font-weight:400;font-size:40px;letter-spacing:6px;color:#0A0C22;display:block;line-height:1.1;direction:ltr}
+.joincard .url{font-size:13px;color:#777;direction:ltr;word-break:break-all;margin-top:4px}
+.side h3{margin:4px 0 10px;font-size:20px;color:var(--mute);font-weight:800}
+.plist{display:flex;flex-wrap:wrap;gap:10px;min-height:64px;align-items:center}
+.pchip{flex:none;white-space:nowrap;display:flex;align-items:center;gap:8px;background:var(--panel);border:2px solid var(--line);border-radius:999px;padding:6px 8px 6px 14px;font-weight:800;font-size:19px;animation:pop .4s}
+.pchip .av{font-size:22px}
+.pchip.hp{border-color:var(--gold)}
+.pchip .x{background:none;color:var(--mute);font-size:18px;padding:0 6px}
+.pchip .crownb{background:none;font-size:18px;padding:0 2px;opacity:.35}
+.pchip.hp .crownb{opacity:1}
+@keyframes pop{from{transform:scale(.6);opacity:0}}
+.empty{color:var(--mute);font-size:18px;padding:16px;border:2px dashed var(--line);border-radius:18px;width:100%}
+.rchips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+.rchip{background:var(--panel);border:2px solid var(--line);border-radius:14px;padding:8px 12px;font-weight:800;font-size:16px;color:var(--mute)}
+.rchip.on{border-color:var(--gold);color:var(--ink);background:var(--panel2)}
+.hint{color:var(--mute);line-height:1.7;margin:14px 0 0}
+.net{position:fixed;bottom:10px;inset-inline-start:12px;font-size:13px;color:var(--mute);background:rgba(10,12,34,.8);padding:6px 10px;border-radius:10px;z-index:5}
+.net.bad{color:var(--bad)}
+
+.hbar{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.hbar .brand{font-size:clamp(26px,3vw,38px)}
+.rinfo{font-weight:800;font-size:clamp(16px,1.8vw,22px);display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.mini{display:flex;align-items:center;gap:10px;background:#fff;color:#0A0C22;border-radius:14px;padding:6px 12px 6px 6px;font-weight:800}
+.mini .qr{width:64px;height:64px}
+.mini .qr svg{width:100%;height:100%}
+.mini b{font-family:var(--display);font-weight:400;font-size:24px;letter-spacing:3px;direction:ltr;display:block;line-height:1}
+.board{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.pod{position:relative;background:linear-gradient(180deg,var(--panel2),var(--panel));border:2px solid var(--line);border-radius:18px;padding:12px 8px 8px;text-align:center;overflow:hidden}
+.pod::before{content:"";position:absolute;inset:0 0 auto 0;height:6px;background:var(--c)}
+.pod .top{display:flex;align-items:center;justify-content:center;gap:6px;font-weight:800;font-size:clamp(14px,1.5vw,18px);white-space:nowrap;overflow:hidden}
+.pod .top .av{font-size:18px}
+.pod .sc{font-family:var(--display);font-size:clamp(34px,4.2vw,54px);line-height:1;color:var(--c);margin-top:4px;font-variant-numeric:tabular-nums}
+.pod.lead{border-color:var(--gold);box-shadow:0 0 22px rgba(255,201,64,.3)}
+.pod .cr{position:absolute;top:6px;inset-inline-start:8px;font-size:18px}
+.pod .done{position:absolute;top:6px;inset-inline-end:8px;width:22px;height:22px;border-radius:50%;background:var(--ok);color:#06210f;font-weight:900;display:grid;place-items:center;font-size:14px}
+.pod .delta{direction:ltr;unicode-bidi:isolate;position:absolute;top:34%;inset-inline-end:10px;font-family:var(--display);font-size:30px;animation:floatup 1.6s forwards;pointer-events:none}
+.pod .delta.p{color:var(--ok)}.pod .delta.n{color:var(--bad)}
+@keyframes floatup{0%{opacity:0;transform:translateY(10px)}15%{opacity:1}100%{opacity:0;transform:translateY(-44px)}}
+.pod.off{opacity:.5}
+
+.stage{flex:1;position:relative;background:linear-gradient(180deg,#141949 0%,#0E1234 100%);border:2px solid var(--line);border-radius:26px;padding:clamp(18px,3vw,40px);min-height:420px;display:flex;flex-direction:column;gap:18px;box-shadow:0 20px 60px rgba(0,0,0,.45)}
+.center{text-align:center;display:flex;flex-direction:column;align-items:center;gap:14px}
+.big-ico{font-size:clamp(70px,10vw,120px);line-height:1;animation:pop .5s}
+.rtitle{font-family:var(--display);font-weight:400;font-size:clamp(40px,6vw,74px);line-height:1.15;margin:0;color:var(--gold)}
+.lede{color:var(--ink);font-size:clamp(18px,2.2vw,28px);line-height:1.7;max-width:60ch;margin:0}
+.qtext{font-family:var(--display);font-weight:400;font-size:clamp(30px,4.4vw,60px);line-height:1.35;text-align:center;margin:0;text-wrap:balance}
+.status{text-align:center;font-weight:800;font-size:clamp(20px,2.4vw,32px);min-height:1.4em}
+.status .av{font-size:1.1em;vertical-align:middle}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.opts.two{grid-template-columns:1fr 1fr}
+.opt{position:relative;display:flex;align-items:center;gap:14px;background:var(--oc);border-radius:18px;padding:16px 18px;font-weight:800;font-size:clamp(20px,2.6vw,34px);min-height:84px;box-shadow:inset 0 -6px 0 rgba(0,0,0,.22);transition:opacity .3s,transform .3s}
+.opt .sh{font-size:.9em;opacity:.9;width:1.3em;text-align:center;flex:none}
+.opt .who{margin-inline-start:auto;display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
+.opt .who .av{font-size:18px;border:2px solid rgba(255,255,255,.7)}
+.opt .cnt{margin-inline-start:auto;font-family:var(--display);font-size:1.1em}
+.opt.dim{opacity:.22}
+.opt.right{outline:5px solid #fff;transform:scale(1.03);opacity:1}
+.opt.x::after{content:"✕";position:absolute;inset-inline-end:14px;top:50%;transform:translateY(-50%);font-size:1.3em;color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.5)}
+.c0{--oc:var(--o0)}.c1{--oc:var(--o1)}.c2{--oc:var(--o2)}.c3{--oc:var(--o3)}
+.rowav{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;min-height:48px}
+.rowav .av{font-size:26px;transition:.3s}
+.rowav .av.wait{opacity:.25;filter:grayscale(1)}
+.rowav .av.lock{opacity:.35;filter:grayscale(1);position:relative}
+.rowav .av.lock::after{content:"🔒";position:absolute;font-size:14px;bottom:-4px;left:-4px}
+.tbar{position:relative;height:16px;background:rgba(255,255,255,.08);border-radius:999px;overflow:hidden}
+.tbar i{position:absolute;inset:0 0 0 auto;background:linear-gradient(90deg,var(--bad),var(--gold));border-radius:999px;transition:width .25s linear}
+.tnum{position:absolute;top:-34px;inset-inline-start:0;font-family:var(--display);font-size:28px;color:var(--gold)}
+.answer{font-family:var(--display);font-size:clamp(46px,7vw,96px);color:var(--ok);line-height:1.1;text-align:center;animation:pop .5s}
+.list{display:flex;flex-direction:column;gap:10px;width:min(900px,100%);margin:0 auto}
+.lrow{display:flex;align-items:center;gap:12px;background:var(--panel);border:2px solid var(--line);border-radius:16px;padding:10px 16px;font-weight:800;font-size:clamp(18px,2.2vw,28px)}
+.lrow .av{font-size:24px}
+.lrow .v{margin-inline-start:auto;font-family:var(--display);font-size:1.2em}
+.lrow .d{direction:ltr;unicode-bidi:isolate;min-width:3em;text-align:center;font-family:var(--display);font-size:1.1em;color:var(--ok)}
+.lrow.best{border-color:var(--gold);background:var(--panel2)}
+.bars{display:flex;flex-direction:column;gap:12px;width:min(1000px,100%);margin:0 auto}
+.bar{display:grid;grid-template-columns:minmax(120px,220px) 1fr auto;gap:12px;align-items:center;font-weight:800;font-size:clamp(17px,2vw,26px)}
+.bar .nm{display:flex;align-items:center;gap:8px;overflow:hidden;white-space:nowrap}
+.bar .nm .av{font-size:22px}
+.bar .track{height:38px;background:rgba(255,255,255,.06);border-radius:12px;overflow:hidden;position:relative}
+.bar .fill{position:absolute;inset:0 0 0 auto;background:var(--c);border-radius:12px;transition:width .25s}
+.bar .num{font-family:var(--display);font-size:1.3em;min-width:2.2em;text-align:center}
+.bar .vot{display:flex;gap:3px;position:absolute;inset-inline-start:8px;top:50%;transform:translateY(-50%)}
+.bar .vot .av{font-size:15px;border:2px solid rgba(255,255,255,.6)}
+.fibopts{display:flex;flex-direction:column;gap:12px;width:min(1000px,100%);margin:0 auto}
+.fibo{display:flex;align-items:center;gap:14px;background:var(--panel2);border:2px solid var(--line);border-radius:16px;padding:14px 18px;font-weight:800;font-size:clamp(20px,2.6vw,32px)}
+.fibo .lt{font-family:var(--display);color:var(--gold);font-size:1.1em;width:1.4em;text-align:center}
+.fibo .meta{margin-inline-start:auto;display:flex;align-items:center;gap:8px;font-size:.62em;color:var(--mute);flex-wrap:wrap;justify-content:flex-end}
+.fibo .meta .av{font-size:20px}
+.fibo.truth{border-color:var(--ok);background:rgba(53,224,138,.12)}
+.fibo .own{color:var(--bad)}
+.bomb{font-size:clamp(110px,16vw,200px);line-height:1;filter:drop-shadow(0 0 30px rgba(255,90,78,.6));animation:shake var(--sp,1s) infinite}
+@keyframes shake{0%,100%{transform:rotate(-6deg) scale(1)}50%{transform:rotate(6deg) scale(1.06)}}
+.boom{font-size:clamp(140px,20vw,260px);animation:pop .4s}
+.cd{font-family:var(--display);font-size:clamp(120px,18vw,240px);line-height:1;color:var(--gold);text-shadow:0 0 40px rgba(255,201,64,.6)}
+.podium{display:flex;justify-content:center;align-items:flex-end;gap:16px;margin-top:10px}
+.pd{display:flex;flex-direction:column;align-items:center;gap:8px;font-weight:800;font-size:clamp(18px,2vw,26px)}
+.pd .av{font-size:clamp(34px,4vw,54px)}
+.pd .blk{width:clamp(90px,12vw,160px);border-radius:16px 16px 0 0;background:linear-gradient(180deg,var(--c),rgba(0,0,0,.2));display:grid;place-items:start center;padding-top:10px;font-family:var(--display);font-size:clamp(30px,4vw,52px)}
+.punish{background:rgba(255,90,78,.12);border:2px dashed var(--bad);border-radius:18px;padding:14px 22px;font-size:clamp(18px,2.2vw,26px);font-weight:800;text-align:center}
+.ctrlbar{position:fixed;bottom:0;inset-inline:0;display:flex;gap:10px;justify-content:center;align-items:center;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:linear-gradient(0deg,rgba(10,12,34,.97) 60%,transparent);z-index:4;flex-wrap:wrap}
+.confetti{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:9}
+.confetti i{position:absolute;top:-20px;width:10px;height:16px;border-radius:2px;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+
+/* ============ phone ============ */
+.ph{min-height:100%;min-height:100dvh;display:flex;flex-direction:column;padding:calc(10px + env(safe-area-inset-top)) 16px calc(16px + env(safe-area-inset-bottom));gap:12px;max-width:560px;margin:0 auto;user-select:none;-webkit-user-select:none}
+.phead{display:flex;align-items:center;gap:10px;background:var(--panel);border:1.5px solid var(--line);border-radius:16px;padding:8px 12px}
+.phead .av{font-size:22px}
+.phead .nm{font-weight:800;font-size:18px;flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.phead .sc{font-family:var(--display);font-size:28px;color:var(--c)}
+.phead .rk{font-size:13px;color:var(--mute);font-weight:700}
+.pbody{flex:1;display:flex;flex-direction:column;justify-content:center;gap:14px;text-align:center}
+.pbody .msg{font-size:22px;font-weight:800;line-height:1.6}
+.pbody .ico{font-size:72px;line-height:1}
+.pq{font-weight:800;font-size:19px;line-height:1.6;color:var(--ink);background:rgba(255,255,255,.05);border-radius:14px;padding:10px 12px}
+.buzzer{align-self:center;width:min(78vw,340px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 50% 35%,#ff8a8a,#e5203a 60%,#9c0a1f);box-shadow:0 14px 0 #6d0614,0 24px 50px rgba(229,32,58,.5),inset 0 -10px 30px rgba(0,0,0,.25);font-family:var(--display);font-size:56px;color:#fff;text-shadow:0 3px 0 rgba(0,0,0,.3);transition:transform .06s}
+.buzzer:active,.buzzer.hit{transform:translateY(10px);box-shadow:0 4px 0 #6d0614,0 10px 30px rgba(229,32,58,.5)}
+.popts{display:grid;gap:12px}
+.popt{display:flex;align-items:center;gap:12px;background:var(--oc);border-radius:18px;padding:16px;font-weight:800;font-size:21px;min-height:70px;text-align:right;box-shadow:inset 0 -5px 0 rgba(0,0,0,.22)}
+.popt .sh{width:1.4em;text-align:center;flex:none}
+.popt:active{transform:scale(.97)}
+.pfield{font-size:28px;text-align:center;background:#0E1234;border:2px solid var(--line);border-radius:16px;color:var(--ink);padding:14px;width:100%}
+.pfield:focus{outline:none;border-color:var(--gold)}
+.plist2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pbtn{display:flex;align-items:center;gap:10px;background:var(--panel2);border:2px solid var(--line);border-radius:16px;padding:12px;font-weight:800;font-size:18px;text-align:right}
+.pbtn .av{font-size:22px}
+.pbtn.sel{border-color:var(--gold)}
+.tapzone{flex:1;min-height:52vh;border-radius:28px;background:radial-gradient(circle at 50% 40%,var(--c),rgba(0,0,0,.35));display:grid;place-items:center;font-family:var(--display);font-size:90px;color:#fff;touch-action:none;box-shadow:inset 0 0 0 4px rgba(255,255,255,.15)}
+.tapzone.pulse{animation:tp .12s}
+@keyframes tp{50%{transform:scale(.97)}}
+.stopbtn{align-self:center;width:min(78vw,320px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 50% 35%,#7fffc0,#14b86a 60%,#07683b);box-shadow:0 14px 0 #05472a,0 24px 50px rgba(20,184,106,.45);font-family:var(--display);font-size:52px;color:#fff}
+.stopbtn:active{transform:translateY(10px);box-shadow:0 4px 0 #05472a}
+.pctrl{position:sticky;bottom:0;display:flex;gap:8px;align-items:center;background:rgba(255,201,64,.1);border:1.5px solid rgba(255,201,64,.45);border-radius:18px;padding:10px}
+.pctrl span{font-size:13px;color:var(--gold);font-weight:800;flex:none}
+.pctrl .btn{flex:1;font-size:18px;padding:12px}
+.emojis{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+.emojis button{font-size:30px;background:var(--panel);border:2px solid var(--line);border-radius:14px;aspect-ratio:1}
+.emojis button.sel{border-color:var(--gold);background:var(--panel2)}
+.ptimer{height:8px;background:rgba(255,255,255,.08);border-radius:999px;overflow:hidden}
+.ptimer i{display:block;height:100%;background:linear-gradient(90deg,var(--bad),var(--gold));transition:width .25s linear;margin-inline-start:auto}
+.res{direction:ltr;unicode-bidi:isolate;font-family:var(--display);font-size:80px;line-height:1}
+.res.p{color:var(--ok)}.res.n{color:var(--bad)}.res.z{color:var(--mute)}
+.toast{position:fixed;top:calc(14px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);background:var(--bad);color:#fff;font-weight:800;padding:10px 16px;border-radius:12px;z-index:20;max-width:90vw;text-align:center;animation:pop .3s}
+.connov{position:fixed;inset:0;background:rgba(10,12,34,.88);display:grid;place-items:center;z-index:15;text-align:center;padding:24px}
+.spin{width:44px;height:44px;border:4px solid var(--line);border-top-color:var(--gold);border-radius:50%;animation:sp 1s linear infinite;margin:0 auto 14px}
+@keyframes sp{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script src="lib/peerjs.min.js"></script>
+<script src="lib/qrcode.js"></script>
+<script>
+/* =====================================================================
+   ليلة التحدي — نسخة الجوالات
+   الشاشة الكبيرة هي المضيف (تحفظ الحالة وتصحح)، وكل جوال يتصل بها مباشرة.
+   ===================================================================== */
+'use strict';
+
+/* ---------------- بنك الأسئلة ---------------- */
+const BANK = {
+  // أول خيار هو الصحيح (تُخلط عند العرض). tf = صح/خطأ بترتيب ثابت.
+  mc: [
+    {q:'ما هي عاصمة أستراليا؟', o:['كانبرا','سيدني','ملبورن','بيرث']},
+    {q:'ما أكبر كوكب في المجموعة الشمسية؟', o:['المشتري','زحل','نبتون','الأرض']},
+    {q:'أي حيوان يُلقّب بسفينة الصحراء؟', o:['الجمل','الحصان','الفيل','الحمار الوحشي']},
+    {q:'أي قارة هي الأكبر مساحة؟', o:['آسيا','أفريقيا','أوروبا','أمريكا الشمالية']},
+    {q:'كم قلب عند الأخطبوط؟', o:['٣','١','٢','٤']},
+    {q:'ما أسرع حيوان بري؟', o:['الفهد','الأسد','الغزال','الحصان']},
+    {q:'ما هي عاصمة المغرب؟', o:['الرباط','الدار البيضاء','مراكش','فاس']},
+    {q:'أي كوكب يُسمّى الكوكب الأحمر؟', o:['المريخ','الزهرة','عطارد','المشتري']},
+    {q:'كم ضلع للشكل السداسي؟', o:['٦','٥','٧','٨']},
+    {q:'أي معدن يكون سائلاً في درجة حرارة الغرفة؟', o:['الزئبق','الحديد','النحاس','الرصاص']},
+    {q:'وش يُسمّى صغير الحصان؟', o:['مهر','جحش','حوار','شبل']},
+    {q:'ما أكبر محيط في العالم؟', o:['الهادئ','الأطلسي','الهندي','المتجمد الشمالي']},
+    {q:'كم لاعب لكل فريق داخل ملعب كرة القدم؟', o:['١١','١٠','٩','١٢']},
+    {q:'في أي مدينة يقع برج إيفل؟', o:['باريس','روما','لندن','مدريد']},
+    {q:'ما أكبر عضو في جسم الإنسان؟', o:['الجلد','الكبد','القلب','الرئة']},
+    {q:'كم دقيقة في ساعتين ونص؟', o:['١٥٠','١٣٠','١٦٠','١٢٠']},
+    {q:'الماء يتكون من الهيدروجين و...؟', o:['الأكسجين','النيتروجين','الكربون','الهيليوم']},
+    {q:'ما أول شهر في السنة الهجرية؟', o:['محرم','صفر','رجب','رمضان']},
+    {q:'ما عملة اليابان؟', o:['الين','اليوان','الوون','الروبية']},
+    {q:'وش اللون اللي يطلع لو خلطت الأزرق مع الأصفر؟', o:['أخضر','برتقالي','بنفسجي','بني']},
+    {q:'كم رجل عند العنكبوت؟', o:['٨','٦','١٠','١٢']},
+    {q:'ما هي عاصمة تركيا؟', o:['أنقرة','إسطنبول','إزمير','بورصة']},
+    {q:'كمّل المثل: «اللي ما يعرف الصقر ...»', o:['يشويه','يطيّره','يبيعه','يخاف منه']},
+    {q:'كمّل المثل: «على قد لحافك ...»', o:['مد رجولك','نام بدري','تغطّى زين','اشترِ غيره']},
+    {q:'كمّل المثل: «الجار قبل ...»', o:['الدار','الأهل','الطريق','الصديق']},
+    {q:'كمّل المثل: «من طق الباب ...»', o:['سمع الجواب','فتحوا له','دخل البيت','انتظر شوي']},
+    {q:'كمّل المثل: «اللي ما يطول العنب ...»', o:['يقول عنه حامض','يشتريه','يزرعه','يتركه للعصافير']},
+    {q:'ما هي عاصمة إيطاليا؟', o:['روما','ميلانو','البندقية','نابولي']},
+    {q:'كم عدد أيام السنة الكبيسة؟', o:['٣٦٦','٣٦٥','٣٦٤','٣٦٠']},
+    {q:'أي طائر ما يقدر يطير؟', o:['النعامة','الصقر','الحمامة','البومة']},
+    {q:'ناتج ٧ × ٨ = ؟', o:['٥٦','٥٤','٦٣','٤٨']},
+    {q:'العسل الطبيعي ما يخرب مع الوقت.', o:['صح','خطأ'], a:0, tf:true},
+    {q:'البطريق يعيش في القطب الشمالي.', o:['صح','خطأ'], a:1, tf:true},
+    {q:'القمر يضيء بنوره الخاص.', o:['صح','خطأ'], a:1, tf:true},
+    {q:'الدلفين من الثدييات.', o:['صح','خطأ'], a:0, tf:true},
+    {q:'سور الصين العظيم يُرى بالعين المجردة من القمر.', o:['صح','خطأ'], a:1, tf:true}
+  ],
+  num: [
+    {q:'كم طول برج خليفة بالمتر تقريباً؟', a:828, u:'متر'},
+    {q:'كم عدد مفاتيح البيانو العادي؟', a:88, u:'مفتاح'},
+    {q:'كم سورة في القرآن الكريم؟', a:114, u:'سورة'},
+    {q:'كم عظمة في جسم الإنسان البالغ؟', a:206, u:'عظمة'},
+    {q:'كم عدد الدول العربية؟', a:22, u:'دولة'},
+    {q:'في أي سنة ميلادية توحّدت المملكة العربية السعودية باسمها الحالي؟', a:1932, u:''},
+    {q:'كم درجة غليان الماء بالفهرنهايت؟', a:212, u:'درجة'},
+    {q:'كم ثانية في الساعة الوحدة؟', a:3600, u:'ثانية'},
+    {q:'كم ارتفاع جبل إيفرست بالمتر تقريباً؟', a:8849, u:'متر'},
+    {q:'كم سن عند الإنسان البالغ مع ضروس العقل؟', a:32, u:'سن'},
+    {q:'كم مربع في رقعة الشطرنج؟', a:64, u:'مربع'},
+    {q:'كم دولة تشارك في كأس العالم ٢٠٢٦؟', a:48, u:'منتخب'}
+  ],
+  fib: [
+    {q:'الحيوان اللي بصمات أصابعه تشبه بصمات الإنسان لدرجة تلخبط المحققين هو ...', a:'الكوالا', f:['الشمبانزي','القنفذ']},
+    {q:'الفيل هو الحيوان الوحيد اللي ما يقدر ...', a:'يقفز', f:['يسبح','ينام واقف']},
+    {q:'لسان الحوت الأزرق وزنه تقريباً قد وزن ...', a:'فيل', f:['سيارة صغيرة','حصان']},
+    {q:'القطط ما تقدر تحس بالطعم ...', a:'الحلو', f:['الحامض','المالح']},
+    {q:'في سويسرا ممنوع قانونياً تربي ... لحاله، لأنه حيوان اجتماعي.', a:'خنزير غينيا', f:['ببغاء','سمكة ذهبية']},
+    {q:'الموز علمياً يُصنّف على أنه نوع من ...', a:'التوت', f:['الخضار','الأعشاب']},
+    {q:'الحيوان اللي ينام وعين وحدة مفتوحة ونص مخه صاحي هو ...', a:'الدلفين', f:['البومة','الزرافة']},
+    {q:'عين النعامة أكبر من ...', a:'مخها', f:['منقارها','بيضتها']},
+    {q:'أول شي انباع في التاريخ بالباركود كان علبة ...', a:'علكة', f:['حليب','صابون']},
+    {q:'البقرة عندها أصدقاء مقرّبين، وإذا انفصلت عنهم ...', a:'تتوتر', f:['تغني','ترفض الأكل']}
+  ],
+  who: [
+    'مين أكثر واحد يتأخر عن المواعيد؟',
+    'مين أول واحد ينام في السهرة؟',
+    'مين لو صار مليونير بيخلّص الفلوس في أسبوع؟',
+    'مين أكثر واحد يضحك على نكتته قبل يكمّلها؟',
+    'مين اللي يدوّر جواله وهو في يده؟',
+    'مين أكثر واحد ياكل حلا؟',
+    'مين أحسن طبّاخ فينا؟',
+    'مين يقدر يقنعك بأي شي؟',
+    'مين بيضيع لو سافر بدون خرائط قوقل؟',
+    'مين أكثر واحد يصوّر الأكل قبل ياكله؟'
+  ]
+};
+const PUNISH = ['يسوّي الشاهي للكل','يقلّد أحد المشاهير لين يحزرونه','يغني أغنية طفولة كاملة','يتكلم فصحى عشر دقايق','يمدح الفائز بقصيدة','يرقص عشرين ثانية بدون موسيقى','يعتذر للفائز اعتذار رسمي','يطلب حلا للكل'];
+
+const RT = {
+  buzz:   {name:'الجرس', icon:'🔔', n:5, desc:'السؤال يطلع على الشاشة وجوالاتكم تصير جرس. أول واحد يضغط يختار الإجابة من جواله. الصح ‎+٢ والغلط ‎−١ ويتقفل عليه الجرس.'},
+  who:    {name:'مين فينا؟', icon:'👀', n:3, desc:'سؤال عن واحد منكم! كل واحد يصوّت من جواله بالسر، واللي يصوّت مع الأغلبية ياخذ ‎+١.'},
+  race:   {name:'السباق', icon:'⚡', n:5, desc:'الكل يجاوب من جواله في نفس الوقت. أسرع إجابة صح ‎+٣، اللي بعدها ‎+٢، وأي إجابة صح بعدهم ‎+١.'},
+  clock:  {name:'الساعة الداخلية', icon:'⏱️', n:1, desc:'بعد العد التنازلي يشتغل عدّاد مخفي! أوقفه من جوالك لما تحس إن الوقت المطلوب خلص بالضبط. الأقرب ‎+٣ ثم ‎+٢ ثم ‎+١.'},
+  closest:{name:'قرّب الرقم', icon:'🎯', n:3, desc:'سؤال جوابه رقم. اكتب تخمينك من جوالك. الأقرب ‎+٣ (والإجابة بالضبط ‎+٥)، واللي بعده ‎+١.'},
+  fib:    {name:'المخادع', icon:'🎭', n:3, desc:'سؤال غريب جوابه حقيقي. كل واحد يكتب جواب كذب مقنع، وبعدين الكل يصوّت على الجواب اللي يظنه الصح. تعرف الصح ‎+٣، وكل واحد ينخدع بكذبتك ‎+٢.'},
+  tap:    {name:'الهرس', icon:'👆', n:1, desc:'عشر ثواني بس! اضغط على شاشة جوالك بأسرع ما تقدر. الأول ‎+٣ ثم ‎+٢ ثم ‎+١.'},
+  bomb:   {name:'القنبلة الموقوتة', icon:'💣', n:1, desc:'القنبلة عند واحد منكم ويطلع له سؤال على جواله. إذا جاوب صح يرميها على اللي يبيه. وقت الانفجار مخفي! اللي تنفجر عنده ‎−٣ والباقين ‎+١.'}
+};
+const ORDER = ['buzz','who','race','clock','closest','fib','tap','bomb'];
+const COLORS = ['#2EE6C8','#FF6B8A','#B9A2FF','#FFC940','#7AD7FF','#FF9F5A','#9BE564','#F78CFF','#FF5A4E','#5AA9FF','#E4D96F','#C3A6FF'];
+const EMOJIS = ['🦁','🐯','🐼','🦊','🐸','🐵','🐧','🦄','🐙','🐝','🦅','🐪','🐢','🐬','🦉','🐨','🐲','🌵'];
+const SHAPES = ['▲','◆','●','■'];
+
+/* ---------------- أدوات ---------------- */
+const $ = s => document.querySelector(s);
+const app = document.getElementById('app');
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const AR = n => String(n).replace('-', '−');
+const SG = n => n > 0 ? '+' + AR(n) : AR(n);
+const toLat = s => String(s).replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[٫,]/g, '.');
+const shuffle = a => { a = a.slice(); for (let k = a.length - 1; k > 0; k--) { const j = Math.floor(Math.random() * (k + 1)); [a[k], a[j]] = [a[j], a[k]]; } return a; };
+const rnd = (a, b) => a + Math.random() * (b - a);
+const now = () => Date.now();
+const norm = s => String(s || '').trim().replace(/[ً-ْـ]/g, '').replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').replace(/^ال/, '').replace(/\s+/g, ' ').toLowerCase();
+const params = new URLSearchParams(location.search);
+const NETMODE = params.get('net') === 'local' ? 'local' : 'peer';
+const PREFIX = 'laylat-v2-';
+const baseURL = () => location.origin + location.pathname;
+const joinURL = code => baseURL() + '?r=' + code + (NETMODE === 'local' ? '&net=local' : '');
+const lsGet = k => { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
+function avatar(p, cls = '') { return p ? `<span class="av ${cls}" style="--c:${p.color}">${esc(p.emoji)}</span>` : ''; }
+function qrSVG(text) {
+  try { const q = qrcode(0, 'M'); q.addData(text); q.make(); return q.createSvgTag({cellSize: 6, margin: 2, scalable: true}); }
+  catch (e) { return ''; }
+}
+function confetti() {
+  const box = document.createElement('div'); box.className = 'confetti';
+  for (let k = 0; k < 120; k++) { const i = document.createElement('i'); i.style.left = Math.random() * 100 + 'vw'; i.style.background = COLORS[k % COLORS.length]; i.style.animationDuration = rnd(2.2, 4.2) + 's'; i.style.animationDelay = rnd(0, .8) + 's'; box.appendChild(i); }
+  document.body.appendChild(box); setTimeout(() => box.remove(), 5500);
+}
+
+/* ---------------- الصوت ---------------- */
+let AC = null, soundOn = true;
+function ac() { if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} } if (AC && AC.state === 'suspended') AC.resume(); return AC; }
+function tone(f, d = .15, type = 'sine', v = .18, t0 = 0) {
+  if (!soundOn) return; const a = ac(); if (!a) return;
+  const o = a.createOscillator(), g = a.createGain(); o.type = type; o.frequency.value = f;
+  const t = a.currentTime + t0; g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(v, t + .01); g.gain.exponentialRampToValueAtTime(.0001, t + d);
+  o.connect(g).connect(a.destination); o.start(t); o.stop(t + d + .02);
+}
+function noise(d = .8, v = .4) {
+  if (!soundOn) return; const a = ac(); if (!a) return;
+  const len = Math.floor(a.sampleRate * d), buf = a.createBuffer(1, len, a.sampleRate), ch = buf.getChannelData(0);
+  for (let k = 0; k < len; k++) ch[k] = (Math.random() * 2 - 1) * Math.pow(1 - k / len, 2);
+  const src = a.createBufferSource(), g = a.createGain(), f = a.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 900; g.gain.value = v;
+  src.buffer = buf; src.connect(f).connect(g).connect(a.destination); src.start();
+}
+const SFX = {
+  join() { tone(660, .1, 'triangle', .15); tone(990, .14, 'triangle', .15, .08); },
+  buzz() { tone(180, .35, 'sawtooth', .2); tone(240, .35, 'square', .08); },
+  ok() { [523, 659, 784, 1046].forEach((f, k) => tone(f, .22, 'triangle', .2, k * .09)); },
+  bad() { tone(140, .5, 'sawtooth', .22); tone(110, .5, 'square', .1, .05); },
+  tick() { tone(1200, .05, 'square', .06); },
+  whoosh() { [300, 450, 600, 900].forEach((f, k) => tone(f, .12, 'sine', .12, k * .05)); },
+  fanfare() { [523, 523, 523, 698, 880, 784, 1046].forEach((f, k) => tone(f, .28, 'triangle', .2, [0, .15, .3, .45, .75, .95, 1.15][k])); },
+  end() { tone(880, .2, 'square', .15); tone(660, .2, 'square', .15, .22); tone(440, .5, 'square', .15, .44); },
+  boom() { noise(1.4, .9); tone(60, 1, 'sine', .4); },
+  beep() { tone(880, .12, 'sine', .2); },
+  go() { tone(1320, .3, 'sine', .22); }
+};
+const vib = p => { try { navigator.vibrate && navigator.vibrate(p); } catch (e) {} };
+
+/* =====================================================================
+   طبقة الاتصال: PeerJS (حقيقي) أو BroadcastChannel (للتجربة على جهاز واحد)
+   ===================================================================== */
+function wrapPeerConn(c) {
+  return {
+    id: c.peer,
+    send(o) { try { if (c.open) c.send(o); } catch (e) {} },
+    onData(f) { c.on('data', f); },
+    onClose(f) { let done = false; const g = () => { if (!done) { done = true; f(); } }; c.on('close', g); c.on('error', g); },
+    close() { try { c.close(); } catch (e) {} }
+  };
+}
+function mkLocalConn(bc, remote, self) {
+  const ds = [], cs = []; let closed = false;
+  return {
+    id: remote,
+    send(o) { if (!closed) bc.postMessage({to: remote, from: self, k: 'data', d: JSON.parse(JSON.stringify(o))}); },
+    onData(f) { ds.push(f); }, onClose(f) { cs.push(f); },
+    close() { if (closed) return; closed = true; bc.postMessage({to: remote, from: self, k: 'close'}); cs.forEach(f => f()); },
+    _d(d) { if (!closed) ds.forEach(f => f(d)); }, _c() { if (!closed) { closed = true; cs.forEach(f => f()); } }
+  };
+}
+const Net = {
+  host(code, h) {
+    if (NETMODE === 'local') {
+      const bc = new BroadcastChannel(PREFIX + code), conns = {};
+      bc.onmessage = e => {
+        const m = e.data; if (m.to !== 'host') return;
+        if (m.k === 'open') { const c = mkLocalConn(bc, m.from, 'host'); conns[m.from] = c; bc.postMessage({to: m.from, from: 'host', k: 'ack'}); h.conn(c); }
+        else if (m.k === 'data') conns[m.from] && conns[m.from]._d(m.d);
+        else if (m.k === 'close') { conns[m.from] && conns[m.from]._c(); delete conns[m.from]; }
+      };
+      setTimeout(() => h.status('ok'), 30); return;
+    }
+    let peer, pending = false;
+    const start = () => {
+      pending = false; h.status('starting');
+      peer = new Peer(PREFIX + code, {debug: 0});
+      peer.on('open', () => h.status('ok'));
+      peer.on('connection', c => c.on('open', () => h.conn(wrapPeerConn(c))));
+      peer.on('disconnected', () => { h.status('reconnect'); setTimeout(() => { try { if (!peer.destroyed) peer.reconnect(); } catch (e) {} }, 1500); });
+      peer.on('error', e => {
+        if (e.type === 'unavailable-id') { h.status('busy'); pending = true; try { peer.destroy(); } catch (x) {} setTimeout(start, 4000); }
+        else if (['network', 'server-error', 'socket-error', 'socket-closed', 'browser-incompatible'].includes(e.type)) { h.status('neterr'); }
+      });
+    };
+    start();
+    setInterval(() => { if (pending) return; if (peer && peer.destroyed) start(); else if (peer && peer.disconnected) { try { peer.reconnect(); } catch (e) {} } }, 8000);
+  },
+  join(code, h) {
+    if (NETMODE === 'local') {
+      const id = 'p' + Math.random().toString(36).slice(2, 9), bc = new BroadcastChannel(PREFIX + code); let c = null;
+      bc.onmessage = e => { const m = e.data; if (m.to !== id) return;
+        if (m.k === 'ack' && !c) { c = mkLocalConn(bc, 'host', id); h.open(c); }
+        else if (m.k === 'data') c && c._d(m.d); else if (m.k === 'close') c && c._c(); };
+      bc.postMessage({to: 'host', from: id, k: 'open'}); return;
+    }
+    const go = () => {
+      const c = Net._pp.connect(PREFIX + code, {serialization: 'json', reliable: true});
+      c.on('open', () => h.open(wrapPeerConn(c)));
+    };
+    const P = Net._pp;
+    if (!P || P.destroyed) {
+      const np = Net._pp = new Peer({debug: 0});
+      np.on('error', e => { h.status(e.type === 'peer-unavailable' ? 'noroom' : 'neterr'); if (['network', 'server-error', 'socket-error', 'socket-closed'].includes(e.type)) { try { np.destroy(); } catch (x) {} } });
+      np.on('disconnected', () => { try { if (!np.destroyed) np.reconnect(); } catch (e) {} });
+      np.once('open', go);
+    } else if (P.open) go(); else P.once('open', go);
+  },
+  _pp: null
+};
+
+/* =====================================================================
+   المضيف (الشاشة الكبيرة)
+   ===================================================================== */
+let S = null;               // حالة اللعبة (تُحفظ)
+const conns = {};           // key -> conn
+const seen = {};            // key -> آخر ping
+const lastSent = {};        // key -> آخر عرض أُرسل
+let netState = 'starting';
+const HKEY = 'laylat-host-v2';
+
+function newState(code) {
+  return {code, players: {}, order: [], hostKey: null, lineup: ORDER.slice(), phase: 'lobby', ri: 0, qi: 0, cur: null, decks: {}, t: now()};
+}
+const P = k => S.players[k];
+const keys = () => S.order.filter(k => S.players[k]);
+const isOn = k => !!conns[k] && now() - (seen[k] || 0) < 8000;
+const onKeys = () => keys().filter(isOn);
+const RTc = () => RT[S.lineup[S.ri]];
+const typ = () => S.lineup[S.ri];
+
+function draw(pool) {
+  let d = S.decks[pool];
+  if (!d || !d.length) { d = S.decks[pool] = shuffle([...BANK[pool].keys()]); }
+  return BANK[pool][d.pop()];
+}
+function mc(it) {
+  if (it.tf) return {q: it.q, o: it.o.slice(), a: it.a, tf: true};
+  const idx = shuffle([0, 1, 2, 3]); return {q: it.q, o: idx.map(i => it.o[i]), a: idx.indexOf(0)};
+}
+
+let renderQueued = false, saveT = null;
+function sync() {
+  if (!renderQueued) { renderQueued = true; requestAnimationFrame(() => { renderQueued = false; renderHost(); }); }
+  sendViews();
+  clearTimeout(saveT); saveT = setTimeout(() => { S.t = now(); lsSet(HKEY, S); }, 300);
+}
+function sendViews() {
+  for (const k of keys()) {
+    const c = conns[k]; if (!c) continue;
+    const v = viewFor(k);
+    const sig = JSON.stringify(v, (kk, vv) => kk === 'left' ? undefined : vv);
+    if (lastSent[k] === sig) continue;
+    lastSent[k] = sig; c.send({t: 'view', v});
+  }
+}
+function sendTo(k, msg) { conns[k] && conns[k].send(msg); }
+
+function startHost(code, resume) {
+  S = (resume && resume.code === code) ? resume : newState(code);
+  history.replaceState(null, '', baseURL() + '?host=' + code + (NETMODE === 'local' ? '&net=local' : ''));
+  window.addEventListener('beforeunload', () => lsSet(HKEY, S));
+  Net.host(code, {
+    status(s) { netState = s; sync(); },
+    conn(c) {
+      let key = null;
+      c.onData(m => {
+        if (!m || typeof m !== 'object') return;
+        if (m.t === 'ping') { if (key) seen[key] = now(); c.send({t: 'pong'}); return; }
+        if (m.t === 'hello') { key = hello(c, m); return; }
+        if (!key || conns[key] !== c) return;
+        seen[key] = now();
+        if (m.t === 'act') onAct(key, m);
+      });
+      c.onClose(() => { if (key && conns[key] === c) { delete conns[key]; delete lastSent[key]; sync(); } });
+    }
+  });
+  setInterval(tick, 200);
+  sync();
+}
+
+function hello(c, m) {
+  const key = String(m.key || '').slice(0, 40); if (!key) return null;
+  let name = String(m.name || '').trim().replace(/\s+/g, ' ').slice(0, 14) || 'لاعب';
+  const emoji = EMOJIS.includes(m.emoji) ? m.emoji : EMOJIS[0];
+  if (!S.players[key]) {
+    if (keys().length >= 12) { c.send({t: 'toast', msg: 'الغرفة ممتلئة (١٢ لاعب)'}); return null; }
+    const used = keys().map(k => P(k).color);
+    const color = COLORS.find(x => !used.includes(x)) || COLORS[keys().length % COLORS.length];
+    S.players[key] = {name, emoji, color, score: 0};
+    if (!S.order.includes(key)) S.order.push(key);
+    if (!S.hostKey || !S.players[S.hostKey]) S.hostKey = key;
+    SFX.join();
+  } else { S.players[key].name = name; S.players[key].emoji = emoji; }
+  if (conns[key] && conns[key] !== c) conns[key].close();
+  conns[key] = c; seen[key] = now(); delete lastSent[key];
+  sync(); return key;
+}
+
+/* ---------------- منطق الجولات ---------------- */
+function startQ() {
+  const t = typ(), c = {deltas: {}, st: 'q'};
+  S.cur = c; S.phase = 'q';
+  if (t === 'buzz') Object.assign(c, {item: mc(draw('mc')), st: 'open', locked: [], wrong: [], buzzer: null}), setDL(20000);
+  if (t === 'race') Object.assign(c, {item: mc(draw('mc')), ans: {}, t0: now()}), setDL(15000);
+  if (t === 'closest') Object.assign(c, {item: draw('num'), ans: {}}), setDL(30000);
+  if (t === 'fib') Object.assign(c, {item: draw('fib'), st: 'write', lies: {}}), setDL(60000);
+  if (t === 'who') Object.assign(c, {prompt: draw('who'), votes: {}}), setDL(25000);
+  if (t === 'clock') Object.assign(c, {target: [7, 8, 10, 12, 15][Math.floor(Math.random() * 5)], st: 'ready', res: {}});
+  if (t === 'tap') Object.assign(c, {st: 'ready', taps: {}});
+  if (t === 'bomb') {
+    const pool = onKeys().length ? onKeys() : keys();
+    Object.assign(c, {holder: pool[Math.floor(Math.random() * pool.length)], st: 'q', item: mc(draw('mc')), passes: 0, t0: now(), fuse: rnd(45000, 75000), hideT: true});
+    c.dl = now() + c.fuse; c.dlT = c.fuse;
+  }
+  SFX.whoosh(); sync();
+}
+function setDL(ms) { S.cur.dl = now() + ms; S.cur.dlT = ms; }
+function allDone(map) { const on = onKeys(); return on.length > 0 && on.every(k => map[k] !== undefined); }
+
+function onAct(k, m) {
+  const a = m.a;
+  if (a === 'next') { if (k === S.hostKey) next(); return; }
+  if (S.phase !== 'q') return;
+  const c = S.cur, t = typ();
+  if (t === 'buzz') {
+    if (a === 'buzz' && c.st === 'open' && !c.locked.includes(k)) { c.buzzer = k; c.st = 'answer'; setDL(8000); SFX.buzz(); sync(); }
+    else if (a === 'ans' && c.st === 'answer' && c.buzzer === k) buzzAnswer(k, +m.i);
+  }
+  if (t === 'race' && a === 'ans' && !c.ans[k] && m.i >= 0 && m.i < c.item.o.length) {
+    c.ans[k] = {i: +m.i, t: now() - c.t0}; SFX.tick();
+    if (allDone(c.ans)) reveal(); else sync();
+  }
+  if (t === 'closest' && a === 'num') {
+    const v = parseFloat(toLat(m.v)); if (!isFinite(v)) return;
+    c.ans[k] = v; SFX.tick(); if (allDone(c.ans)) reveal(); else sync();
+  }
+  if (t === 'fib') {
+    if (a === 'lie' && c.st === 'write') {
+      const s = String(m.s || '').trim().replace(/\s+/g, ' ').slice(0, 40);
+      if (!s) return;
+      if (norm(s) === norm(c.item.a)) { sendTo(k, {t: 'toast', msg: 'كتبت الجواب الصحيح 😅 اكتب كذبة غيرها'}); return; }
+      c.lies[k] = s; SFX.tick(); if (allDone(c.lies)) fibVote(); else sync();
+    } else if (a === 'vote' && c.st === 'vote') {
+      const o = c.opts[+m.i]; if (!o || o.owners.includes(k)) return;
+      c.votes[k] = +m.i; SFX.tick(); if (allDone(c.votes)) reveal(); else sync();
+    }
+  }
+  if (t === 'who' && a === 'who' && S.players[m.k]) { c.votes[k] = m.k; SFX.tick(); if (allDone(c.votes)) reveal(); else sync(); }
+  if (t === 'clock' && a === 'stop' && c.st === 'run' && c.res[k] === undefined) {
+    c.res[k] = Math.max(0, Math.min(60000, +m.ms || 0)); SFX.tick(); if (allDone(c.res)) reveal(); else sync();
+  }
+  if (t === 'tap' && a === 'tap' && c.st === 'run') {
+    c.taps[k] = Math.max(c.taps[k] || 0, Math.min(400, +m.n || 0)); updateTapBars();
+  }
+  if (t === 'bomb' && k === c.holder) {
+    if (a === 'ans' && c.st === 'q') {
+      if (+m.i === c.item.a) { c.st = 'pass'; SFX.ok(); vib(80); }
+      else { c.item = mc(draw('mc')); c.wrongFlash = now(); SFX.bad(); }
+      sync();
+    } else if (a === 'pass' && c.st === 'pass' && S.players[m.k] && m.k !== k) {
+      c.holder = m.k; c.st = 'q'; c.passes++; c.item = mc(draw('mc')); SFX.whoosh(); sync();
+    }
+  }
+}
+function buzzAnswer(k, i) {
+  const c = S.cur;
+  if (i === c.item.a) { c.win = k; c.deltas[k] = (c.deltas[k] || 0) + 2; reveal(); return; }
+  c.locked.push(k); c.wrong.push(i); c.deltas[k] = (c.deltas[k] || 0) - 1; c.buzzer = null; SFX.bad();
+  const left = onKeys().filter(x => !c.locked.includes(x));
+  if (!left.length || c.wrong.length >= c.item.o.length - 1) reveal();
+  else { c.st = 'open'; setDL(15000); sync(); }
+}
+function fibVote() {
+  const c = S.cur, map = new Map();
+  for (const [k, s] of Object.entries(c.lies)) { const n = norm(s); if (!map.has(n)) map.set(n, {text: s, owners: []}); map.get(n).owners.push(k); }
+  const fakes = shuffle(c.item.f);
+  while (map.size < 3 && fakes.length) { const s = fakes.pop(); if (!map.has(norm(s))) map.set(norm(s), {text: s, owners: [], house: true}); }
+  c.opts = shuffle([...map.values(), {text: c.item.a, owners: [], truth: true}]);
+  c.st = 'vote'; c.votes = {}; setDL(35000); SFX.whoosh(); sync();
+}
+
+function reveal() {
+  const c = S.cur, t = typ(), d = c.deltas;
+  const add = (k, n) => { d[k] = (d[k] || 0) + n; };
+  if (t === 'race') {
+    const right = Object.entries(c.ans).filter(([, v]) => v.i === c.item.a).sort((x, y) => x[1].t - y[1].t);
+    right.forEach(([k], n) => add(k, n === 0 ? 3 : n === 1 ? 2 : 1));
+  }
+  if (t === 'closest') {
+    const rows = Object.entries(c.ans).map(([k, v]) => ({k, v, df: Math.abs(v - c.item.a)})).sort((x, y) => x.df - y.df);
+    c.rows = rows;
+    if (rows.length) {
+      const best = rows[0].df; rows.filter(r => r.df === best).forEach(r => add(r.k, best === 0 ? 5 : 3));
+      const sec = rows.find(r => r.df > best); if (sec && rows.length > 2) rows.filter(r => r.df === sec.df).forEach(r => add(r.k, 1));
+    }
+  }
+  if (t === 'fib') {
+    if (c.st === 'write') fibVoteSilent();
+    for (const [k, i] of Object.entries(c.votes || {})) { const o = c.opts[i]; if (!o) continue; if (o.truth) add(k, 3); else o.owners.forEach(ow => add(ow, 2)); }
+  }
+  if (t === 'who') {
+    const cnt = {}; Object.values(c.votes).forEach(v => cnt[v] = (cnt[v] || 0) + 1);
+    const mx = Math.max(0, ...Object.values(cnt)); c.cnt = cnt; c.top = Object.keys(cnt).filter(k => cnt[k] === mx && mx > 0);
+    Object.entries(c.votes).forEach(([k, v]) => { if (c.top.includes(v)) add(k, 1); });
+  }
+  if (t === 'clock') {
+    const rows = Object.entries(c.res).map(([k, ms]) => ({k, ms, df: Math.abs(ms - c.target * 1000)})).sort((x, y) => x.df - y.df);
+    c.rows = rows; rows.slice(0, 3).forEach((r, n) => add(r.k, 3 - n));
+  }
+  if (t === 'tap') {
+    const rows = Object.entries(c.taps).map(([k, n]) => ({k, n})).sort((x, y) => y.n - x.n);
+    c.rows = rows; rows.filter(r => r.n > 0).slice(0, 3).forEach((r, n) => add(r.k, 3 - n));
+  }
+  if (t === 'bomb') { keys().forEach(k => add(k, k === c.holder ? -3 : 1)); SFX.boom(); vib([300, 100, 300]); }
+  for (const [k, n] of Object.entries(d)) if (S.players[k]) S.players[k].score += n;
+  c.dl = null; S.phase = 'reveal';
+  if (t !== 'bomb') { const anyPos = Object.values(d).some(n => n > 0); anyPos ? SFX.ok() : SFX.end(); }
+  sync();
+}
+function fibVoteSilent() { const c = S.cur; const saved = c.dl; fibVote(); c.dl = saved; c.st = 'vote'; c.votes = {}; }
+
+function next() {
+  ac();
+  if (S.phase === 'lobby') { if (!keys().length || !S.lineup.length) return; S.ri = 0; S.qi = 0; S.phase = 'intro'; S.cur = null; SFX.fanfare(); sync(); return; }
+  if (S.phase === 'intro') { S.qi = 0; startQ(); return; }
+  if (S.phase === 'q') {
+    const c = S.cur, t = typ();
+    if ((t === 'clock' || t === 'tap') && c.st === 'ready') {
+      c.st = 'run'; c.goAt = now() + 3000;
+      if (t === 'clock') setDL(3000 + c.target * 1000 + 15000); else setDL(3000 + 10000 + 1200);
+      c.hideT = true; sync(); return;
+    }
+    if (t === 'fib' && c.st === 'write') { fibVote(); return; }
+    reveal(); return;
+  }
+  if (S.phase === 'reveal') {
+    S.qi++;
+    if (S.qi < RTc().n) { startQ(); return; }
+    S.ri++; S.qi = 0; S.cur = null;
+    if (S.ri < S.lineup.length) { S.phase = 'intro'; SFX.whoosh(); }
+    else { S.phase = 'final'; const r = rank(); S.punish = r.length > 1 ? PUNISH[Math.floor(Math.random() * PUNISH.length)] : null; SFX.fanfare(); setTimeout(confetti, 300); }
+    sync(); return;
+  }
+  if (S.phase === 'final') { keys().forEach(k => S.players[k].score = 0); S.phase = 'lobby'; S.cur = null; sync(); }
+}
+const rank = () => keys().slice().sort((a, b) => P(b).score - P(a).score);
+
+let lastBeat = 0, lastOnline = '';
+function tick() {
+  const c = S.cur;
+  if ((S.phase === 'q') && c && c.dl && now() >= c.dl) onTimeout();
+  const tb = document.querySelector('.tbar i');
+  if (tb && c && c.dl) { const left = Math.max(0, c.dl - now()); tb.style.width = (100 * left / c.dlT) + '%'; const tn = document.querySelector('.tnum'); if (tn) tn.textContent = AR(Math.ceil(left / 1000)); }
+  // عد تنازلي لجولتي الساعة والهرس
+  if (S.phase === 'q' && c && c.goAt) {
+    const el = document.querySelector('.cd'); const l = c.goAt - now();
+    if (el) { const s = Math.ceil(l / 1000); const txt = l > 0 ? AR(s) : (typ() === 'tap' ? 'اهرس!' : '🤫'); if (el.textContent !== txt) { el.textContent = txt; l > 0 ? SFX.beep() : SFX.go(); } }
+  }
+  // صوت القنبلة يتسارع
+  if (S.phase === 'q' && typ() === 'bomb' && c) {
+    const frac = Math.min(1, (now() - c.t0) / c.fuse), gap = 900 - frac * 700;
+    if (now() - lastBeat > gap) { lastBeat = now(); SFX.tick(); const b = document.querySelector('.bomb'); if (b) b.style.setProperty('--sp', (gap / 1000 * 2) + 's'); }
+  }
+  const on = onKeys().join(',');
+  if (on !== lastOnline) { lastOnline = on; sync(); }
+}
+function onTimeout() {
+  const c = S.cur, t = typ();
+  if (t === 'buzz') { if (c.st === 'answer') buzzAnswer(c.buzzer, -1); else reveal(); return; }
+  if (t === 'fib' && c.st === 'write') { fibVote(); return; }
+  reveal();
+}
+
+/* ---------------- عرض كل لاعب على جواله ---------------- */
+function viewFor(k) {
+  const me = P(k), r = rank();
+  const v = {me: {name: me.name, emoji: me.emoji, color: me.color, score: me.score, rank: r.indexOf(k) + 1, of: r.length, host: k === S.hostKey}, ctrl: k === S.hostKey ? ctrlLabel() : null};
+  const c = S.cur, t = S.phase === 'q' || S.phase === 'reveal' ? typ() : null;
+  if (c && c.dl && !c.hideT && S.phase === 'q') v.timer = {id: c.dl, total: c.dlT, left: Math.max(0, c.dl - now())};
+  if (S.phase === 'lobby') return Object.assign(v, {scr: 'lobby', n: keys().length});
+  if (S.phase === 'intro') { const R = RTc(); return Object.assign(v, {scr: 'intro', icon: R.icon, name: R.name, desc: R.desc, num: S.ri + 1, of: S.lineup.length}); }
+  if (S.phase === 'final') { return Object.assign(v, {scr: 'final', win: r[0] === k, last: r.length > 1 && r[r.length - 1] === k, punish: S.punish, champ: P(r[0]).name}); }
+  if (S.phase === 'reveal') return Object.assign(v, {scr: 'result', delta: c.deltas[k] || 0, line: revealLine(k)});
+  // phase q
+  const W = (icon, msg) => Object.assign(v, {scr: 'msg', icon, msg});
+  if (t === 'buzz') {
+    if (c.st === 'answer') return c.buzzer === k ? Object.assign(v, {scr: 'pick', q: c.item.q, opts: c.item.o, act: 'ans', hot: true}) : W('👀', `${P(c.buzzer).name} ضغط الجرس أول!`);
+    if (c.locked.includes(k)) return W('🔒', 'تقفّل عليك الجرس في هالسؤال');
+    return Object.assign(v, {scr: 'buzzer', q: c.item.q, n: c.locked.length});
+  }
+  if (t === 'race') return c.ans[k] ? W('✅', 'وصلت إجابتك! ننتظر الباقين') : Object.assign(v, {scr: 'pick', q: c.item.q, opts: c.item.o, act: 'ans'});
+  if (t === 'closest') return c.ans[k] !== undefined ? W('🎯', 'تخمينك: ' + AR(c.ans[k])) : Object.assign(v, {scr: 'num', q: c.item.q, unit: c.item.u});
+  if (t === 'fib') {
+    if (c.st === 'write') return c.lies[k] ? W('😏', 'كذبتك جاهزة: «' + c.lies[k] + '»') : Object.assign(v, {scr: 'text', q: c.item.q});
+    if (c.votes[k] !== undefined) return W('🗳️', 'صوّتت! ننتظر الباقين');
+    return Object.assign(v, {scr: 'choose', q: 'وش الجواب الصحيح؟', opts: c.opts.map((o, i) => ({i, text: o.text, mine: o.owners.includes(k)})).filter(o => !o.mine), act: 'vote'});
+  }
+  if (t === 'who') return c.votes[k] ? W('🤫', 'صوّتت بالسر') : Object.assign(v, {scr: 'players', q: c.prompt, list: keys().map(x => ({k: x, name: P(x).name, emoji: P(x).emoji, color: P(x).color})), act: 'who'});
+  if (t === 'clock') {
+    if (c.st === 'ready') return W('⏱️', `استعد! الهدف: أوقف العدّاد عند ${AR(c.target)} ثواني بالضبط`);
+    return Object.assign(v, {scr: 'clock', target: c.target, go: {id: c.goAt, left: c.goAt - now()}, done: c.res[k] !== undefined});
+  }
+  if (t === 'tap') {
+    if (c.st === 'ready') return W('👆', 'جهّز أصابعك... أول ما يبدأ العد اهرس الشاشة!');
+    return Object.assign(v, {scr: 'tap', go: {id: c.goAt, left: c.goAt - now()}, dur: 10000});
+  }
+  if (t === 'bomb') {
+    if (c.holder === k) {
+      if (c.st === 'pass') return Object.assign(v, {scr: 'players', q: '💣 ارمِ القنبلة على...', list: keys().filter(x => x !== k).map(x => ({k: x, name: P(x).name, emoji: P(x).emoji, color: P(x).color})), act: 'pass', hot: true});
+      return Object.assign(v, {scr: 'pick', q: c.item.q, opts: c.item.o, act: 'ans', bomb: true, wf: c.wrongFlash || 0});
+    }
+    return W('😬', `القنبلة عند ${P(c.holder).name}!`);
+  }
+  return W('⏳', 'لحظة...');
+}
+function revealLine(k) {
+  const c = S.cur, t = typ();
+  if (t === 'buzz' || t === 'race') return 'الإجابة: ' + c.item.o[c.item.a];
+  if (t === 'closest') return 'الإجابة: ' + AR(c.item.a) + ' ' + (c.item.u || '');
+  if (t === 'fib') return 'الصح: ' + c.item.a;
+  if (t === 'who') return c.top && c.top.length ? 'الأغلبية اختارت: ' + c.top.map(x => P(x) ? P(x).name : '').join(' و ') : 'ما أحد صوّت';
+  if (t === 'clock') { const r = (c.rows || []).find(x => x.k === k); return r ? 'وقّفت عند ' + AR((r.ms / 1000).toFixed(2)) + ' ث' : 'ما وقّفت العدّاد'; }
+  if (t === 'tap') { const r = (c.rows || []).find(x => x.k === k); return 'ضغطاتك: ' + AR(r ? r.n : 0); }
+  if (t === 'bomb') return c.holder === k ? '💥 انفجرت عندك!' : '💥 انفجرت عند ' + P(c.holder).name;
+  return '';
+}
+function ctrlLabel() {
+  if (S.phase === 'lobby') return 'ابدأ اللعبة ▶';
+  if (S.phase === 'intro') return 'ابدأ الجولة ▶';
+  if (S.phase === 'q') {
+    const c = S.cur, t = typ();
+    if ((t === 'clock' || t === 'tap') && c.st === 'ready') return 'ابدأ العد ▶';
+    if (t === 'fib' && c.st === 'write') return 'انتقل للتصويت';
+    return 'أنهِ السؤال';
+  }
+  if (S.phase === 'reveal') return (S.qi + 1 >= RTc().n && S.ri + 1 >= S.lineup.length) ? 'النتيجة النهائية 🏆' : 'التالي ▶';
+  if (S.phase === 'final') return 'لعبة جديدة ↺';
+  return null;
+}
+
+/* ---------------- رسم الشاشة الكبيرة ---------------- */
+function renderHost() {
+  const url = joinURL(S.code);
+  const net = {starting: 'جاري تجهيز الغرفة...', ok: '🟢 الغرفة جاهزة', reconnect: '🟡 إعادة الاتصال بالخادم...', busy: '🟡 جاري استرجاع الغرفة...', neterr: '🔴 مشكلة في الإنترنت'}[netState] || '';
+  const netHTML = `<div class="net ${netState === 'neterr' ? 'bad' : ''}">${net}</div>`;
+  if (S.phase === 'lobby') {
+    const ks = keys();
+    app.innerHTML = `<div class="host">
+      <div class="lobby">
+        <div class="joincard"><div class="qr">${qrSVG(url)}</div><div class="how">امسح الباركود بكاميرا جوالك 📱</div><div class="code">أو افتح الرابط واكتب الرمز<b>${S.code}</b></div><div class="url">${esc(url)}</div></div>
+        <div class="side">
+          <div class="brand">ليلة التحدي<small>كل جوال جرس · والمقدّم يلعب معكم</small></div>
+          <h3>اللاعبين (${AR(ks.length)})</h3>
+          <div class="plist">${ks.length ? ks.map(k => `<div class="pchip ${k === S.hostKey ? 'hp' : ''} ${isOn(k) ? '' : 'off'}">${avatar(P(k), isOn(k) ? '' : 'off')}<span>${esc(P(k).name)}</span><button class="crownb" data-act="crown" data-k="${k}" title="اجعله المقدّم">👑</button><button class="x" data-act="kick" data-k="${k}" title="إزالة">✕</button></div>`).join('') : '<div class="empty">بانتظار أول لاعب... أول واحد يدخل يصير المقدّم 👑</div>'}</div>
+          <h3>الجولات</h3>
+          <div class="rchips">${ORDER.map(t => `<button class="rchip ${S.lineup.includes(t) ? 'on' : ''}" data-act="toggle" data-t="${t}">${RT[t].icon} ${RT[t].name}</button>`).join('')}</div>
+          <button class="btn" data-act="next" ${ks.length && S.lineup.length ? '' : 'disabled'}>ابدأ اللعبة ▶</button>
+          <p class="hint">👑 المقدّم يتحكم باللعبة من جواله (اضغط التاج لتغييره). التصحيح تلقائي، فالمقدّم يلعب مثل الباقين. يقدر أي أحد ينضم حتى بعد ما تبدأ اللعبة.</p>
+        </div>
+      </div>${netHTML}</div>`;
+    return;
+  }
+  const R = S.lineup[S.ri] ? RTc() : null;
+  const head = `<div class="hbar"><div class="brand">ليلة التحدي</div>
+    <div class="rinfo">${R && S.phase !== 'final' ? `<span class="tag">${R.icon} ${R.name}</span><span class="mute">الجولة ${AR(S.ri + 1)} من ${AR(S.lineup.length)}${S.phase !== 'intro' && R.n > 1 ? ' · سؤال ' + AR(S.qi + 1) + ' من ' + AR(R.n) : ''}</span>` : ''}</div>
+    <div class="mini"><div class="qr">${qrSVG(url)}</div><div><span class="mute" style="color:#666;font-size:13px">انضم الحين</span><b>${S.code}</b></div></div></div>`;
+  const top = rank()[0];
+  const d = (S.phase === 'reveal' && S.cur) ? S.cur.deltas : {};
+  const doneMap = answeredMap();
+  const board = `<div class="board">${keys().map(k => { const p = P(k), dl = d[k]; return `<div class="pod ${top === k && p.score > 0 ? 'lead' : ''} ${isOn(k) ? '' : 'off'}" style="--c:${p.color}">
+      ${k === S.hostKey ? '<span class="cr">👑</span>' : ''}${doneMap[k] ? '<span class="done">✓</span>' : ''}
+      <div class="top">${avatar(p)}<span>${esc(p.name)}</span></div><div class="sc">${AR(p.score)}</div>
+      ${dl ? `<span class="delta ${dl > 0 ? 'p' : 'n'}">${SG(dl)}</span>` : ''}</div>`; }).join('')}</div>`;
+  const lbl = ctrlLabel();
+  const ctrl = `<div class="ctrlbar"><button class="btn" data-act="next">${lbl}</button><button class="ghost" data-act="sound">${soundOn ? '🔊' : '🔇'}</button><button class="ghost" data-act="fs">⛶ شاشة كاملة</button><button class="ghost" data-act="lobby">الرجوع للغرفة</button></div>`;
+  app.innerHTML = `<div class="host">${head}${board}<main class="stage">${stageHTML()}</main>${ctrl}${netHTML}</div>`;
+}
+function answeredMap() {
+  const c = S.cur; if (!c || S.phase !== 'q') return {};
+  const t = typ();
+  if (t === 'race' || t === 'closest') return c.ans;
+  if (t === 'fib') return c.st === 'write' ? c.lies : c.votes;
+  if (t === 'who') return c.votes;
+  if (t === 'clock') return c.res;
+  return {};
+}
+const timerHTML = () => (S.cur && S.cur.dl && !S.cur.hideT && S.phase === 'q') ? `<div class="tbar" style="margin-top:28px"><span class="tnum"></span><i style="width:100%"></i></div>` : '';
+function optsHTML(it, opt = {}) {
+  return `<div class="opts">${it.o.map((o, i) => {
+    let cls = 'c' + i;
+    if (opt.reveal) cls += i === it.a ? ' right' : ' dim';
+    if (opt.wrong && opt.wrong.includes(i)) cls += ' x dim';
+    const who = opt.who ? opt.who(i) : '';
+    return `<div class="opt ${cls}"><span class="sh">${SHAPES[i]}</span><span>${esc(o)}</span>${who}</div>`; }).join('')}</div>`;
+}
+function rowAv(list, cls) { return `<div class="rowav">${list.map(k => avatar(P(k), cls(k))).join('')}</div>`; }
+
+function stageHTML() {
+  const c = S.cur, R = RTc ? (S.lineup[S.ri] ? RTc() : null) : null;
+  if (S.phase === 'intro') return `<div class="center" style="margin:auto"><div class="big-ico">${R.icon}</div><span class="tag">الجولة ${AR(S.ri + 1)}</span><h2 class="rtitle">${R.name}</h2><p class="lede">${R.desc}</p><p class="mute">${R.n > 1 ? AR(R.n) + ' أسئلة' : ''}</p></div>`;
+  if (S.phase === 'final') {
+    const r = rank(), pod = [r[1], r[0], r[2]].filter(Boolean), h = {0: 150, 1: 110, 2: 80};
+    return `<div class="center" style="margin:auto;gap:10px"><div class="big-ico" style="font-size:70px">🏆</div><h2 class="rtitle">${esc(P(r[0]).name)} بطل الليلة!</h2>
+      <div class="podium">${pod.map(k => { const pos = r.indexOf(k); return `<div class="pd">${avatar(P(k))}<span>${esc(P(k).name)}</span><div class="blk" style="--c:${P(k).color};height:${h[pos]}px">${AR(P(k).score)}</div></div>`; }).join('')}</div>
+      ${S.punish ? `<div class="punish">😈 عقاب ${esc(P(r[r.length - 1]).name)}: ${esc(S.punish)}</div>` : ''}</div>`;
+  }
+  const t = typ(), rev = S.phase === 'reveal';
+  if (t === 'buzz') {
+    let st = '';
+    if (rev) st = c.win ? `✅ ${avatar(P(c.win))} ${esc(P(c.win).name)} جاوب صح! <span style="color:var(--ok);direction:ltr;unicode-bidi:isolate">+2</span>` : '⌛ ما أحد جاب الإجابة';
+    else if (c.st === 'answer') st = `🔔 ${avatar(P(c.buzzer))} <span style="color:${P(c.buzzer).color}">${esc(P(c.buzzer).name)}</span> يجاوب الحين...`;
+    else st = c.locked.length ? 'الجرس مفتوح للباقين! 🔔' : 'اضغطوا الجرس من جوالاتكم! 🔔';
+    return `<p class="qtext">${esc(c.item.q)}</p>${optsHTML(c.item, {reveal: rev, wrong: c.wrong})}<div class="status">${st}</div>${c.locked.length ? rowAv(c.locked, () => 'lock') : ''}${timerHTML()}`;
+  }
+  if (t === 'race') {
+    const who = rev ? i => `<span class="who">${Object.entries(c.ans).filter(([, v]) => v.i === i).sort((a, b) => a[1].t - b[1].t).map(([k]) => avatar(P(k))).join('')}</span>` : null;
+    return `<p class="qtext">${esc(c.item.q)}</p>${optsHTML(c.item, {reveal: rev, who})}${rev ? '' : rowAv(keys(), k => c.ans[k] ? '' : 'wait')}${timerHTML()}`;
+  }
+  if (t === 'closest') {
+    if (rev) return `<p class="qtext">${esc(c.item.q)}</p><div class="answer">${AR(c.item.a)} <span style="font-size:.45em;color:var(--mute)">${esc(c.item.u)}</span></div>
+      <div class="list">${(c.rows || []).map((r, n) => `<div class="lrow ${c.deltas[r.k] > 0 ? 'best' : ''}">${avatar(P(r.k))}<span>${esc(P(r.k).name)}</span><span class="v">${AR(r.v)}</span><span class="d">${c.deltas[r.k] ? SG(c.deltas[r.k]) : ''}</span></div>`).join('')}</div>`;
+    return `<p class="qtext">${esc(c.item.q)}</p><div class="status mute">اكتبوا تخمينكم من الجوال 🎯</div>${rowAv(keys(), k => c.ans[k] !== undefined ? '' : 'wait')}${timerHTML()}`;
+  }
+  if (t === 'fib') {
+    const q = esc(c.item.q).replace('...', '<span style="color:var(--gold)">_____</span>');
+    if (c.st === 'write' && !rev) return `<p class="qtext">${q}</p><div class="status">✍️ اكتبوا جواب كذب مقنع من جوالاتكم</div>${rowAv(keys(), k => c.lies[k] ? '' : 'wait')}${timerHTML()}`;
+    const L = 'أبجدهوزحطيكلمن';
+    return `<p class="qtext" style="font-size:clamp(24px,3vw,40px)">${q}</p><div class="fibopts">${c.opts.map((o, i) => {
+      const voters = Object.entries(c.votes).filter(([, v]) => v === i).map(([k]) => avatar(P(k))).join('');
+      const meta = rev ? (o.truth ? '<span style="color:var(--ok)">✓ الجواب الصحيح</span>' : o.house ? '<span>كذبة اللعبة</span>' : `<span class="own">كذبة ${o.owners.map(k => esc(P(k).name)).join(' و ')}</span>`) + voters : '';
+      return `<div class="fibo ${rev && o.truth ? 'truth' : ''}"><span class="lt">${L[i]}</span><span>${esc(o.text)}</span><span class="meta">${meta}</span></div>`; }).join('')}</div>
+      ${rev ? '' : `<div class="status mute">صوّتوا من جوالاتكم 🗳️</div>${rowAv(keys(), k => c.votes[k] !== undefined ? '' : 'wait')}${timerHTML()}`}`;
+  }
+  if (t === 'who') {
+    if (!rev) return `<div class="center" style="margin:auto"><div class="big-ico">👀</div><p class="qtext">${esc(c.prompt)}</p><div class="status mute">صوّتوا بالسر من جوالاتكم</div>${rowAv(keys(), k => c.votes[k] ? '' : 'wait')}</div>${timerHTML()}`;
+    const ks = keys().slice().sort((a, b) => (c.cnt[b] || 0) - (c.cnt[a] || 0)), mx = Math.max(1, ...Object.values(c.cnt));
+    return `<p class="qtext">${esc(c.prompt)}</p>${c.top.length ? `<div class="status">🏆 ${c.top.map(k => avatar(P(k)) + ' ' + esc(P(k).name)).join(' و ')}</div>` : ''}
+      <div class="bars">${ks.map(k => `<div class="bar" style="--c:${P(k).color}"><span class="nm">${avatar(P(k))}${esc(P(k).name)}</span><div class="track"><div class="fill" style="width:${100 * (c.cnt[k] || 0) / mx}%"></div><div class="vot">${Object.entries(c.votes).filter(([, v]) => v === k).map(([x]) => avatar(P(x))).join('')}</div></div><span class="num">${AR(c.cnt[k] || 0)}</span></div>`).join('')}</div>`;
+  }
+  if (t === 'clock') {
+    if (rev) return `<p class="qtext">الهدف: ${AR(c.target)} ثواني</p><div class="list">${(c.rows || []).map(r => `<div class="lrow ${c.deltas[r.k] > 0 ? 'best' : ''}">${avatar(P(r.k))}<span>${esc(P(r.k).name)}</span><span class="v">${AR((r.ms / 1000).toFixed(2))} ث</span><span class="d">${c.deltas[r.k] ? SG(c.deltas[r.k]) : ''}</span></div>`).join('') || '<div class="status mute">ما أحد وقّف العدّاد</div>'}</div>`;
+    if (c.st === 'ready') return `<div class="center" style="margin:auto"><div class="big-ico">⏱️</div><p class="qtext">أوقفوا العدّاد عند <span style="color:var(--gold)">${AR(c.target)} ثواني</span> بالضبط</p><p class="lede mute">العدّاد بيكون مخفي! المقدّم يضغط «ابدأ العد».</p></div>`;
+    return `<div class="center" style="margin:auto"><p class="qtext">الهدف: ${AR(c.target)} ثواني</p><div class="cd">${c.goAt > now() ? AR(Math.ceil((c.goAt - now()) / 1000)) : '🤫'}</div>${rowAv(keys(), k => c.res[k] !== undefined ? '' : 'wait')}</div>`;
+  }
+  if (t === 'tap') {
+    if (c.st === 'ready' && !rev) return `<div class="center" style="margin:auto"><div class="big-ico">👆</div><p class="qtext">عشر ثواني هرس!</p><p class="lede mute">المقدّم يضغط «ابدأ العد».</p></div>`;
+    const rows = rev ? c.rows : keys().map(k => ({k, n: c.taps[k] || 0}));
+    return `<div class="center"><div class="cd" style="font-size:clamp(60px,8vw,110px)">${rev ? '🏁' : (c.goAt > now() ? AR(Math.ceil((c.goAt - now()) / 1000)) : 'اهرس!')}</div></div>${tapBarsHTML(rows)}`;
+  }
+  if (t === 'bomb') {
+    if (rev) return `<div class="center" style="margin:auto"><div class="boom">💥</div><h2 class="rtitle">${avatar(P(c.holder))} ${esc(P(c.holder).name)} انفجرت عنده!</h2><p class="lede">${esc(P(c.holder).name)} ‎−٣ والباقين ‎+١ · القنبلة تنقّلت ${AR(c.passes)} مرة</p></div>`;
+    const h = P(c.holder);
+    return `<div class="center"><div class="bomb">💣</div><div class="status">القنبلة عند ${avatar(h)} <span style="color:${h.color}">${esc(h.name)}</span></div>
+      ${c.st === 'pass' ? '<div class="status" style="color:var(--ok)">✅ جاوب صح! يختار على مين يرميها...</div>' : `<p class="qtext" style="font-size:clamp(24px,3.2vw,44px)">${esc(c.item.q)}</p>${optsHTML(c.item)}`}</div>`;
+  }
+  return '';
+}
+function tapBarsHTML(rows) {
+  const mx = Math.max(20, ...rows.map(r => r.n));
+  return `<div class="bars" id="tapbars">${rows.map(r => `<div class="bar" style="--c:${P(r.k).color}" data-k="${r.k}"><span class="nm">${avatar(P(r.k))}${esc(P(r.k).name)}</span><div class="track"><div class="fill" style="width:${100 * r.n / mx}%"></div></div><span class="num">${AR(r.n)}</span></div>`).join('')}</div>`;
+}
+function updateTapBars() {
+  const c = S.cur, box = document.getElementById('tapbars'); if (!box) return;
+  const mx = Math.max(20, ...keys().map(k => c.taps[k] || 0));
+  box.querySelectorAll('.bar').forEach(b => { const n = c.taps[b.dataset.k] || 0; b.querySelector('.fill').style.width = (100 * n / mx) + '%'; b.querySelector('.num').textContent = AR(n); });
+}
+
+function hostClick(e) {
+  const b = e.target.closest('[data-act]'); if (!b) return;
+  const a = b.dataset.act; ac();
+  if (a === 'next') next();
+  if (a === 'toggle') { const t = b.dataset.t; S.lineup = S.lineup.includes(t) ? S.lineup.filter(x => x !== t) : ORDER.filter(x => x === t || S.lineup.includes(x)); sync(); }
+  if (a === 'crown') { S.hostKey = b.dataset.k; sync(); }
+  if (a === 'kick') { const k = b.dataset.k; if (conns[k]) { conns[k].send({t: 'kicked'}); conns[k].close(); delete conns[k]; } delete S.players[k]; S.order = S.order.filter(x => x !== k); if (S.hostKey === k) S.hostKey = keys()[0] || null; sync(); }
+  if (a === 'sound') { soundOn = !soundOn; sync(); }
+  if (a === 'fs') { try { document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen(); } catch (x) {} }
+  if (a === 'lobby') { if (confirmLobby()) { S.phase = 'lobby'; S.cur = null; sync(); } }
+}
+let lobbyArm = 0;
+function confirmLobby() { if (now() - lobbyArm < 3000) return true; lobbyArm = now(); const b = document.querySelector('[data-act=lobby]'); if (b) b.textContent = 'اضغط مرة ثانية للتأكيد'; return false; }
+
+/* =====================================================================
+   اللاعب (الجوال)
+   ===================================================================== */
+const PKEY = 'laylat-player-v2' + (params.get('slot') || '');
+let ME = null, link = null, lastPong = 0, connStart = 0, pstat = 'connecting', V = null, code = null;
+const local = {}; // حالة محلية لكل شاشة
+
+function startPlayer(c) {
+  code = c.toUpperCase();
+  ME = lsGet(PKEY) || {};
+  if (!ME.key) ME.key = 'k' + Math.random().toString(36).slice(2, 12) + Date.now().toString(36);
+  lsSet(PKEY, ME);
+  if (ME.name && ME.code === code) { pConnect(); } else renderJoin();
+  setInterval(() => {
+    if (link) { link.send({t: 'ping'}); if (now() - lastPong > 7000) { const l = link; link = null; l.close(); pstat = 'lost'; renderPhone(); pConnect(); } }
+    else if (ME.joined && now() - connStart > 6000) pConnect();
+  }, 2000);
+  setInterval(phoneTick, 100);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) { wake(); if (!link && ME.joined) pConnect(); } });
+}
+function renderJoin() {
+  const sel = ME.emoji || EMOJIS[Math.floor(Math.random() * 12)];
+  app.innerHTML = `<div class="ph"><div class="pbody" style="justify-content:flex-start;gap:16px;padding-top:6vh">
+    <div class="brand" style="font-size:44px">ليلة التحدي<small>الغرفة ${esc(code)}</small></div>
+    <input id="nm" class="pfield" maxlength="14" placeholder="اكتب اسمك" value="${esc(ME.name || '')}" autocomplete="off">
+    <div class="mute" style="font-weight:700">اختر شخصيتك</div>
+    <div class="emojis">${EMOJIS.map(e => `<button data-e="${e}" class="${e === sel ? 'sel' : ''}">${e}</button>`).join('')}</div>
+    <button class="btn" id="go">يلا ندخل 🎉</button></div></div>`;
+  let em = sel;
+  app.querySelectorAll('[data-e]').forEach(b => b.onclick = () => { em = b.dataset.e; app.querySelectorAll('[data-e]').forEach(x => x.classList.toggle('sel', x === b)); });
+  $('#go').onclick = () => {
+    const n = $('#nm').value.trim(); if (!n) { $('#nm').focus(); return; }
+    ME.name = n.slice(0, 14); ME.emoji = em; ME.code = code; ME.joined = true; lsSet(PKEY, ME); ac(); wake(); pConnect();
+  };
+}
+function pConnect() {
+  ME.joined = true; connStart = now(); if (pstat !== 'lost') pstat = 'connecting'; renderPhone();
+  Net.join(code, {
+    open(c) {
+      if (link) { c.close(); return; }
+      link = c; lastPong = now(); pstat = 'ok';
+      c.onData(onHostMsg);
+      c.onClose(() => { if (link === c) { link = null; pstat = 'lost'; renderPhone(); setTimeout(pConnect, 1200); } });
+      c.send({t: 'hello', key: ME.key, name: ME.name, emoji: ME.emoji});
+    },
+    status(s) { if (!link) { pstat = s; renderPhone(); } }
+  });
+}
+let wakeLock = null;
+async function wake() { try { if ('wakeLock' in navigator && !wakeLock) { wakeLock = await navigator.wakeLock.request('screen'); wakeLock.addEventListener('release', () => wakeLock = null); } } catch (e) {} }
+function onHostMsg(m) {
+  if (!m) return; lastPong = now();
+  if (m.t === 'pong') return;
+  if (m.t === 'toast') { toast(m.msg); return; }
+  if (m.t === 'kicked') { ME.joined = false; ME.code = null; lsSet(PKEY, ME); link = null; app.innerHTML = '<div class="ph"><div class="pbody"><div class="ico">👋</div><div class="msg">تمت إزالتك من الغرفة</div></div></div>'; return; }
+  if (m.t === 'view') {
+    const prev = V; V = m.v; V._at = now();
+    // اهتزاز وأصوات للحظات المهمة
+    if (V.scr === 'pick' && V.hot && (!prev || !prev.hot)) { vib([60, 40, 60]); tone(880, .12, 'square', .12); }
+    if (V.scr === 'pick' && V.bomb && (!prev || !prev.bomb)) { vib([200, 80, 200]); }
+    if (V.scr === 'result' && (!prev || prev.scr !== 'result')) { V.delta > 0 ? (vib(60), SFX.ok()) : V.delta < 0 ? (vib([200, 60, 200]), SFX.bad()) : 0; }
+    if (V.scr === 'final' && V.win && (!prev || prev.scr !== 'final')) { confetti(); SFX.fanfare(); }
+    renderPhone();
+  }
+}
+function toast(msg) { const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; document.body.appendChild(t); vib(120); setTimeout(() => t.remove(), 3000); }
+function act(a, d = {}) { if (link) link.send(Object.assign({t: 'act', a}, d)); }
+
+let lastSig = '';
+function renderPhone(force) {
+  if (!ME.joined) return;
+  if (pstat !== 'ok' || !V) {
+    const msg = {connecting: 'جاري الاتصال بالشاشة...', lost: 'انقطع الاتصال، نحاول نرجع...', noroom: 'ما لقينا الغرفة. تأكد إن الشاشة الكبيرة مفتوحة والرمز صحيح.', neterr: 'مشكلة في الإنترنت، نحاول مرة ثانية...'}[pstat] || 'جاري الاتصال...';
+    app.innerHTML = `<div class="ph"><div class="connov"><div><div class="spin"></div><div class="msg" style="font-weight:800;font-size:20px;line-height:1.7">${msg}</div><div class="mute" style="margin-top:8px">الغرفة ${esc(code)}</div>${pstat === 'noroom' ? '<button class="ghost" style="margin-top:16px" id="chg">تغيير الاسم أو الغرفة</button>' : ''}</div></div></div>`;
+    const chg = $('#chg'); if (chg) chg.onclick = () => { ME.joined = false; lsSet(PKEY, ME); location.href = baseURL() + (NETMODE === 'local' ? '?net=local' : ''); };
+    lastSig = ''; return;
+  }
+  const sig = JSON.stringify(V, (k, v) => (k === 'left' || k === '_at') ? undefined : v);
+  if (sig === lastSig && !force) return;
+  // حافظ على النص المكتوب عند إعادة الرسم
+  const inp = document.querySelector('.pfield'); const keep = inp ? inp.value : null;
+  lastSig = sig;
+  const me = V.me;
+  const head = `<div class="phead" style="--c:${me.color}">${avatar(me)}<span class="nm">${esc(me.name)} ${me.host ? '👑' : ''}</span><span class="rk">المركز ${AR(me.rank)}/${AR(me.of)}</span><span class="sc">${AR(me.score)}</span></div>`;
+  const timer = V.timer ? `<div class="ptimer"><i style="width:100%"></i></div>` : '';
+  const ctrl = V.ctrl ? `<div class="pctrl"><span>👑 المقدّم</span><button class="btn" data-pa="next">${esc(V.ctrl)}</button></div>` : '';
+  app.innerHTML = `<div class="ph">${head}${timer}<div class="pbody">${phoneBody()}</div>${ctrl}</div>`;
+  if (keep !== null) { const n = document.querySelector('.pfield'); if (n && !n.value) n.value = keep; }
+  bindPhone();
+}
+function phoneBody() {
+  const v = V;
+  switch (v.scr) {
+    case 'lobby': return `<div class="ico">🎉</div><div class="msg">أنت داخل!<br><span class="mute" style="font-size:17px">عدد اللاعبين ${AR(v.n)} · ${v.me.host ? 'أنت المقدّم، ابدأ لما يكتمل الكل' : 'ننتظر المقدّم يبدأ'}</span></div>`;
+    case 'intro': return `<div class="ico">${v.icon}</div><span class="tag" style="align-self:center">الجولة ${AR(v.num)} من ${AR(v.of)}</span><div class="disp" style="font-size:40px;color:var(--gold)">${esc(v.name)}</div><div class="msg" style="font-size:17px;font-weight:600">${esc(v.desc)}</div>`;
+    case 'msg': return `<div class="ico">${v.icon}</div><div class="msg">${esc(v.msg)}</div>`;
+    case 'buzzer': return `<div class="pq">${esc(v.q)}</div><button class="buzzer" data-buzz>اضغط!</button><div class="mute">أول واحد يضغط يجاوب</div>`;
+    case 'pick': return `${v.bomb ? '<div class="ico" style="font-size:54px">💣</div>' : v.hot ? '<div class="tag" style="align-self:center">🔔 أنت أول واحد! اختر بسرعة</div>' : ''}<div class="pq">${esc(v.q)}</div><div class="popts">${v.opts.map((o, i) => `<button class="popt c${i}" data-pick="${i}"><span class="sh">${SHAPES[i]}</span><span>${esc(o)}</span></button>`).join('')}</div>`;
+    case 'num': return `<div class="pq">${esc(v.q)}</div><input class="pfield" inputmode="decimal" placeholder="تخمينك${v.unit ? ' (' + esc(v.unit) + ')' : ''}" autocomplete="off"><button class="btn" data-send="num">أرسل 🎯</button>`;
+    case 'text': return `<div class="pq">${esc(v.q)}</div><input class="pfield" maxlength="40" placeholder="اكتب جواب كذب مقنع" autocomplete="off" style="font-size:22px"><button class="btn" data-send="lie">أرسل الكذبة 😏</button><div class="mute">لا تكتب الصح! خلّها تشبهه عشان تخدعهم</div>`;
+    case 'choose': return `<div class="pq">${esc(v.q)}</div><div class="popts">${v.opts.map(o => `<button class="pbtn" data-choose="${o.i}">${esc(o.text)}</button>`).join('')}</div>`;
+    case 'players': return `<div class="pq">${esc(v.q)}</div><div class="plist2">${v.list.map(p => `<button class="pbtn" data-who="${esc(p.k)}">${avatar(p)}<span>${esc(p.name)}</span></button>`).join('')}</div>`;
+    case 'clock': return v.done ? `<div class="ico">✅</div><div class="msg">وقّفت العدّاد! ننتظر النتيجة</div>` : `<div class="msg">أوقف عند <span style="color:var(--gold)">${AR(v.target)}</span> ثواني</div><div class="disp" id="pcd" style="font-size:80px;color:var(--gold)"></div><button class="stopbtn" data-stop disabled>أوقف</button>`;
+    case 'tap': return `<div class="disp" id="pcd" style="font-size:44px;color:var(--gold)"></div><div class="tapzone" data-tap style="--c:${v.me.color}"><span id="tapn">اهرس!</span></div>`;
+    case 'result': { const d = v.delta; return `<div class="res ${d > 0 ? 'p' : d < 0 ? 'n' : 'z'}">${d ? SG(d) : '0'}</div><div class="msg">${d > 0 ? 'كفو! 🔥' : d < 0 ? 'أووه 😅' : 'ولا نقطة هالمرة'}</div><div class="pq">${esc(v.line)}</div>`; }
+    case 'final': return `<div class="ico">${v.win ? '🏆' : v.last ? '😈' : '🎖️'}</div><div class="disp" style="font-size:38px;color:var(--gold)">${v.win ? 'أنت بطل الليلة!' : 'مركزك ' + AR(v.me.rank)}</div><div class="msg">مجموعك ${AR(v.me.score)} نقطة${v.win ? '' : '<br><span class="mute" style="font-size:17px">البطل: ' + esc(v.champ) + '</span>'}</div>${v.last && v.punish ? `<div class="punish">عقابك: ${esc(v.punish)}</div>` : ''}`;
+  }
+  return '';
+}
+function bindPhone() {
+  const b = app;
+  const nx = b.querySelector('[data-pa=next]'); if (nx) nx.onclick = () => { ac(); act('next'); nx.disabled = true; setTimeout(() => nx.disabled = false, 800); };
+  const bz = b.querySelector('[data-buzz]');
+  if (bz) bz.addEventListener('pointerdown', e => { e.preventDefault(); bz.classList.add('hit'); vib(40); act('buzz'); bz.textContent = '...'; }, {passive: false});
+  b.querySelectorAll('[data-pick]').forEach(x => x.onclick = () => { act('ans', {i: +x.dataset.pick}); b.querySelectorAll('[data-pick]').forEach(y => y.disabled = true); x.style.outline = '4px solid #fff'; vib(30); });
+  const sendBtn = b.querySelector('[data-send]');
+  if (sendBtn) {
+    const inp = b.querySelector('.pfield');
+    const send = () => { const val = inp.value.trim(); if (!val) { inp.focus(); return; }
+      if (sendBtn.dataset.send === 'num') { if (!isFinite(parseFloat(toLat(val)))) { toast('اكتب رقم'); return; } act('num', {v: toLat(val)}); }
+      else act('lie', {s: val});
+      sendBtn.disabled = true; setTimeout(() => sendBtn.disabled = false, 1500); };
+    sendBtn.onclick = send; inp.onkeydown = e => { if (e.key === 'Enter') send(); };
+  }
+  b.querySelectorAll('[data-choose]').forEach(x => x.onclick = () => { act('vote', {i: +x.dataset.choose}); x.classList.add('sel'); b.querySelectorAll('[data-choose]').forEach(y => y.disabled = true); });
+  b.querySelectorAll('[data-who]').forEach(x => x.onclick = () => { act(V.act === 'pass' ? 'pass' : 'who', {k: x.dataset.who}); x.classList.add('sel'); b.querySelectorAll('[data-who]').forEach(y => y.disabled = true); });
+  const stop = b.querySelector('[data-stop]');
+  if (stop) stop.addEventListener('pointerdown', e => { e.preventDefault(); const L = local['go' + V.go.id]; if (!L || performance.now() < L.goAt) return; const ms = performance.now() - L.goAt; act('stop', {ms: Math.round(ms)}); vib(50); stop.disabled = true; stop.textContent = '✓'; }, {passive: false});
+  const tz = b.querySelector('[data-tap]');
+  if (tz) tz.addEventListener('pointerdown', e => { e.preventDefault(); const L = local['go' + V.go.id]; if (!L) return; const t = performance.now(); if (t < L.goAt || t > L.goAt + V.dur) return; L.n++; $('#tapn').textContent = AR(L.n); tz.classList.remove('pulse'); void tz.offsetWidth; tz.classList.add('pulse'); }, {passive: false});
+}
+function phoneTick() {
+  if (!V || pstat !== 'ok') return;
+  if (V.timer) { const el = document.querySelector('.ptimer i'); if (el) { const left = Math.max(0, V.timer.left - (now() - V._at)); el.style.width = (100 * left / V.timer.total) + '%'; } }
+  if (V.go) {
+    const id = 'go' + V.go.id;
+    if (!local[id]) local[id] = {goAt: performance.now() + Math.max(0, V.go.left), n: 0, sent: 0, lastSend: 0};
+    const L = local[id], t = performance.now(), cd = document.getElementById('pcd');
+    if (cd) { const l = L.goAt - t; cd.textContent = l > 0 ? AR(Math.ceil(l / 1000)) : (V.scr === 'tap' ? (t < L.goAt + V.dur ? AR(Math.ceil((L.goAt + V.dur - t) / 1000)) : '🏁') : '🤫'); }
+    const stop = document.querySelector('[data-stop]'); if (stop && t >= L.goAt && stop.disabled && stop.textContent !== '✓') { stop.disabled = false; vib(80); }
+    if (V.scr === 'tap' && L.n !== L.sent && t - L.lastSend > 200) { L.sent = L.n; L.lastSend = t; act('tap', {n: L.n}); }
+  }
+}
+
+/* =====================================================================
+   البداية
+   ===================================================================== */
+function landing() {
+  const saved = lsGet(HKEY);
+  const resumable = saved && saved.code && now() - (saved.t || 0) < 12 * 3600 * 1000;
+  const pme = lsGet(PKEY);
+  app.innerHTML = `<div class="land">
+    <div class="brand">ليلة التحدي<small>لعبة عائلية · كل جوال يصير جرس</small></div>
+    <div class="cards">
+      <div class="card"><h2>📺 الشاشة الكبيرة</h2><p>افتحها على التلفزيون أو اللابتوب. يطلع باركود، وكل واحد يمسحه بجواله ويدخل.</p>
+        <button class="btn" id="newroom">ابدأ غرفة جديدة</button>
+        ${resumable ? `<button class="btn alt" id="resume">كمّل الغرفة ${esc(saved.code)}</button>` : ''}</div>
+      <div class="card"><h2>📱 لاعب</h2><p>عندك رمز الغرفة؟ اكتبه هنا.</p>
+        <div class="codein"><input id="code" maxlength="4" placeholder="رمز" value="${esc(pme && pme.code || '')}" autocomplete="off"><button class="btn" id="joinb">دخول</button></div></div>
+    </div></div>`;
+  $('#newroom').onclick = () => { ac(); startHost(genCode()); };
+  if (resumable) $('#resume').onclick = () => { ac(); startHost(saved.code, saved); };
+  const j = () => { const c = $('#code').value.trim().toUpperCase(); if (c.length >= 4) location.href = joinURL(c); };
+  $('#joinb').onclick = j; $('#code').onkeydown = e => { if (e.key === 'Enter') j(); };
+}
+function genCode() { const A = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; let s = ''; for (let k = 0; k < 4; k++) s += A[Math.floor(Math.random() * A.length)]; return s; }
+
+app.addEventListener('click', e => { if (S) hostClick(e); });
+document.addEventListener('keydown', e => { if (S && (e.code === 'Space' || e.key === 'Enter') && !e.target.closest('input,button')) { e.preventDefault(); next(); } });
+
+if (NETMODE === 'peer' && typeof Peer === 'undefined') {
+  app.innerHTML = '<div class="land"><div class="brand">ليلة التحدي</div><p>تعذّر تحميل مكتبة الاتصال. تأكد من الإنترنت وحدّث الصفحة.</p></div>';
+} else if (params.get('r')) startPlayer(params.get('r'));
+else if (params.get('host')) { const saved = lsGet(HKEY), c = params.get('host').toUpperCase(); startHost(c, saved && saved.code === c ? saved : null); }
+else landing();
+</script>
+</body>
+</html>
