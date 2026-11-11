@@ -9,7 +9,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="icon-192.png">
 <script>
-var APP_VER = "202611112130";
+var APP_VER = "202611120030";
 if("serviceWorker" in navigator){ navigator.serviceWorker.register("sw.js", {updateViaCache:"none"}).then(function(r){ r.update(); }).catch(function(){}); }
 fetch("version.txt?t=" + Date.now(), {cache:"no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
   v = (v || "").trim();
@@ -1884,6 +1884,15 @@ body.side-min .snav .grp.gv button, body.side-min .snav button.vw > i{display:no
 #pfCmp{max-width:220px}
 a.kpi{display:flex}
 
+
+/* ============ الإصدار ٧ ============ */
+.fbtn.tog{border-style:dashed; color:var(--text-2); background:transparent}
+.fbtn.tog:hover{color:var(--s1)}
+.fbtn.more{background:color-mix(in srgb,var(--s1) 5%,var(--surface))}
+.card:has(> .card-h:only-child){background:none; border:none; box-shadow:none; padding:6px 2px 0}
+.card:has(> .card-h:only-child)::after{display:none}
+.card:has(> .card-h:only-child) .card-h{margin:0}
+
 /* ============ حركة الدخول (عند تبديل الصفحة فقط) ============ */
 @media (prefers-reduced-motion: no-preference){
   body.anim .page.active > *{animation:rise .5s var(--ease) both}
@@ -3007,6 +3016,7 @@ function rebuild(){
   ALL.visits = visits; ALL.items = items; ALL.built = true;
   const days = work.map(x => x.ad).filter(d => d !== null && d !== undefined);
   ALL.minDay = days.length ? Math.min(...days.slice(0, 50000)) : TODAY - 180;
+  presetSync();
   histUpdate();
   render();
   uiAnimate();
@@ -3023,14 +3033,21 @@ const DIMS = {
   cs:{label:'الاستشاري', w:1, q:1},
   cat:{label:'تصنيف العمل', w:1},
   cc:{label:'رمز إجراء المقاول', w:1, num:1, disp:v => codeLabel(v)},
-  ca:{label:'رمز إجراء الاستشاري', w:1, num:1, disp:v => codeLabel(v)}
+  ca:{label:'رمز إجراء الاستشاري', w:1, num:1, disp:v => codeLabel(v)},
+  wt:{label:'نوع العمل', w:1}, eng:{label:'المهندس المشرف', w:1}, slc:{label:'فئة المدة', w:1}, ex:{label:'حالة التنفيذ', w:1},
+  dr:{label:'سبب التأخر', w:1}, dc:{label:'حالة المستندات', w:1}, ds:{label:'حالة مهمة الصيانة', w:1}, em:{label:'طارئ / مجدول', w:1}
 };
+const DIMS_MORE = ['wt','eng','slc','ex','dr','dc','ds','em'];
+let FB_MORE = safeLS('pdc_fb_more') === '1';
 /* مسميات رموز الإجراءات كما وردت في سجل أوامر العمل */
 const CODE_NAME = {};
 function codeLabel(v){ return CODE_NAME[v] ? v + ' — ' + CODE_NAME[v] : String(v); }
 const F = {r:[], s:[], st:[], u:[], sec:[], ct:[], cs:[], cat:[], cc:[], ca:[], from:null, to:null, q:'', preset:'all'};
 try{ const saved = JSON.parse(safeLS('pdc_filters') || 'null'); if(saved) Object.assign(F, saved); }catch(e){}
 for(const d in DIMS) if(!Array.isArray(F[d])) F[d] = [];
+/* الفترات النسبية تُعاد حسابها عند كل فتح وكل تحديث حتى يبقى «اليوم» هو اليوم الفعلي */
+function presetSync(){ const p = F.preset; if(p === 'today'){ F.from = TODAY; F.to = TODAY; } else if(p === 'yest'){ F.from = TODAY - 1; F.to = TODAY - 1; } else if(/^\d+$/.test(p || '')){ F.from = TODAY - Number(p); F.to = null; } }
+presetSync();
 function saveFilters(){ safeLS('pdc_filters', JSON.stringify(F)); }
 function matchWork(x, skip){
   for(const d in DIMS){ if(d === skip) continue; const sel = F[d]; if(sel.length && sel.indexOf(x[d]) < 0) return false; }
@@ -3066,6 +3083,8 @@ function clearFilters(){ for(const d in DIMS) F[d] = []; F.from = null; F.to = n
 function applyPreset(p){
   F.preset = p;
   if(p === 'all'){ F.from = null; F.to = null; }
+  else if(p === 'today'){ F.from = TODAY; F.to = TODAY; }
+  else if(p === 'yest'){ F.from = TODAY - 1; F.to = TODAY - 1; }
   else if(p === 'm'){ const d = new Date(); F.from = Math.floor(Date.UTC(d.getFullYear(), d.getMonth(), 1) / 86400000); F.to = null; }
   else if(p === 'y'){ const d = new Date(); F.from = Math.floor(Date.UTC(d.getFullYear(), 0, 1) / 86400000); F.to = null; }
   else if(p !== 'custom'){ F.from = TODAY - Number(p); F.to = null; }
@@ -3076,8 +3095,10 @@ function renderFilterBar(){
   const bar = $('#fbarRow');
   const segR = ['', 'جدة', 'مكة'].map(v => `<button class="${(v === '' && !F.r.length) || (F.r.length === 1 && F.r[0] === v) ? 'on' : ''}" data-seg="r" data-v="${v}">${v || 'كل المناطق'}</button>`).join('');
   const segS = ['', 'إنشاءات', 'صيانة'].map(v => `<button class="${(v === '' && !F.s.length) || (F.s.length === 1 && F.s[0] === v) ? 'on' : ''}" data-seg="s" data-v="${v}">${v || 'كل القطاعات'}</button>`).join('');
-  const btns = ['st','u','sec','ct','cs','cat','cc','ca'].map(d => `<button class="fbtn ${F[d].length ? 'on' : ''}" data-ms="${d}">${DIMS[d].label}${F[d].length ? ' <span class="cnt">' + F[d].length + '</span>' : ''} <span class="car">▼</span></button>`).join('');
-  const presets = [['all','كل الفترات'],['7','آخر 7 أيام'],['30','آخر 30 يوماً'],['90','آخر 90 يوماً'],['m','هذا الشهر'],['y','هذه السنة'],['custom','مخصص']];
+  const btns = ['st','u','sec','ct','cs','cat','cc','ca'].map(d => `<button class="fbtn ${F[d].length ? 'on' : ''}" data-ms="${d}">${DIMS[d].label}${F[d].length ? ' <span class="cnt">' + F[d].length + '</span>' : ''} <span class="car">▼</span></button>`).join('') +
+    DIMS_MORE.filter(d => FB_MORE || F[d].length).map(d => `<button class="fbtn more ${F[d].length ? 'on' : ''}" data-ms="${d}">${DIMS[d].label}${F[d].length ? ' <span class="cnt">' + F[d].length + '</span>' : ''} <span class="car">▼</span></button>`).join('') +
+    `<button class="fbtn tog" id="fMore" title="إظهار أو إخفاء الفلاتر الإضافية: نوع العمل، المهندس، فئة المدة، حالة التنفيذ، سبب التأخر، المستندات، حالة الصيانة، طارئ/مجدول">${FB_MORE ? 'فلاتر أقل −' : 'فلاتر أكثر ＋'}</button>`;
+  const presets = [['all','كل الفترات'],['today','اليوم'],['yest','أمس'],['7','آخر 7 أيام'],['30','آخر 30 يوماً'],['90','آخر 90 يوماً'],['m','هذا الشهر'],['y','هذه السنة'],['custom','مخصص']];
   bar.innerHTML = `<div class="seg">${segR}</div><div class="seg">${segS}</div>${btns}
     <span class="dates" title="تاريخ الإسناد للأعمال وتاريخ الزيارة للسلامة والجودة">الفترة:
       <select id="fPreset">${presets.map(p => `<option value="${p[0]}" ${F.preset === p[0] ? 'selected' : ''}>${p[1]}</option>`).join('')}</select>
@@ -3443,7 +3464,7 @@ const FIELD_LABELS = {
   po:'رقم PO', wsx:'حالة أمر العمل', desc:'وصف العمل', dur:'مدة التنفيذ (يوم)', late:'متأخر', lc:'متأخر إغلاق',
   sla:'المدة النظامية (يوم)', slc:'فئة المدة', prg:'نسبة التقدم', pcs:'حالة عدّاد الغرامة', eqs:'حالة تركيب المعدات', pmd:'تاريخ التصريح', gov:'تاريخ برنامج الحوكمة', cax:'مسمى إجراء الاستشاري', np2:'ملاحظات PDC'
 };
-const DATE_FIELDS = new Set(['ad','ed','due','sd','d','pmd','gov']);
+const DATE_FIELDS = new Set(['ad','ed','due','sd','d','pmd','gov','cld']);
 function showRecord(id){
   const x = ALL.work.find(r => r.id === id) || ALL.cancelled.find(r => r.id === id);
   if(!x) return;
@@ -4286,6 +4307,8 @@ function renderHelp(){
       <tr><td>فحص نواقص الإدخال في الملفات</td><td>صفحة «جودة البيانات»: نسبة اكتمال كل ملف وعدد السجلات الناقصة في كل فحص لجدة ومكة، والنقر على أي خانة يعرض سجلاتها</td></tr>
       <tr><td>حفظ عرض للرجوع إليه</td><td>زر ＋ بجانب «عروضي المحفوظة» في الشريط الجانبي يحفظ الصفحة الحالية بفلاترها باسم تختاره</td></tr>
       <tr><td>مقارنة مقاولَين أو استشاريَّين</td><td>افتح ملف أحدهما ثم اختر الآخر من قائمة «قارن مع…»</td></tr>
+      <tr><td>عرض بيانات اليوم فقط</td><td>اختر «اليوم» من قائمة الفترة في شريط الفلاتر (أو «أمس») — تُعرض الأعمال المُسندة في ذلك اليوم وزيارات السلامة التي تمت فيه، ويبقى الاختيار «اليوم» حتى عند فتح اللوحة في يوم لاحق</td></tr>
+      <tr><td>فلاتر إضافية</td><td>زر «فلاتر أكثر» في شريط الفلاتر يُظهر: نوع العمل، المهندس المشرف، فئة المدة، حالة التنفيذ، سبب التأخر، حالة المستندات، حالة مهمة الصيانة، طارئ/مجدول</td></tr>
       <tr><td>توسيع مساحة العرض</td><td>زر «طيّ القائمة» أسفل الشريط الجانبي</td></tr>
     </tbody></table>
     <p>«خط الإنجاز» أعلى الملخص التنفيذي يوضّح كم عملاً وصل إلى كل مرحلة من المراحل الخمس وأين تتوقف الأعمال: العمود الملوّن هو عدد الأعمال الموجودة الآن في المرحلة، والمساحة المظللة هي ما واصل إلى المراحل التالية.</p>
@@ -4425,15 +4448,16 @@ const BLD_FIELDS = {
     ['التواريخ والأعمار', [['ad','تاريخ الإسناد'],['sd','تاريخ المباشرة'],['ed','تاريخ التنفيذ / الانتهاء'],['due','تاريخ الاستحقاق'],['age','عمر الأمر (يوم)'],['dl','أيام التأخير'],['pd','أيام الغرامة'],['dur','مدة التنفيذ (يوم)'],['wp','فترة الانتظار']]],
     ['حالة الإنشاءات', [['ls','مرحلة السلّم'],['ex','حالة التنفيذ'],['cl','حالة الإغلاق'],['late','متأخر'],['ca','رمز إجراء الاستشاري'],['cc','رمز إجراء المقاول'],['cct','مسمى إجراء المقاول'],['fs','حالة المرحلة الميدانية'],['fe','مرحلة التنفيذ الميدانية'],['np','يحتاج تصريحاً'],['pm','حالة التصريح'],['dc','حالة المستندات'],['ms','حالة تركيب العدادات'],['dr','سبب التأخير'],['drx','مبررات التأخير'],['eng','المهندس المشرف']]],
     ['حالة الصيانة', [['ds','حالة الإنجاز'],['em','مجدول / طارئ'],['tp','أرضي / هوائي'],['ar','أرشفة المستندات'],['pe','مهندس PDC'],['wo','رقم أمر العمل'],['wsx','حالة أمر العمل'],['po','رقم PO'],['stn','رقم المحطة / المغذي'],['desc','وصف العمل']]],
-    ['المالية والكميات', [['v1','تكلفة المقاول / مبلغ PO'],['v2','تكلفة PDC'],['gT','الحفر المستهدف (م)'],['gD','الحفر المنفذ (م)'],['xT','التمديد المستهدف (م)'],['xD','التمديد المنفذ (م)'],['nt','ملاحظات']]]
+    ['المالية والكميات', [['v1','تكلفة المقاول / مبلغ PO'],['v2','تكلفة PDC'],['gT','الحفر المستهدف (م)'],['gD','الحفر المنفذ (م)'],['xT','التمديد المستهدف (م)'],['xD','التمديد المنفذ (م)'],['nt','ملاحظات']]],
+    ['الالتزام والمعدات', [['sla','المدة النظامية (يوم)'],['slc','فئة المدة'],['prg','نسبة التقدم'],['pcs','حالة عدّاد الغرامة'],['pmd','تاريخ التصريح'],['gov','تاريخ برنامج الحوكمة'],['eqs','حالة تركيب المعدات'],['eqT','المعدات المستهدفة'],['eqD','المعدات المنفذة'],['cax','مسمى إجراء الاستشاري'],['np2','ملاحظات PDC']]]
   ],
   visits:[
     ['الزيارة', [['id','رقم الزيارة'],['d','التاريخ'],['r','المنطقة'],['s','القطاع'],['u','الدائرة'],['sec','القسم'],['no','رقم أمر العمل'],['wt','نوع الأمر'],['loc','الموقع'],['ct','المقاول'],['cs','الاستشاري'],['en','الراصد']]],
-    ['النتائج', [['hv','بها مخالفات'],['sw','إيقاف عمل'],['rf','رُفع محضر'],['oc','عدد الملاحظات'],['vc','عدد المخالفات'],['f','الغرامات (ر.س)'],['lk','رابط التقرير']]]
+    ['النتائج', [['hv','بها مخالفات'],['sw','إيقاف عمل'],['rf','رُفع محضر'],['oc','عدد الملاحظات'],['vc','عدد المخالفات'],['f','الغرامات (ر.س)'],['hr','ساعة الزيارة'],['lk','رابط التقرير']]]
   ],
   items:[
     ['البند', [['vid','رقم الزيارة'],['d','التاريخ'],['r','المنطقة'],['s','القطاع'],['u','الدائرة'],['no','رقم أمر العمل'],['ty','نوع السجل'],['cg','التصنيف'],['ac','النشاط'],['vn','اسم المخالفة'],['desc','الوصف التفصيلي'],['ct','المقاول'],['cs','الاستشاري']]],
-    ['الجزاء والمعالجة', [['rp','الجهة المسؤولة'],['sc','الفئة الفرعية'],['sv','درجة الخطورة'],['pn','الجزاء'],['am','المبلغ (ر.س)'],['stt','الحالة'],['cdays','مدة التصحيح (يوم)'],['cv','مخالفة محتسبة'],['cst','إيقاف محتسب']]]
+    ['الجزاء والمعالجة', [['rp','الجهة المسؤولة'],['sc','الفئة الفرعية'],['sv','درجة الخطورة'],['pn','الجزاء'],['am','المبلغ (ر.س)'],['stt','الحالة'],['cdays','مدة التصحيح (يوم)'],['cv','مخالفة محتسبة'],['cst','إيقاف محتسب'],['rpt','التكرار'],['tl','قائد الفريق المخالف'],['cra','الإجراء التصحيحي المطلوب'],['cld','تاريخ التصحيح/الإغلاق'],['act','الإجراء الفعلي'],['ded','موقف الخصم']]]
   ]
 };
 const BLD_PRESETS = {
@@ -5827,6 +5851,10 @@ function renderTodo(){
   const ns = M.filter(x => x.ds === 'لم يتم البدء' && nn(x.ad)).sort((a, b) => a.ad - b.ad);
   const openI = I.filter(x => !x.empty && x.stt === 'مفتوحة' && nn(x.d) && TODAY - x.d > 7).sort((a, b) => a.d - b.d);
   const und = I.filter(x => x.ty === 'مخالفة' && x.am > 0 && x.ded !== 'تم').sort((a, b) => b.am - a.am);
+  const docs = C.filter(x => x.st === 'A' && /لم تُسل|لم تسل/.test(x.dc || '') && nn(x.ed)).sort((a, b) => a.ed - b.ed);
+  const cert = W.filter(x => x.st === 'T').sort((a, b) => (nn(a.ed) ? a.ed : 1e9) - (nn(b.ed) ? b.ed : 1e9));
+  const pen = C.filter(x => x.st === 'U' && x.pcs === 'جارية' && x.pd > 0).sort((a, b) => b.pd - a.pd);
+  const stops = V.filter(v => v.sw && nn(v.d) && TODAY - v.d <= 14).sort((a, b) => b.d - a.d);
   const wRow = (x, extra) => ({click:x.id, h:[`<b>${esc(x.no)}</b>`, esc(x.r), esc(x.u), esc(x.ct)].concat(extra.map(e => e[0])), v:[x.no, x.r, x.u, x.ct].concat(extra.map(e => e[1]))});
   const wCols = ['رقم الأمر', 'المنطقة', 'المكتب / الدائرة', 'المقاول'];
   const k = (label, n, sub, color, anchor) => `<a class="kpi click" href="#${anchor}" style="--kc:${color};text-decoration:none;color:inherit" onclick="event.preventDefault();var t=document.getElementById('tw-${anchor}');if(t)t.closest('.card').scrollIntoView({behavior:'smooth',block:'center'})"><div class="kl">${label}</div><div class="kv num">${fmt(n)}</div><div class="ks">${sub}</div></a>`;
@@ -5838,6 +5866,10 @@ function renderTodo(){
       ${k('صيانة لم تبدأ', ns.length, 'مهام حالتها «لم يتم البدء»', 'var(--s8)', 'td-ns')}
       ${k('بنود سلامة مفتوحة منذ أكثر من أسبوع', openI.length, 'ملاحظات ومخالفات لم تُغلق', 'var(--critical)', 'td-open')}
       ${k('غرامات لم تُخصم', und.length, `<span class="num">${fmt(sumBy(und, x => x.am))}</span> ر.س`, 'var(--s4)', 'td-und')}
+      ${k('منفَّذة بلا مستندات مسلَّمة', docs.length, 'المقاول لم يسلّم مستنداتها بعد', 'var(--s3)', 'td-docs')}
+      ${k('مستلمة تنتظر شهادة الإنجاز', cert.length, 'مرحلة «مستلمة من إدارة الكهرباء»', 'var(--st-t)', 'td-cert')}
+      ${k('عدّاد غرامة جارٍ', pen.length, 'أوامر تحت التنفيذ تتراكم عليها الغرامة', 'var(--serious)', 'td-pen')}
+      ${k('إيقافات عمل خلال 14 يوماً', stops.length, 'من زيارات السلامة والجودة', 'var(--critical)', 'td-stops')}
     </div>
     <div class="grid">
       ${todoCard({id:'td-soon', title:'أوامر ستتجاوز مدتها النظامية خلال 7 أيام', sub:'مرتّبة بالأقرب إلى التجاوز — انقر الصف لتفاصيل الأمر', tone:'b-warn', all:soon, cols:wCols.concat(['المدة', 'المتبقي (يوم)']), num:[4, 5], row:x => wRow(x, [[fmt(x.sla), x.sla], [`<span class="badge b-warn">${fmt(x.sla - x.age)}</span>`, x.sla - x.age]])})}
@@ -5850,6 +5882,14 @@ function renderTodo(){
     <div class="grid">
       ${todoCard({id:'td-open', title:'بنود سلامة وجودة مفتوحة منذ أكثر من أسبوع', sub:'مرتّبة بالأقدم رصداً', tone:'b-err', all:openI, cols:['رقم الزيارة', 'المقاول', 'العمر (يوم)', 'البند'], num:[2], row:x => ({h:[esc(x.vid), esc(x.ct), `<span class="badge b-err">${fmt(TODAY - x.d)}</span>`, `<span title="${esc(x.desc || '')}">${esc(x.ty)}: ${esc((x.vn || x.desc || '').slice(0, 70))}</span>`], v:[x.vid, x.ct, TODAY - x.d, x.ty + ': ' + (x.vn || x.desc || '')]})})}
       ${todoCard({id:'td-und', title:'مخالفات لم تُخصم غراماتها', sub:'موقف الخصم «لم يتم» — مرتّبة بالأعلى مبلغاً', tone:'b-warn', all:und, cols:['رقم الزيارة', 'المقاول', 'المبلغ (ر.س)', 'المخالفة'], num:[2], row:x => ({h:[esc(x.vid), esc(x.ct), `<b class="num">${fmt(x.am)}</b>`, `<span title="${esc(x.desc || '')}">${esc((x.vn || x.desc || '').slice(0, 70))}</span>`], v:[x.vid, x.ct, x.am, x.vn || x.desc || '']})})}
+    </div>
+    <div class="grid">
+      ${todoCard({id:'td-docs', title:'أعمال منفَّذة لم يسلّم المقاول مستنداتها', sub:'سبب مباشر لتأخر الاستلام — مرتّبة بالأقدم تنفيذاً', tone:'b-warn', all:docs, cols:wCols.concat(['منذ التنفيذ (يوم)', 'القيمة']), num:[4, 5], row:x => wRow(x, [[fmt(TODAY - x.ed), TODAY - x.ed], [money(x.v1), Math.round(x.v1 || 0)]])})}
+      ${todoCard({id:'td-cert', title:'أعمال مستلمة تنتظر شهادة الإنجاز', sub:'مرتّبة بالأقدم تنفيذاً', tone:'b-run', all:cert, cols:wCols.concat(['القطاع', 'القيمة']), num:[5], row:x => wRow(x, [[esc(x.s), x.s], [money(x.v1), Math.round(x.v1 || 0)]])})}
+    </div>
+    <div class="grid">
+      ${todoCard({id:'td-pen', title:'أوامر عدّاد غرامتها جارٍ', sub:'تحت التنفيذ وحالة العدّاد «جارية» — مرتّبة بالأعلى أياماً', tone:'b-err', all:pen, cols:wCols.concat(['أيام الغرامة', 'القيمة']), num:[4, 5], row:x => wRow(x, [[`<span class="badge b-err">${fmt(x.pd)}</span>`, x.pd], [money(x.v1), Math.round(x.v1 || 0)]])})}
+      ${todoCard({id:'td-stops', title:'إيقافات العمل خلال آخر 14 يوماً', sub:'زيارات سُجّل فيها إيقاف عمل — الأحدث أولاً', tone:'b-err', all:stops, cols:['رقم الزيارة', 'التاريخ', 'المنطقة', 'المقاول', 'الموقع', 'الراصد'], row:x => ({h:[esc(x.id), `<span class="num">${dayStr(x.d)}</span>`, esc(x.r), esc(x.ct), esc(x.loc || x.u || ''), esc(x.en || '')], v:[x.id, dayStr(x.d), x.r, x.ct, x.loc || x.u || '', x.en || '']})})}
     </div>`;
 }
 
@@ -5927,6 +5967,7 @@ function compare(dim, a, b){
 document.addEventListener('click', e => {
   let el;
   if((el = e.target.closest('[data-dq]'))){ dqShow(el.dataset.dq); return; }
+  if(e.target.closest('#fMore')){ FB_MORE = !FB_MORE; safeLS('pdc_fb_more', FB_MORE ? '1' : '0'); renderFilterBar(); return; }
   if((el = e.target.closest('[data-viewdel]'))){ e.stopPropagation(); e.preventDefault(); const v = viewsGet(); v.splice(Number(el.dataset.viewdel), 1); viewsSet(v); return; }
   if((el = e.target.closest('[data-viewadd]'))){ e.stopPropagation(); viewAsk(); return; }
   if((el = e.target.closest('[data-view]'))){ viewApply(Number(el.dataset.view)); return; }
