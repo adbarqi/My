@@ -9,7 +9,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="icon-192.png">
 <script>
-var APP_VER = "202611120115";
+var APP_VER = "202611120125";
 if("serviceWorker" in navigator){ navigator.serviceWorker.register("sw.js", {updateViaCache:"none"}).then(function(r){ r.update(); }).catch(function(){}); }
 fetch("version.txt?t=" + Date.now(), {cache:"no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
   v = (v || "").trim();
@@ -1955,7 +1955,8 @@ table.trust-t tr.tg td{background:var(--surface-3); font-weight:600; font-size:1
 .story-ctl button:hover{border-color:var(--live); color:var(--live)} .story-ctl b{font-weight:500; font-size:12px}
 .story-dots{display:flex; gap:7px; padding:0 6px}
 .story-dots i{width:22px; height:4px; border-radius:3px; background:rgba(255,255,255,.2); cursor:pointer; transition:background .2s, width .2s} .story-dots i.on{background:var(--live); width:38px}
-@media(max-width:900px){ .st-2{grid-template-columns:1fr; gap:18px} .sl{padding:8vh 22px 16vh; justify-content:flex-start; overflow-y:auto} .trust span{display:none} .trust{padding:0 8px} .tb-btn.brief .lbl{display:none} .trust-card{flex-direction:column; text-align:center} .st-logo{height:38px; top:3vh; inset-inline-end:22px} }
+@media(max-width:900px){ .story-ctl{inset-inline:0; bottom:0; padding:26px 16px calc(12px + env(safe-area-inset-bottom)); background:linear-gradient(transparent, #061019 45%)} .story-dots i{width:10px} .story-dots i.on{width:20px} .sl{padding-bottom:22vh !important}
+  .st-2{grid-template-columns:1fr; gap:18px} .sl{padding:8vh 22px 16vh; justify-content:flex-start; overflow-y:auto} .trust span{display:none} .trust{padding:0 8px} .tb-btn.brief .lbl{display:none} .trust-card{flex-direction:column; text-align:center} .st-logo{height:38px; top:3vh; inset-inline-end:22px} }
 @page story{size:A4 landscape; margin:0}
 @media print{
   body.story-open > *:not(.story){display:none !important}
