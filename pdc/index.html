@@ -9,7 +9,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="icon-192.png">
 <script>
-var APP_VER = "202611120030";
+var APP_VER = "202611120115";
 if("serviceWorker" in navigator){ navigator.serviceWorker.register("sw.js", {updateViaCache:"none"}).then(function(r){ r.update(); }).catch(function(){}); }
 fetch("version.txt?t=" + Date.now(), {cache:"no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
   v = (v || "").trim();
@@ -1893,6 +1893,78 @@ a.kpi{display:flex}
 .card:has(> .card-h:only-child)::after{display:none}
 .card:has(> .card-h:only-child) .card-h{margin:0}
 
+
+/* ============ الإصدار ٨: الثقة + الإحاطة ============ */
+.trust{display:inline-flex; align-items:center; gap:6px; height:32px; padding:0 10px; border-radius:var(--r-ctl); border:1px solid; font-size:11.8px; white-space:nowrap; background:transparent}
+.trust .ic{width:15px; height:15px} .trust b{font-weight:650}
+.trust.ok{color:var(--good); border-color:color-mix(in srgb,var(--good) 45%,transparent); background:color-mix(in srgb,var(--good) 9%,transparent)}
+.trust.mid{color:color-mix(in srgb,var(--warning) 70%,var(--text)); border-color:color-mix(in srgb,var(--warning) 55%,transparent); background:color-mix(in srgb,var(--warning) 12%,transparent)}
+.trust.bad{color:var(--critical); border-color:var(--critical); background:color-mix(in srgb,var(--critical) 10%,transparent)}
+.cmdk{min-width:150px; flex:0 1 250px} .cmdk span{white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0}
+.crumb b{overflow:visible}
+@media(max-width:1560px){ .crumb em{display:none} }
+@media(max-width:1300px){ .crumb > span, .crumb > i{display:none} }
+.tb-btn.brief{background:var(--ink); border-color:var(--ink); color:#fff} .tb-btn.brief:hover{color:var(--live); border-color:var(--live)}
+.trust-card{display:flex; align-items:center; gap:16px}
+.trust-card svg{width:132px; flex:none} .trust-card .tn{font-size:24px; font-weight:650; fill:var(--text); font-family:inherit} .trust-card .tl{font-size:10px; fill:var(--muted); font-family:inherit}
+.trust-card h3{font-size:15px; font-weight:600; margin-bottom:6px; line-height:1.5} .trust-card p{margin:0 0 6px; font-size:12px; color:var(--text-2)}
+table.trust-t tr.tg td{background:var(--surface-3); font-weight:600; font-size:11.4px; color:var(--text-2); padding:5px 10px}
+.method{display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:10px 22px; margin:0}
+.method dt{font-weight:600; font-size:12.4px} .method dd{margin:2px 0 0; color:var(--text-2); font-size:11.8px; line-height:1.7}
+.errbox{border-color:var(--critical)} .errbox h3{font-size:15px; margin-bottom:6px} .errbox p{color:var(--text-2); margin:0 0 8px} .errbox code{display:block; font-size:11px; background:var(--surface-3); padding:6px 9px; border-radius:8px; color:var(--text-2)}
+.story{position:fixed; inset:0; z-index:700; color:#eaf3fa; overflow:hidden;
+  --surface:#0b1a27; --surface-2:#0f2233; --surface-3:rgba(255,255,255,.09); --text:#eaf3fa; --text-2:#b6c8d8; --muted:#7f97ab; --grid:rgba(120,180,220,.14); --axis:rgba(120,180,220,.3); --border:rgba(120,190,240,.16);
+  background:
+    linear-gradient(rgba(120,190,240,.035) 1px, transparent 1px) 0 0/100% 40px, linear-gradient(90deg, rgba(120,190,240,.035) 1px, transparent 1px) 0 0/40px 100%,
+    radial-gradient(70% 90% at 90% 0%, rgba(42,127,212,.4), transparent 60%), radial-gradient(50% 70% at 0% 100%, rgba(185,220,75,.14), transparent 62%), #061019}
+.sl{position:absolute; inset:0; display:none; flex-direction:column; justify-content:center; padding:6vh 7vw 14vh; max-width:1500px; margin:0 auto}
+.sl.on{display:flex; animation:slin .55s var(--ease)}
+@keyframes slin{from{opacity:0; transform:translateY(18px)}}
+.sl-k{display:flex; align-items:center; gap:14px; font-size:clamp(13px,1.15vw,17px); color:var(--live); margin-bottom:2.2vh}
+.sl-k span{display:inline-flex; align-items:center; gap:10px} .sl-k span::before{content:""; width:26px; height:2px; background:var(--live)}
+.sl-k em{font-style:normal; color:#6f879c; font-size:.85em}
+.sl h2{font-size:clamp(22px,3.1vw,48px); font-weight:300; line-height:1.55; color:#c9d9e6; margin:0 0 4vh; text-wrap:balance; max-width:26em}
+.sl h2 b{font-weight:650; color:#fff}
+.sl-b{font-size:clamp(12px,1.05vw,15px)}
+.sl-b h5{font-size:1em; font-weight:500; color:#9fc3dd; margin:0 0 10px}
+.sl-b .hb-row{font-size:1em; padding:5px 6px} .sl-b .hb-t{height:12px} .sl-b .hb-v{font-size:1em} .sl-b .hb-row:hover{background:transparent}
+.sl-b .legend{font-size:.95em}
+.st-ts{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px}
+.st-t{padding:14px 16px; border-radius:14px; background:linear-gradient(180deg,rgba(255,255,255,.085),rgba(255,255,255,.03)); border:1px solid rgba(255,255,255,.1); border-top:2px solid var(--pc); min-width:0}
+.st-t span{display:block; font-size:.92em; color:#b6c8d8} .st-t b{display:block; font-size:clamp(22px,2.5vw,38px); font-weight:650; color:#fff; line-height:1.35; white-space:nowrap}
+.st-t em{font-style:normal; font-size:.88em; color:#8fa9bf}
+.st-2{display:grid; grid-template-columns:minmax(0,5fr) minmax(0,6fr); gap:4vw; align-items:start}
+.st-2 > div:first-child .st-ts{grid-template-columns:1fr}
+.sl.cover{justify-content:center}
+.sl.cover h2{font-size:clamp(34px,5.6vw,86px); font-weight:650; color:#fff; margin-bottom:1.5vh}
+.st-date{font-size:clamp(16px,1.9vw,28px); font-weight:300; color:var(--live); margin:0 0 .8vh}
+.st-scope{font-size:clamp(12px,1.1vw,16px); color:#8fa9bf; margin:0 0 5vh}
+.st-stamp{display:inline-flex; align-items:center; gap:10px; padding:10px 16px; border-radius:12px; border:1px solid rgba(185,220,75,.4); background:rgba(185,220,75,.08); color:#dbe9b4; font-size:clamp(12px,1.05vw,15px)}
+.st-stamp .ic{color:var(--live); width:20px; height:20px} .st-stamp b{color:#fff}
+.st-logo{position:absolute; top:6vh; inset-inline-end:7vw; height:54px; background:#fff; border-radius:12px; padding:5px 10px}
+.st-acts{list-style:none; margin:0; padding:0; display:grid; gap:12px; counter-reset:a}
+.st-acts li{display:flex; align-items:center; gap:20px; padding:14px 18px; border-radius:14px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.09)}
+.st-acts li::before{counter-increment:a; content:counter(a); width:28px; height:28px; border-radius:50%; border:1.5px solid var(--live); color:var(--live); display:grid; place-items:center; font-size:13px; flex:none}
+.st-acts b{font-size:clamp(24px,2.6vw,40px); font-weight:650; color:#fff; min-width:3.2em; text-align:center}
+.st-acts span{display:block; font-size:1.15em; color:#eaf3fa} .st-acts em{font-style:normal; color:#8fa9bf; font-size:.95em}
+.st-notes{margin:0; padding-inline-start:20px; display:grid; gap:8px; font-size:1.05em; color:#cfe0ee} .st-notes b{color:#fff; font-weight:600}
+.st-note{color:#8fa9bf; margin:12px 0 0}
+.story-ctl{position:absolute; bottom:3.2vh; inset-inline:7vw; display:flex; align-items:center; gap:10px; z-index:2}
+.story-ctl > span{flex:1}
+.story-ctl button{border:1px solid rgba(255,255,255,.16); background:rgba(255,255,255,.06); color:#dbe7f0; height:36px; min-width:36px; padding:0 9px; border-radius:10px; display:inline-flex; align-items:center; justify-content:center; gap:6px}
+.story-ctl button:hover{border-color:var(--live); color:var(--live)} .story-ctl b{font-weight:500; font-size:12px}
+.story-dots{display:flex; gap:7px; padding:0 6px}
+.story-dots i{width:22px; height:4px; border-radius:3px; background:rgba(255,255,255,.2); cursor:pointer; transition:background .2s, width .2s} .story-dots i.on{background:var(--live); width:38px}
+@media(max-width:900px){ .st-2{grid-template-columns:1fr; gap:18px} .sl{padding:8vh 22px 16vh; justify-content:flex-start; overflow-y:auto} .trust span{display:none} .trust{padding:0 8px} .tb-btn.brief .lbl{display:none} .trust-card{flex-direction:column; text-align:center} .st-logo{height:38px; top:3vh; inset-inline-end:22px} }
+@page story{size:A4 landscape; margin:0}
+@media print{
+  body.story-open > *:not(.story){display:none !important}
+  body.story-open{background:#061019 !important}
+  .story{position:static; -webkit-print-color-adjust:exact; print-color-adjust:exact; overflow:visible}
+  .story .sl{display:flex !important; position:relative; height:100vh; page:story; break-after:page; animation:none}
+  .story-ctl{display:none !important}
+}
+
 /* ============ حركة الدخول (عند تبديل الصفحة فقط) ============ */
 @media (prefers-reduced-motion: no-preference){
   body.anim .page.active > *{animation:rise .5s var(--ease) both}
@@ -2003,6 +2075,8 @@ a.kpi{display:flex}
   <button class="tb-btn" id="btnPick" title="اختيار ملفات الإكسل من الجهاز أو تطبيق الملفات"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7.5A2.5 2.5 0 0 1 5.5 5h3.6l2.2 2.5h7.2A2.5 2.5 0 0 1 21 10v7.5a2.5 2.5 0 0 1-2.500 2.500h-13A2.5 2.5 0 0 1 3 17.5z"/></svg><span class="lbl">اختيار الملفات</span></button>
   <button class="tb-btn main" id="btnRefreshAll" title="تحديث جميع الملفات السبعة"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.340-5.660M20 4v5h-5"/></svg><span>تحديث الكل</span></button>
   <button class="tb-btn opt" id="btnMonitor" title="مراقبة التحديث لكل ملف" aria-label="مراقبة التحديث"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.500 2.500M9 2h6"/></svg></button>
+  <button class="trust" id="trustChip" data-f="go|trust" style="display:none"></button>
+  <button class="tb-btn brief" id="btnBrief" title="إحاطة تنفيذية تُبنى آلياً من البيانات الحالية — للعرض على الإدارة أو الحفظ PDF"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.500v15l12-7.500z"/></svg><span class="lbl">الإحاطة</span></button>
   <button class="tb-btn opt" id="btnPresent" title="وضع العرض على شاشة الاجتماعات" aria-label="وضع العرض"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4M10 8.200v3.600l3.200-1.800z"/></svg></button>
   <button class="tb-btn opt" id="btnTheme" title="الوضع الليلي / النهاري" aria-label="تبديل المظهر"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.500A8.500 8.500 0 0 1 9.500 4a7 7 0 1 0 10.500 10.500z"/></svg></button>
   <button class="tb-btn opt" id="btnHelp" title="دليل الاستخدام" aria-label="دليل الاستخدام"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.500 9.300a2.600 2.600 0 0 1 5 .900c0 1.800-2.500 2.200-2.500 4M12 17.300h.01"/></svg></button>
@@ -2011,6 +2085,7 @@ a.kpi{display:flex}
 <main>
   <section class="page" id="pg-hud"></section>
   <section class="page" id="pg-todo"></section>
+  <section class="page" id="pg-trust"></section>
   <section class="page" id="pg-dq"></section>
   <section class="page" id="pg-risk"></section>
   <section class="page" id="pg-exec"></section>
@@ -3020,6 +3095,7 @@ function rebuild(){
   histUpdate();
   render();
   uiAnimate();
+  uiTrust();
 }
 
 /* ==================== الفلاتر العامة ==================== */
@@ -3506,6 +3582,7 @@ const TABS = [
   {k:'todo', t:'المتابعة اليومية', i:'✅'},
   {k:'risk', t:'الالتزام والمخاطر', i:'⏳'},
   {k:'dq', t:'جودة البيانات', i:'🧪'},
+  {k:'trust', t:'الثقة والتحقق', i:'🛡️'},
   {k:'fin', t:'المؤشرات المالية', i:'💰'},
   {k:'ops', t:'البيانات التشغيلية للإدارة', i:'📋'},
   {k:'cons', t:'الإنشاءات', i:'🏗️'},
@@ -3530,13 +3607,13 @@ function render(){
   applyFilters();
   renderFilterBar();
   for(const k in CARD_DATA) delete CARD_DATA[k];
-  const fn = {hud:renderHud, risk:renderRisk, todo:renderTodo, dq:renderDQ, exec:renderExec, ops:renderOps, cons:renderCons, maint:renderMaint, qs:renderQS, map:renderMap, perf:renderPerf, eng:renderEng, reports:renderReports, builder:renderBuilder, charts:renderCharts, help:renderHelp, plan:renderPlan, fin:renderFin}[CUR];
+  const fn = {hud:renderHud, risk:renderRisk, todo:renderTodo, dq:renderDQ, trust:renderTrust, exec:renderExec, ops:renderOps, cons:renderCons, maint:renderMaint, qs:renderQS, map:renderMap, perf:renderPerf, eng:renderEng, reports:renderReports, builder:renderBuilder, charts:renderCharts, help:renderHelp, plan:renderPlan, fin:renderFin}[CUR];
   document.body.classList.toggle('on-plan', CUR === 'plan');
   document.body.classList.toggle('on-hud', CUR === 'hud');
   if(CUR === 'plan'){ fn(); return; }
   if(!ALL.work.length && !ALL.visits.length && CUR !== 'help'){ $('#pg-' + CUR).innerHTML = onboarding(); return; }
-  if(fn) fn();
-  if(CUR === 'qs') qsExtras();
+  if(fn) safeRender(fn, CUR);
+  if(CUR === 'qs') safeRender(qsExtras, 'qs');
 }
 function ctxLine(){
   const parts = [];
@@ -4309,6 +4386,8 @@ function renderHelp(){
       <tr><td>مقارنة مقاولَين أو استشاريَّين</td><td>افتح ملف أحدهما ثم اختر الآخر من قائمة «قارن مع…»</td></tr>
       <tr><td>عرض بيانات اليوم فقط</td><td>اختر «اليوم» من قائمة الفترة في شريط الفلاتر (أو «أمس») — تُعرض الأعمال المُسندة في ذلك اليوم وزيارات السلامة التي تمت فيه، ويبقى الاختيار «اليوم» حتى عند فتح اللوحة في يوم لاحق</td></tr>
       <tr><td>فلاتر إضافية</td><td>زر «فلاتر أكثر» في شريط الفلاتر يُظهر: نوع العمل، المهندس المشرف، فئة المدة، حالة التنفيذ، سبب التأخر، حالة المستندات، حالة مهمة الصيانة، طارئ/مجدول</td></tr>
+      <tr><td>عرض جاهز للإدارة</td><td>زر «الإحاطة» في الشريط العلوي: عرض بملء الشاشة من تسع شرائح تُكتب عناوينها من البيانات الحالية (والفلاتر المطبّقة). الأسهم أو المسافة للتنقل، وزر PDF للحفظ أو الطباعة، و<kbd>Esc</kbd> للخروج</td></tr>
+      <tr><td>التأكد من سلامة الأرقام</td><td>الشارة بجانب البحث تعرض عدد الفحوص الآلية الناجحة، وصفحة «الثقة والتحقق» تفصّل كل فحص ونتيجته ومصادر البيانات ومنهجية الحساب</td></tr>
       <tr><td>توسيع مساحة العرض</td><td>زر «طيّ القائمة» أسفل الشريط الجانبي</td></tr>
     </tbody></table>
     <p>«خط الإنجاز» أعلى الملخص التنفيذي يوضّح كم عملاً وصل إلى كل مرحلة من المراحل الخمس وأين تتوقف الأعمال: العمود الملوّن هو عدد الأعمال الموجودة الآن في المرحلة، والمساحة المظللة هي ما واصل إلى المراحل التالية.</p>
@@ -5157,13 +5236,13 @@ function exportReport(){
 
 
 /* ==================== واجهة الإصدار ٢: الأيقونات، التنقل، لوح الأوامر، وضع العرض، السحب والإفلات ==================== */
-const IC = {"exec": "<rect x=\"3\" y=\"3\" width=\"7\" height=\"9\" rx=\"1.5\"/><rect x=\"14\" y=\"3\" width=\"7\" height=\"5\" rx=\"1.5\"/><rect x=\"14\" y=\"12\" width=\"7\" height=\"9\" rx=\"1.5\"/><rect x=\"3\" y=\"16\" width=\"7\" height=\"5\" rx=\"1.5\"/>", "charts": "<path d=\"M3 21h18\"/><rect x=\"5\" y=\"11\" width=\"3.5\" height=\"7\" rx=\"1\"/><rect x=\"10.25\" y=\"5\" width=\"3.5\" height=\"13\" rx=\"1\"/><rect x=\"15.5\" y=\"8.5\" width=\"3.5\" height=\"9.5\" rx=\"1\"/>", "fin": "<rect x=\"2.5\" y=\"6\" width=\"19\" height=\"12\" rx=\"2.5\"/><circle cx=\"12\" cy=\"12\" r=\"2.6\"/><path d=\"M6.2 12h.01M17.8 12h.01\"/>", "ops": "<rect x=\"3\" y=\"4\" width=\"18\" height=\"16\" rx=\"2.5\"/><path d=\"M3 9.5h18M3 14.75h18M9.5 9.5V20\"/>", "cons": "<path d=\"M3 21h18M6 21V8l6-4.5L18 8v13M10 21v-5h4v5M10 11h.01M14 11h.01\"/>", "maint": "<path d=\"M14.7 6.3a4.2 4.2 0 0 0-5.3 5.3L3.2 17.8a2.1 2.1 0 0 0 3 3l6.2-6.2a4.2 4.2 0 0 0 5.3-5.3l-2.6 2.6-2.5-.5-.5-2.5z\"/>", "qs": "<path d=\"M12 3l8 3v6c0 4.6-3.2 8-8 9-4.8-1-8-4.4-8-9V6z\"/><path d=\"M8.8 12.2l2.2 2.2 4.2-4.4\"/>", "map": "<path d=\"M12 21.5s7-6.2 7-11.7A7 7 0 0 0 5 9.8c0 5.5 7 11.7 7 11.7z\"/><circle cx=\"12\" cy=\"9.8\" r=\"2.6\"/>", "plan": "<circle cx=\"9\" cy=\"8\" r=\"3.3\"/><path d=\"M2.8 20c0-3.4 2.8-6 6.2-6s6.2 2.6 6.2 6M16.2 5a3.3 3.3 0 0 1 0 6M18.2 14.6c1.8.9 3 2.9 3 5.4\"/>", "perf": "<circle cx=\"12\" cy=\"9\" r=\"5.5\"/><path d=\"M8.6 13.4L7 21l5-2.6 5 2.6-1.6-7.6\"/>", "eng": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><circle cx=\"12\" cy=\"12\" r=\"5\"/><circle cx=\"12\" cy=\"12\" r=\"1.2\"/>", "reports": "<path d=\"M14 3H7.5A2.5 2.5 0 0 0 5 5.5v13A2.5 2.5 0 0 0 7.5 21h9a2.5 2.5 0 0 0 2.500-2.500V8z\"/><path d=\"M14 3v5h5M9 13h6M9 17h4\"/>", "builder": "<path d=\"M4 6h9M19 6h1M4 12h3M13 12h7M4 18h11\"/><circle cx=\"16\" cy=\"6\" r=\"2.2\"/><circle cx=\"10\" cy=\"12\" r=\"2.2\"/><circle cx=\"18\" cy=\"18\" r=\"2.2\"/>", "menu": "<path d=\"M4 6.5h16M4 12h16M4 17.5h16\"/>", "search": "<circle cx=\"11\" cy=\"11\" r=\"6.5\"/><path d=\"M20 20l-4.2-4.2\"/>", "folder": "<path d=\"M3 7.5A2.5 2.5 0 0 1 5.5 5h3.6l2.2 2.5h7.2A2.5 2.5 0 0 1 21 10v7.5a2.5 2.5 0 0 1-2.500 2.500h-13A2.5 2.5 0 0 1 3 17.5z\"/>", "refresh": "<path d=\"M20 12a8 8 0 1 1-2.340-5.660M20 4v5h-5\"/>", "clock": "<circle cx=\"12\" cy=\"13\" r=\"8\"/><path d=\"M12 9v4l2.500 2.500M9 2h6\"/>", "play": "<path d=\"M7 4.500v15l12-7.500z\"/>", "pause": "<path d=\"M8 5v14M16 5v14\"/>", "stop": "<path d=\"M6 6l12 12M18 6L6 18\"/>", "x": "<path d=\"M6 6l12 12M18 6L6 18\"/>", "prev": "<path d=\"M9 5l7 7-7 7\"/>", "next": "<path d=\"M15 5l-7 7 7 7\"/>", "moon": "<path d=\"M20 14.500A8.500 8.500 0 0 1 9.500 4a7 7 0 1 0 10.500 10.500z\"/>", "help": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M9.500 9.300a2.600 2.600 0 0 1 5 .900c0 1.800-2.500 2.200-2.500 4M12 17.300h.01\"/>", "filter": "<path d=\"M4 5h16l-6 7.500V19l-4-2v-4.500z\"/>", "max": "<path d=\"M9 4H4v5M15 4h5v5M9 20H4v-5M15 20h5v-5\"/>", "chev": "<path d=\"M13 6l6 6-6 6M6 6l6 6-6 6\"/>", "screen": "<rect x=\"3\" y=\"4\" width=\"18\" height=\"12\" rx=\"2\"/><path d=\"M8 20h8M12 16v4M10 8.200v3.600l3.200-1.800z\"/>", "hud": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 12l5.500-5.500M12 3v2.500M12 7.500a4.500 4.500 0 1 0 4.500 4.500\"/>", "risk": "<path d=\"M12 3.500l9.500 16.500h-19z\"/><path d=\"M12 10v4.500M12 17.500h.01\"/>", "share": "<path d=\"M12 15V4M8 7.500L12 3.500l4 4M5 12v6.500A1.500 1.500 0 0 0 6.500 20h11a1.500 1.500 0 0 0 1.500-1.500V12\"/>", "todo": "<path d=\"M4 6.500l1.800 1.800L9 5M4 12.500l1.800 1.800L9 11M4 18.500l1.800 1.800L9 17M12.500 7H20M12.500 13H20M12.500 19H20\"/>", "dq": "<ellipse cx=\"11\" cy=\"6\" rx=\"7\" ry=\"3\"/><path d=\"M4 6v6c0 1.700 3.100 3 7 3M4 12v6c0 1.700 3.100 3 7 3M18 6v4M14.500 17.500l2.200 2.200 4.300-4.400\"/>", "star": "<path d=\"M12 3.500l2.600 5.400 5.900.800-4.300 4.100 1 5.900L12 16.900 6.800 19.700l1-5.900L3.500 9.700l5.900-.800z\"/>"};
+const IC = {"exec": "<rect x=\"3\" y=\"3\" width=\"7\" height=\"9\" rx=\"1.5\"/><rect x=\"14\" y=\"3\" width=\"7\" height=\"5\" rx=\"1.5\"/><rect x=\"14\" y=\"12\" width=\"7\" height=\"9\" rx=\"1.5\"/><rect x=\"3\" y=\"16\" width=\"7\" height=\"5\" rx=\"1.5\"/>", "charts": "<path d=\"M3 21h18\"/><rect x=\"5\" y=\"11\" width=\"3.5\" height=\"7\" rx=\"1\"/><rect x=\"10.25\" y=\"5\" width=\"3.5\" height=\"13\" rx=\"1\"/><rect x=\"15.5\" y=\"8.5\" width=\"3.5\" height=\"9.5\" rx=\"1\"/>", "fin": "<rect x=\"2.5\" y=\"6\" width=\"19\" height=\"12\" rx=\"2.5\"/><circle cx=\"12\" cy=\"12\" r=\"2.6\"/><path d=\"M6.2 12h.01M17.8 12h.01\"/>", "ops": "<rect x=\"3\" y=\"4\" width=\"18\" height=\"16\" rx=\"2.5\"/><path d=\"M3 9.5h18M3 14.75h18M9.5 9.5V20\"/>", "cons": "<path d=\"M3 21h18M6 21V8l6-4.5L18 8v13M10 21v-5h4v5M10 11h.01M14 11h.01\"/>", "maint": "<path d=\"M14.7 6.3a4.2 4.2 0 0 0-5.3 5.3L3.2 17.8a2.1 2.1 0 0 0 3 3l6.2-6.2a4.2 4.2 0 0 0 5.3-5.3l-2.6 2.6-2.5-.5-.5-2.5z\"/>", "qs": "<path d=\"M12 3l8 3v6c0 4.6-3.2 8-8 9-4.8-1-8-4.4-8-9V6z\"/><path d=\"M8.8 12.2l2.2 2.2 4.2-4.4\"/>", "map": "<path d=\"M12 21.5s7-6.2 7-11.7A7 7 0 0 0 5 9.8c0 5.5 7 11.7 7 11.7z\"/><circle cx=\"12\" cy=\"9.8\" r=\"2.6\"/>", "plan": "<circle cx=\"9\" cy=\"8\" r=\"3.3\"/><path d=\"M2.8 20c0-3.4 2.8-6 6.2-6s6.2 2.6 6.2 6M16.2 5a3.3 3.3 0 0 1 0 6M18.2 14.6c1.8.9 3 2.9 3 5.4\"/>", "perf": "<circle cx=\"12\" cy=\"9\" r=\"5.5\"/><path d=\"M8.6 13.4L7 21l5-2.6 5 2.6-1.6-7.6\"/>", "eng": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><circle cx=\"12\" cy=\"12\" r=\"5\"/><circle cx=\"12\" cy=\"12\" r=\"1.2\"/>", "reports": "<path d=\"M14 3H7.5A2.5 2.5 0 0 0 5 5.5v13A2.5 2.5 0 0 0 7.5 21h9a2.5 2.5 0 0 0 2.500-2.500V8z\"/><path d=\"M14 3v5h5M9 13h6M9 17h4\"/>", "builder": "<path d=\"M4 6h9M19 6h1M4 12h3M13 12h7M4 18h11\"/><circle cx=\"16\" cy=\"6\" r=\"2.2\"/><circle cx=\"10\" cy=\"12\" r=\"2.2\"/><circle cx=\"18\" cy=\"18\" r=\"2.2\"/>", "menu": "<path d=\"M4 6.5h16M4 12h16M4 17.5h16\"/>", "search": "<circle cx=\"11\" cy=\"11\" r=\"6.5\"/><path d=\"M20 20l-4.2-4.2\"/>", "folder": "<path d=\"M3 7.5A2.5 2.5 0 0 1 5.5 5h3.6l2.2 2.5h7.2A2.5 2.5 0 0 1 21 10v7.5a2.5 2.5 0 0 1-2.500 2.500h-13A2.5 2.5 0 0 1 3 17.5z\"/>", "refresh": "<path d=\"M20 12a8 8 0 1 1-2.340-5.660M20 4v5h-5\"/>", "clock": "<circle cx=\"12\" cy=\"13\" r=\"8\"/><path d=\"M12 9v4l2.500 2.500M9 2h6\"/>", "play": "<path d=\"M7 4.500v15l12-7.500z\"/>", "pause": "<path d=\"M8 5v14M16 5v14\"/>", "stop": "<path d=\"M6 6l12 12M18 6L6 18\"/>", "x": "<path d=\"M6 6l12 12M18 6L6 18\"/>", "prev": "<path d=\"M9 5l7 7-7 7\"/>", "next": "<path d=\"M15 5l-7 7 7 7\"/>", "moon": "<path d=\"M20 14.500A8.500 8.500 0 0 1 9.500 4a7 7 0 1 0 10.500 10.500z\"/>", "help": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M9.500 9.300a2.600 2.600 0 0 1 5 .900c0 1.800-2.500 2.200-2.500 4M12 17.300h.01\"/>", "filter": "<path d=\"M4 5h16l-6 7.500V19l-4-2v-4.500z\"/>", "max": "<path d=\"M9 4H4v5M15 4h5v5M9 20H4v-5M15 20h5v-5\"/>", "chev": "<path d=\"M13 6l6 6-6 6M6 6l6 6-6 6\"/>", "screen": "<rect x=\"3\" y=\"4\" width=\"18\" height=\"12\" rx=\"2\"/><path d=\"M8 20h8M12 16v4M10 8.200v3.600l3.200-1.800z\"/>", "hud": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 12l5.500-5.500M12 3v2.500M12 7.500a4.500 4.500 0 1 0 4.500 4.500\"/>", "risk": "<path d=\"M12 3.500l9.500 16.500h-19z\"/><path d=\"M12 10v4.500M12 17.500h.01\"/>", "share": "<path d=\"M12 15V4M8 7.500L12 3.500l4 4M5 12v6.500A1.500 1.500 0 0 0 6.500 20h11a1.500 1.500 0 0 0 1.500-1.500V12\"/>", "todo": "<path d=\"M4 6.500l1.800 1.800L9 5M4 12.500l1.800 1.800L9 11M4 18.500l1.800 1.800L9 17M12.500 7H20M12.500 13H20M12.500 19H20\"/>", "dq": "<ellipse cx=\"11\" cy=\"6\" rx=\"7\" ry=\"3\"/><path d=\"M4 6v6c0 1.700 3.100 3 7 3M4 12v6c0 1.700 3.100 3 7 3M18 6v4M14.500 17.500l2.200 2.200 4.300-4.400\"/>", "star": "<path d=\"M12 3.500l2.600 5.400 5.900.800-4.300 4.100 1 5.900L12 16.900 6.800 19.700l1-5.900L3.500 9.700l5.900-.800z\"/>", "trust": "<path d=\"M12 3l8 3v6c0 4.6-3.2 8-8 9-4.8-1-8-4.4-8-9V6z\"/><path d=\"M8.8 12.2l2.2 2.2 4.2-4.4\"/>"};
 function icon(k){ return `<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">${IC[k] || ''}</svg>`; }
 const NAV_GROUPS = [
   ['نظرة عامة', ['hud','exec','todo','risk','charts','fin','ops']],
   ['القطاعات', ['cons','maint','qs','map']],
   ['الأطراف والكوادر', ['perf','eng','plan']],
-  ['الأدوات', ['reports','builder','dq']]
+  ['الأدوات', ['reports','builder','dq','trust']]
 ];
 const MNAV = [['hud','القيادة'],['exec','الملخص'],['risk','المخاطر'],['qs','السلامة']];
 function tabTitle(k){ const t = TABS.find(t => t.k === k); return t ? t.t : (k === 'help' ? 'دليل الاستخدام' : ''); }
@@ -5352,7 +5431,8 @@ function ckBuild(q){
     ['refresh', 'تحديث كل الملفات الآن', () => $('#btnRefreshAll').click()],
     ['folder', 'اختيار ملفات الإكسل', () => linkMany()],
     ['clock', 'مراقبة التحديث', () => openMonitor()],
-    ['play', 'وضع العرض على الشاشة', () => presStart()],
+    ['play', 'الإحاطة التنفيذية (عرض للإدارة)', () => storyOpen()],
+    ['screen', 'وضع العرض على الشاشة', () => presStart()],
     ['moon', 'تبديل الوضع الليلي / النهاري', () => $('#btnTheme').click()],
     ['star', 'حفظ العرض الحالي (الصفحة + الفلاتر)', () => viewAsk()],
     ['x', 'مسح كل الفلاتر', () => clearFilters()],
@@ -5440,6 +5520,7 @@ function uiInit(){
   $('#scrim').addEventListener('click', () => document.body.classList.remove('side-open'));
   $('#btnCmd').addEventListener('click', ckOpen);
   $('#btnPresent').addEventListener('click', presStart);
+  $('#btnBrief').addEventListener('click', storyOpen);
   $('#pctl').addEventListener('click', e => { const b = e.target.closest('button'); if(!b) return; ({pctlPrev:() => presGo(-1), pctlNext:() => presGo(1), pctlPause:presPause, pctlStop:presStop})[b.id](); });
   $('#pctlSec').value = String(PRES.sec);
   $('#pctlSec').addEventListener('change', e => { PRES.sec = Number(e.target.value); safeLS('pdc_pres_sec', String(PRES.sec)); PRES.t0 = performance.now(); });
@@ -5851,7 +5932,7 @@ function renderTodo(){
   const ns = M.filter(x => x.ds === 'لم يتم البدء' && nn(x.ad)).sort((a, b) => a.ad - b.ad);
   const openI = I.filter(x => !x.empty && x.stt === 'مفتوحة' && nn(x.d) && TODAY - x.d > 7).sort((a, b) => a.d - b.d);
   const und = I.filter(x => x.ty === 'مخالفة' && x.am > 0 && x.ded !== 'تم').sort((a, b) => b.am - a.am);
-  const docs = C.filter(x => x.st === 'A' && /لم تُسل|لم تسل/.test(x.dc || '') && nn(x.ed)).sort((a, b) => a.ed - b.ed);
+  const docs = C.filter(x => x.st === 'A' && /لم تُسل|لم تسل/.test(x.dc || '')).sort((a, b) => (nn(a.ed) ? a.ed : 1e9) - (nn(b.ed) ? b.ed : 1e9));
   const cert = W.filter(x => x.st === 'T').sort((a, b) => (nn(a.ed) ? a.ed : 1e9) - (nn(b.ed) ? b.ed : 1e9));
   const pen = C.filter(x => x.st === 'U' && x.pcs === 'جارية' && x.pd > 0).sort((a, b) => b.pd - a.pd);
   const stops = V.filter(v => v.sw && nn(v.d) && TODAY - v.d <= 14).sort((a, b) => b.d - a.d);
@@ -5884,7 +5965,7 @@ function renderTodo(){
       ${todoCard({id:'td-und', title:'مخالفات لم تُخصم غراماتها', sub:'موقف الخصم «لم يتم» — مرتّبة بالأعلى مبلغاً', tone:'b-warn', all:und, cols:['رقم الزيارة', 'المقاول', 'المبلغ (ر.س)', 'المخالفة'], num:[2], row:x => ({h:[esc(x.vid), esc(x.ct), `<b class="num">${fmt(x.am)}</b>`, `<span title="${esc(x.desc || '')}">${esc((x.vn || x.desc || '').slice(0, 70))}</span>`], v:[x.vid, x.ct, x.am, x.vn || x.desc || '']})})}
     </div>
     <div class="grid">
-      ${todoCard({id:'td-docs', title:'أعمال منفَّذة لم يسلّم المقاول مستنداتها', sub:'سبب مباشر لتأخر الاستلام — مرتّبة بالأقدم تنفيذاً', tone:'b-warn', all:docs, cols:wCols.concat(['منذ التنفيذ (يوم)', 'القيمة']), num:[4, 5], row:x => wRow(x, [[fmt(TODAY - x.ed), TODAY - x.ed], [money(x.v1), Math.round(x.v1 || 0)]])})}
+      ${todoCard({id:'td-docs', title:'أعمال منفَّذة لم يسلّم المقاول مستنداتها', sub:'سبب مباشر لتأخر الاستلام — مرتّبة بالأقدم تنفيذاً', tone:'b-warn', all:docs, cols:wCols.concat(['منذ التنفيذ (يوم)', 'القيمة']), num:[4, 5], row:x => wRow(x, [[nn(x.ed) ? fmt(TODAY - x.ed) : '—', nn(x.ed) ? TODAY - x.ed : ''], [money(x.v1), Math.round(x.v1 || 0)]])})}
       ${todoCard({id:'td-cert', title:'أعمال مستلمة تنتظر شهادة الإنجاز', sub:'مرتّبة بالأقدم تنفيذاً', tone:'b-run', all:cert, cols:wCols.concat(['القطاع', 'القيمة']), num:[5], row:x => wRow(x, [[esc(x.s), x.s], [money(x.v1), Math.round(x.v1 || 0)]])})}
     </div>
     <div class="grid">
@@ -5973,6 +6054,156 @@ document.addEventListener('click', e => {
   if((el = e.target.closest('[data-view]'))){ viewApply(Number(el.dataset.view)); return; }
 }, true);
 document.addEventListener('change', e => { if(e.target.id === 'pfCmp' && e.target.value){ const [dim, a] = e.target.dataset.me.split('|'); compare(dim, a, e.target.value); } });
+
+/* ==================== الإصدار ٨: الثقة والتحقق + الإحاطة التنفيذية + الحماية من الأخطاء ==================== */
+/* فحوص آلية حقيقية على كل البيانات المقروءة (دون فلاتر) — تُعرض نتيجتها كما هي */
+function integrity(){
+  const R = [], add = (g, n, st, d, why) => R.push({g, n, st, d, why});
+  const Wk = ALL.work, c = stageCounts(Wk), slots = SLOTS.map(s => SLOT[s.key]), have = slots.filter(S => S.data);
+  add('الملفات', 'قراءة الملفات السبعة', have.length === SLOTS.length ? 'pass' : (have.length ? 'warn' : 'fail'), fmt(have.length) + ' من ' + SLOTS.length + ' ملفات مقروءة', 'كل مؤشر يعتمد على ملفه؛ الملف غير المقروء يُغيّب أرقامه');
+  const lo = have.map(S => S.meta.loadedAt).filter(Boolean), oldest = lo.length ? Math.min(...lo) : null;
+  add('الملفات', 'حداثة القراءة', oldest === null ? 'fail' : (Date.now() - oldest < 864e5 ? 'pass' : 'warn'), oldest === null ? 'لا توجد قراءة' : 'أقدم قراءة ' + ago(oldest), 'القراءة الأقدم من 24 ساعة قد لا تعكس آخر تعديل');
+  const lm = have.map(S => S.meta.lastModified).filter(Boolean), stale = lm.filter(t => Date.now() - t > 3 * 864e5).length;
+  add('الملفات', 'تحديث ملفات الإكسل نفسها', !lm.length ? 'warn' : (stale ? 'warn' : 'pass'), !lm.length ? 'تاريخ التعديل غير متاح' : (stale ? fmt(stale) + ' ملف لم يُعدَّل منذ أكثر من 3 أيام' : 'كل الملفات عُدّلت خلال آخر 3 أيام'), 'يكشف توقف جدولة تحديث الملفات');
+  const sumSt = STAGE_KEYS.reduce((s, k) => s + c[k], 0);
+  add('اتساق الأرقام', 'مجموع المراحل الخمس = إجمالي الأعمال', sumSt === Wk.length ? 'pass' : 'fail', fmt(sumSt) + ' مقابل ' + fmt(Wk.length), 'يضمن أن كل عمل مصنَّف في مرحلة واحدة فقط');
+  const j = Wk.filter(x => x.r === 'جدة').length, m = Wk.filter(x => x.r === 'مكة').length;
+  add('اتساق الأرقام', 'جدة + مكة = الإجمالي', j + m === Wk.length ? 'pass' : 'fail', fmt(j) + ' + ' + fmt(m) + ' = ' + fmt(j + m), 'لا عمل بلا منطقة ولا عمل محسوب مرتين');
+  const co = Wk.filter(isCons).length, ma = Wk.filter(x => x.s === 'صيانة').length;
+  add('اتساق الأرقام', 'إنشاءات + صيانة = الإجمالي', co + ma === Wk.length ? 'pass' : 'fail', fmt(co) + ' + ' + fmt(ma) + ' = ' + fmt(co + ma), 'لا عمل بلا قطاع');
+  const ids = new Set(Wk.map(x => x.id));
+  const seen = new Set(), dup = []; Wk.forEach(x => { if(seen.has(x.id)) dup.push(x); else seen.add(x.id); });
+  add('اتساق الأرقام', 'لا سجلات مكرّرة في الملفات', !dup.length ? 'pass' : (dup.length > Wk.length * .001 ? 'fail' : 'warn'), dup.length ? fmt(dup.length) + ' صفاً مكرّراً: ' + dup.slice(0, 4).map(x => x.no + ' (' + x.r + ' ' + x.s + ')').join('، ') + (dup.length > 4 ? '…' : '') : 'لا تكرار', 'الصف المكرّر في الإكسل يُحسب مرتين — يُحذف من الملف المصدر');
+  const bad = Wk.filter(x => STAGE_KEYS.indexOf(x.st) < 0).length;
+  add('اتساق الأرقام', 'كل عمل له مرحلة معرَّفة', bad ? 'fail' : 'pass', fmt(bad) + ' عملاً بمرحلة غير معروفة', 'رمز إجراء جديد لم يُضف إلى قاموس المراحل يظهر هنا');
+  add('اتساق الأرقام', 'الملغاة مستبعدة من المؤشرات', 'pass', fmt(ALL.cancelled.length) + ' سجلاً ملغى خارج الحساب', 'الملغى لا يدخل في أي نسبة أو مجموع');
+  const fut = Wk.filter(x => nn(x.ad) && x.ad > TODAY + 1).length, inv = Wk.filter(x => nn(x.ed) && nn(x.ad) && x.ed < x.ad).length, neg = Wk.filter(x => x.v1 < 0 || x.v2 < 0).length;
+  add('منطقية القيم', 'لا تواريخ إسناد مستقبلية', fut ? 'warn' : 'pass', fmt(fut) + ' سجلاً', 'تاريخ في المستقبل خطأ إدخال غالباً');
+  add('منطقية القيم', 'التنفيذ لا يسبق الإسناد', inv ? 'warn' : 'pass', fmt(inv) + ' سجلاً تاريخ تنفيذه قبل إسناده', 'تُستبعد هذه السجلات من حساب الالتزام بالمدة');
+  add('منطقية القيم', 'لا قيم مالية سالبة', neg ? 'warn' : 'pass', fmt(neg) + ' سجلاً', 'القيمة السالبة تُنقص المجاميع');
+  const vids = new Set(ALL.visits.map(v => v.id)), items = ALL.items.filter(x => !x.empty), orphan = items.filter(x => !vids.has(x.vid)).length;
+  add('السلامة والجودة', 'كل بند مرتبط بزيارة موجودة', orphan ? 'warn' : 'pass', fmt(orphan) + ' بنداً بلا زيارة مطابقة من ' + fmt(items.length), 'البند اليتيم لا يظهر في تحليل زيارته');
+  const fV = sumBy(ALL.visits, v => v.f || 0), fI = sumBy(items.filter(x => x.ty === 'مخالفة'), x => x.am || 0);
+  add('السلامة والجودة', 'غرامات ورقة الزيارات = غرامات ورقة المخالفات', fV === fI ? 'pass' : 'warn', fmt(fV) + ' مقابل ' + fmt(fI) + (fV === fI ? '' : ' — الفرق ' + fmt(Math.abs(fV - fI)) + ' ر.س'), 'الفرق يعني أن إحدى الورقتين لم تُحدَّث مع الأخرى');
+  const vcV = sumBy(ALL.visits, v => v.vc || 0), vcI = items.filter(x => x.ty === 'مخالفة').length;
+  add('السلامة والجودة', 'عدد المخالفات متطابق بين الورقتين', vcV === vcI ? 'pass' : 'warn', fmt(vcV) + ' في الزيارات مقابل ' + fmt(vcI) + ' في البنود', 'يكشف مخالفة سُجّلت في ورقة دون الأخرى');
+  const prev = HIST.filter(s => s.d < TODAY).pop();
+  add('الاستمرارية', 'عدد السجلات لم ينخفض عن آخر لقطة', !prev ? 'pass' : (Wk.length >= prev.n * .98 ? 'pass' : 'warn'), !prev ? 'لا لقطة سابقة بعد — تبدأ المقارنة من الغد' : fmt(prev.n) + ' في ' + dayAr(prev.d) + ' ← ' + fmt(Wk.length) + ' اليوم', 'انخفاض مفاجئ يعني ملفاً ناقصاً أو صفوفاً محذوفة');
+  add('الاستمرارية', 'ملف دائرة التخطيط مقروء', ALL.plan ? 'pass' : 'warn', ALL.plan ? 'مقروء' : 'غير مقروء — صفحة دائرة التخطيط فارغة', 'صفحة التخطيط والمؤشرات المالية تعتمد عليه');
+  return R;
+}
+function trustScore(){ const R = integrity(); return {R, pass:R.filter(r => r.st === 'pass').length, warn:R.filter(r => r.st === 'warn').length, fail:R.filter(r => r.st === 'fail').length}; }
+function uiTrust(){
+  const el = $('#trustChip'); if(!el) return;
+  if(!ALL.work.length){ el.style.display = 'none'; return; }
+  const t = trustScore(); el.style.display = '';
+  el.className = 'trust ' + (t.fail ? 'bad' : t.warn ? 'mid' : 'ok');
+  el.innerHTML = `${icon('qs')}<span><b class="num">${t.pass}</b> / <span class="num">${t.R.length}</span> فحصاً</span>`;
+  el.title = t.fail ? 'فحوص فاشلة — افتح صفحة الثقة والتحقق' : t.warn ? t.warn + ' ملاحظات على البيانات — افتح صفحة الثقة والتحقق' : 'كل الفحوص الآلية ناجحة';
+}
+const METHOD = [
+  ['المراحل الخمس', 'تُشتق من «مرحلة السلّم» لأوامر الإنشاءات ومن «حالة الإنجاز» وأمر العمل لمهام الصيانة: تحت التنفيذ ← تم التنفيذ ← مستلمة من إدارة الكهرباء ← أصدرت شهادة الإنجاز ← مقفلة. كل عمل في مرحلة واحدة.'],
+  ['الإنجاز التنفيذي', 'نسبة كل ما تجاوز «تحت التنفيذ» إلى الإجمالي.'],
+  ['الفترة', 'تُطبَّق على تاريخ الإسناد للأعمال وعلى تاريخ الزيارة للسلامة والجودة.'],
+  ['الالتزام بالمدة النظامية', 'لأوامر الإنشاءات فقط: ما تحت التنفيذ يُقاس بعمره اليوم مقابل «المدة النظامية»، والمنفَّذ يُقاس بالمدة بين تاريخ الإسناد وتاريخ التنفيذ. السجلات بلا تاريخ تنفيذ أو بتاريخ يسبق الإسناد تُستبعد.'],
+  ['تقدير تصفية التراكم', 'متوسط الإسناد والإنجاز الأسبوعي لآخر 4 أسابيع مكتملة؛ تقدير خطي وليس التزاماً.'],
+  ['الإشارة غير الاعتيادية', 'مقاول لديه 50 عملاً فأكثر ونسبة تأخره أعلى من متوسط المقاولين بانحرافين معياريين.'],
+  ['اكتمال البيانات', 'نسبة الخانات السليمة من (عدد السجلات × عدد الفحوص) لكل ملف.'],
+  ['الملغاة', 'تُستبعد من كل المؤشرات وتظهر عدداً فقط.']
+];
+function renderTrust(){
+  const pg = $('#pg-trust'), t = trustScore(), tot = t.R.length;
+  const stUI = {pass:['b-ok', '✓ ناجح'], warn:['b-warn', '! ملاحظة'], fail:['b-err', '✗ فشل']};
+  const groups = Array.from(new Set(t.R.map(r => r.g)));
+  const rows = groups.map(g => `<tr class="tg"><td colspan="4">${esc(g)}</td></tr>` + t.R.filter(r => r.g === g).map(r => `<tr><td><b>${esc(r.n)}</b></td><td><span class="badge ${stUI[r.st][0]}">${stUI[r.st][1]}</span></td><td class="num">${esc(r.d)}</td><td style="color:var(--text-2)">${esc(r.why)}</td></tr>`).join('')).join('');
+  const src = SLOTS.map(s => { const S = SLOT[s.key], su = STATUS_UI[S.status] || STATUS_UI.unlinked, mt = S.meta || {}; return `<tr><td><b>${esc(s.label)}</b><br><small style="color:var(--muted)">${esc(s.region)}</small></td><td><span class="badge ${su[0]}">${su[1]}</span></td><td class="n num">${S.data ? fmt(mt.count || 0) : '—'}</td><td class="num">${mt.lastModified ? new Date(mt.lastModified).toLocaleString('en-GB', {dateStyle:'short', timeStyle:'short'}) : '—'}</td><td>${mt.loadedAt ? ago(mt.loadedAt) : '—'}</td><td class="n num">${mt.totalMs ? (mt.totalMs / 1000).toFixed(1) + ' ث' : '—'}</td></tr>`; }).join('');
+  const L = 2 * Math.PI * 52, p = tot ? t.pass / tot : 0, col = t.fail ? 'var(--critical)' : t.warn ? 'var(--warning)' : 'var(--good)';
+  pg.innerHTML = head('الثقة والتحقق', `<span class="badge b-run">فحوص آلية تُعاد عند كل قراءة للملفات — على كل البيانات دون فلاتر</span><button class="btn sm" data-f="go|trust">إعادة التحقق الآن</button>`) +
+    `<div class="grid">
+      <div class="card c4 trust-card"><svg viewBox="0 0 130 130"><circle cx="65" cy="65" r="52" fill="none" stroke="var(--surface-3)" stroke-width="11"/><circle class="hg" cx="65" cy="65" r="52" fill="none" stroke="${col}" stroke-width="11" stroke-linecap="round" stroke-dasharray="${L * p} ${L}" transform="rotate(-90 65 65)"/><text x="65" y="63" text-anchor="middle" class="tn">${t.pass}/${tot}</text><text x="65" y="80" text-anchor="middle" class="tl">فحصاً ناجحاً</text></svg>
+        <div><h3>${t.fail ? 'توجد فحوص فاشلة تحتاج معالجة' : t.warn ? 'حسابات اللوحة متّسقة، مع ' + t.warn + ' ملاحظات على ملفات الإكسل' : 'كل الفحوص ناجحة'}</h3>
+        <p>${fmt(ALL.work.length)} عملاً • ${fmt(ALL.visits.length)} زيارة • ${fmt(ALL.items.length)} بنداً — من ${SLOTS.filter(s => SLOT[s.key].data).length} ملفات</p>
+        <p class="tw"><span class="badge b-ok">${t.pass} ناجح</span> <span class="badge b-warn">${t.warn} ملاحظة</span> <span class="badge b-err">${t.fail} فشل</span></p>
+        <p class="note" style="margin:6px 0 0">«ملاحظة» تعني أن اللوحة حسبت صحيحاً لكن في الملفات المصدرية ما يستحق المراجعة.</p></div></div>
+      ${card({cls:'c8', title:'مصادر البيانات', sub:'الملف الذي قُرئ منه كل جزء، ومتى عُدّل ومتى قُرئ', body:`<div class="tbl-wrap"><table class="t"><thead><tr><th>الملف</th><th>الحالة</th><th class="n">الصفوف المقروءة</th><th>آخر تعديل للملف</th><th>آخر قراءة</th><th class="n">زمن القراءة</th></tr></thead><tbody>${src}</tbody></table></div>`})}
+    </div>
+    <div class="grid">${card({cls:'c12', title:'نتائج الفحوص الآلية', sub:'كل فحص ونتيجته الفعلية ولماذا يهم', body:`<div class="tbl-wrap" style="max-height:none"><table class="t trust-t"><thead><tr><th>الفحص</th><th>النتيجة</th><th>التفصيل</th><th>لماذا يهم؟</th></tr></thead><tbody>${rows}</tbody></table></div>`, data:{cols:['المجموعة', 'الفحص', 'النتيجة', 'التفصيل', 'لماذا يهم'], rows:t.R.map(r => [r.g, r.n, stUI[r.st][1], r.d, r.why])}})}</div>
+    <div class="grid">${card({cls:'c12', title:'منهجية الحساب', sub:'كيف تُحسب المؤشرات الرئيسية — لتوحيد الفهم عند عرض الأرقام', body:`<dl class="method">${METHOD.map(m => `<div><dt>${m[0]}</dt><dd>${m[1]}</dd></div>`).join('')}</dl>`})}</div>`;
+}
+
+/* ---------- الإحاطة التنفيذية: عرض قصصي يُبنى آلياً من البيانات الحالية ---------- */
+const STORY = {i:0, n:0, el:null};
+function storySlides(){
+  const c = stageCounts(W), C = W.filter(isCons), done = c.A + c.T + c.S + c.C, late = W.filter(x => x.late).length;
+  const tile = (l, v, s, col) => `<div class="st-t" style="--pc:${col || 'var(--live)'}"><span>${l}</span><b class="num">${v}</b>${s ? `<em>${s}</em>` : ''}</div>`;
+  const tiles = a => `<div class="st-ts">${a.join('')}</div>`;
+  const strip = `<div class="sstrip" style="height:16px;margin:0 0 18px">${STAGE_KEYS.map(k => c[k] ? `<i style="flex:${c[k]} 1 0;background:${STAGE_COLOR[k]}"></i>` : '').join('')}</div>`;
+  const stuck = ['U','A','T','S'].reduce((b, k) => c[k] > c[b] ? k : b, 'U');
+  const sla = C.map(x => ({x, i:slaInfo(x)})).filter(r => r.i), so = sla.filter(r => r.i.open), sov = so.filter(r => r.i.over), sd = sla.filter(r => !r.i.open), sok = sd.filter(r => !r.i.over);
+  const docs = C.filter(x => x.st === 'A' && /لم تُسل|لم تسل/.test(x.dc || '')).length;
+  const viol = I.filter(x => x.ty === 'مخالفة'), stops = V.filter(v => v.sw).length, openI = I.filter(x => !x.empty && x.stt === 'مفتوحة'), und = viol.filter(x => x.am > 0 && x.ded !== 'تم');
+  const val = sumBy(W, x => x.v1), valOpen = sumBy(W.filter(x => x.st === 'U' || x.st === 'A'), x => x.v1), valOver = sumBy(sov, r => r.x.v1 || 0);
+  const fc = forecastText(flowForecast(W)), t = trustScore();
+  const weeks = 12, wEnd = Math.floor(TODAY / 7), wStart = wEnd - weeks, asg = new Array(weeks).fill(0), fin = new Array(weeks).fill(0);
+  W.forEach(x => { if(nn(x.ad)){ const w = Math.floor(x.ad / 7) - wStart; if(w >= 0 && w < weeks) asg[w]++; } if(x.st !== 'U' && nn(x.ed)){ const w = Math.floor(x.ed / 7) - wStart; if(w >= 0 && w < weeks) fin[w]++; } });
+  const soon = C.filter(x => x.st === 'U' && x.sla && nn(x.age) && x.sla - x.age >= 0 && x.sla - x.age <= 7).length, openOld = openI.filter(x => nn(x.d) && TODAY - x.d > 7).length;
+  const stuckH = {U:`ما زال <b>${fmt(c.U)}</b> عملاً تحت التنفيذ`, A:`<b>${fmt(c.A)}</b> عملاً منفَّذاً لم تستلمه إدارة الكهرباء بعد`, T:`<b>${fmt(c.T)}</b> عملاً مستلماً ينتظر شهادة الإنجاز`, S:`<b>${fmt(c.S)}</b> عملاً صدرت شهادته وينتظر الإقفال`}[stuck];
+  const wm = new Map(); sov.forEach(r => wm.set(r.x.ct, (wm.get(r.x.ct) || 0) + 1));
+  const logo = ($('#logoSrc') || {}).src || '';
+  const S = [];
+  S.push({k:'', cover:1, h:'إحاطة مشاريع التوزيع', b:`<p class="st-date">${new Date().toLocaleDateString('ar-SA-u-ca-gregory-nu-latn', {weekday:'long', day:'numeric', month:'long', year:'numeric'})}</p><p class="st-scope">${esc(ctxLine())}</p>
+    <div class="st-stamp">${icon('qs')}<span><b class="num">${t.pass}</b> من <b class="num">${t.R.length}</b> فحصاً آلياً ناجحاً • <b class="num">${fmt(W.length)}</b> عملاً و<b class="num">${fmt(V.length)}</b> زيارة ضمن العرض</span></div>${logo ? `<img class="st-logo" src="${logo}" alt="">` : ''}`});
+  if(c.n) S.push({k:'أين نقف؟', h:`<b>${fpct(done, c.n)}</b> من الأعمال تجاوزت مرحلة التنفيذ، و<b>${fpct(c.C, c.n)}</b> منها أُقفلت`, b:strip + tiles(STAGE_KEYS.map(k => tile(STAGE_NAME[k], fmt(c[k]), fpct(c[k], c.n), STAGE_COLOR[k])))});
+  if(c.n) S.push({k:'أين الاختناق؟', h:`أكبر تجمّع: ${stuckH}`, b:`<div class="st-2"><div>${tiles([tile('متأخرة', fmt(late), fpct(late, c.n) + ' من الإجمالي', '#ff5252'), tile('منفَّذة بلا مستندات مسلَّمة', fmt(docs), 'المقاول لم يسلّمها بعد', '#ffb82e')])}</div><div><h5>أكثر المكاتب تجمّعاً في «${STAGE_NAME[stuck]}»</h5>${hbars(mapToBars(countBy(W.filter(x => x.st === stuck), x => x.u), 6, {color:STAGE_COLOR[stuck]}), {})}</div></div>`});
+  if(so.length || sd.length) S.push({k:'الالتزام بالمدد النظامية', h:`<b>${fpct(sov.length, so.length)}</b> من أوامر الإنشاءات تحت التنفيذ تجاوزت مدتها، و<b>${fpct(sok.length, sd.length)}</b> من المنفَّذ أُنجز ضمن المدة`, b:`<div class="st-2"><div>${tiles([tile('تحت التنفيذ ومتجاوز', fmt(sov.length), 'من ' + fmt(so.length), '#ff5252'), tile('ستتجاوز خلال أسبوع', fmt(soon), 'يمكن تداركها الآن', '#ffb82e'), tile('قيمة المتجاوز', money(valOver), 'ر.س', '#a78bfa')])}</div><div><h5>أكثر المقاولين أوامر متجاوزة</h5>${hbars(sortedEntries(wm, 6).map(([k, v]) => ({label:k, value:v, color:'#ff5252'})), {noPct:true})}</div></div>`});
+  if(V.length) S.push({k:'السلامة والجودة', h:`<b>${fmt(V.length)}</b> زيارة رصدت <b>${fmt(viol.length)}</b> مخالفة و<b>${fmt(stops)}</b> إيقاف عمل`, b:`<div class="st-2"><div>${tiles([tile('الغرامات', fmt(sumBy(viol, x => x.am)), 'ر.س', '#ff8c5a'), tile('لم تُخصم بعد', fmt(sumBy(und, x => x.am)), fmt(und.length) + ' مخالفة', '#ff5252'), tile('بنود مفتوحة', fmt(openI.length), fmt(openOld) + ' منذ أكثر من أسبوع', '#ffb82e')])}</div><div><h5>أكثر المخالفات تكراراً</h5>${hbars(mapToBars(countBy(viol, x => x.vn || x.desc || 'غير محدد'), 6, {color:'#ff8c5a'}), {})}</div></div>`});
+  if(val) S.push({k:'القيمة المالية', h:`قيمة الأعمال <b>${money(val)}</b> ر.س، منها <b>${fpct(valOpen, val)}</b> في أعمال لم تُستلم بعد`, b:`<h5>القيمة حسب المرحلة (ر.س)</h5>${hbars(STAGE_KEYS.map(k => ({label:STAGE_NAME[k], value:sumBy(W.filter(x => x.st === k), x => x.v1), color:STAGE_COLOR[k]})), {fmt:money})}`});
+  if(c.n) S.push({k:'الاتجاه', h:fc ? fc + '.' : 'الإسناد والإنجاز خلال آخر 12 أسبوعاً', b:lines([{name:'مُسندة', color:'#4a96f0', values:asg}, {name:'منجزة', color:'#35d07f', values:fin}], Array.from({length:weeks}, (_, i) => weekLabel(wStart + i + 1)), {area:true, h:250, tipPrefix:'أسبوع ينتهي '}) + (fc ? '<p class="st-note">تقدير خطي من متوسط آخر 4 أسابيع مكتملة، وليس التزاماً.</p>' : '')});
+  const acts = [[soon, 'أمراً ستتجاوز مدتها النظامية خلال أسبوع', 'يمكن تداركها قبل وقوع التجاوز'], [docs, 'عملاً منفَّذاً لم تُسلَّم مستنداته', 'يعطّل الاستلام من إدارة الكهرباء'], [openOld, 'بند سلامة وجودة مفتوحاً منذ أكثر من أسبوع', 'يحتاج إغلاقاً أو تصعيداً'], [und.length, 'مخالفة لم تُخصم غرامتها', fmt(sumBy(und, x => x.am)) + ' ر.س']].filter(a => a[0]);
+  if(acts.length) S.push({k:'ما يحتاج قراراً', h:`${acts.length === 1 ? 'أمر واحد يحتاج' : acts.length + ' أمور تحتاج'} متابعة هذا الأسبوع`, b:`<ol class="st-acts">${acts.map(a => `<li><b class="num">${fmt(a[0])}</b><div><span>${a[1]}</span><em>${a[2]}</em></div></li>`).join('')}</ol>`});
+  const notes = t.R.filter(r => r.st !== 'pass');
+  S.push({k:'ثقة البيانات', h:`<b>${t.pass}</b> من <b>${t.R.length}</b> فحصاً آلياً ناجحاً على البيانات المعروضة`, b:notes.length ? `<h5>ملاحظات على البيانات المصدرية</h5><ul class="st-notes">${notes.map(r => `<li><b>${esc(r.n)}</b> — ${esc(r.d)}</li>`).join('')}</ul>` : '<p class="st-note">لا ملاحظات: الملفات كاملة ومتّسقة.</p>'});
+  return S;
+}
+function storyOpen(){
+  if(!ALL.work.length){ toast('اربط ملفات الإكسل أولاً', 'warn'); return; }
+  storyClose();
+  const S = storySlides(); STORY.n = S.length; STORY.i = 0;
+  const el = document.createElement('div'); el.className = 'story'; STORY.el = el;
+  el.innerHTML = S.map((s, i) => `<section class="sl ${s.cover ? 'cover' : ''}" data-i="${i}">${s.k ? `<div class="sl-k"><span>${s.k}</span><em class="num">${i + 1} / ${S.length}</em></div>` : ''}<h2>${s.h}</h2><div class="sl-b">${s.b}</div></section>`).join('') +
+    `<div class="story-ctl"><button data-st="prev" title="السابق">${icon('prev')}</button><div class="story-dots">${S.map((_, i) => `<i data-st="go" data-i="${i}"></i>`).join('')}</div><button data-st="next" title="التالي">${icon('next')}</button><span></span><button data-st="print" title="طباعة أو حفظ PDF">${icon('reports')}<b>PDF</b></button><button data-st="close" title="إغلاق">${icon('x')}</button></div>`;
+  document.body.appendChild(el); document.body.classList.add('story-open');
+  el.addEventListener('click', e => { const b = e.target.closest('[data-st]'); if(!b) return; const a = b.dataset.st; if(a === 'prev') storyGo(STORY.i - 1); else if(a === 'next') storyGo(STORY.i + 1); else if(a === 'go') storyGo(Number(b.dataset.i)); else if(a === 'print') window.print(); else storyClose(); });
+  try{ const r = el.requestFullscreen && el.requestFullscreen(); if(r && r.catch) r.catch(() => {}); }catch(e){}
+  storyGo(0);
+}
+function storyGo(i){
+  if(!STORY.el) return; STORY.i = Math.max(0, Math.min(STORY.n - 1, i));
+  $$('.sl', STORY.el).forEach(s => s.classList.toggle('on', Number(s.dataset.i) === STORY.i));
+  $$('.story-dots i', STORY.el).forEach((d, k) => d.classList.toggle('on', k === STORY.i));
+}
+function storyClose(){ if(!STORY.el) return; try{ if(document.fullscreenElement) document.exitFullscreen(); }catch(e){} STORY.el.remove(); STORY.el = null; document.body.classList.remove('story-open'); }
+document.addEventListener('keydown', e => {
+  if(!STORY.el) return;
+  if(e.key === 'ArrowLeft' || e.key === ' ' || e.key === 'PageDown' || e.key === 'Enter'){ storyGo(STORY.i + 1); e.preventDefault(); e.stopPropagation(); }
+  else if(e.key === 'ArrowRight' || e.key === 'PageUp'){ storyGo(STORY.i - 1); e.preventDefault(); e.stopPropagation(); }
+  else if(e.key === 'Escape'){ storyClose(); e.stopPropagation(); }
+}, true);
+document.addEventListener('fullscreenchange', () => { if(!document.fullscreenElement && STORY.el && STORY.fs) storyClose(); STORY.fs = !!document.fullscreenElement; });
+
+/* ---------- الحماية من الأخطاء: لا صفحة بيضاء أمام أحد ---------- */
+const ERRS = [];
+function pageError(e, where){
+  ERRS.push({t:Date.now(), where, msg:String(e && e.message || e)});
+  try{ log('خطأ في العرض (' + where + '): ' + String(e && e.message || e), null, 'err'); }catch(x){}
+  return `<div class="card c12 errbox"><h3>تعذّر عرض هذا الجزء</h3><p>بقية اللوحة تعمل. جرّب «تحديث الكل»، وإن تكرر فالتفاصيل مسجّلة في نافذة مراقبة التحديث.</p><code dir="ltr">${esc(String(e && e.message || e)).slice(0, 220)}</code><div style="margin-top:10px"><button class="btn" data-f="go|${CUR}">إعادة المحاولة</button> <button class="btn" data-f="go|__mon">فتح المراقبة</button></div></div>`;
+}
+function safeRender(fn, key){
+  try{ fn(); }
+  catch(e){ console.error(e); const pg = $('#pg-' + key); if(pg) pg.innerHTML = head(tabTitle(key)) + `<div class="grid">${pageError(e, tabTitle(key))}</div>`; }
+}
+window.addEventListener('error', e => { if(e && e.message && !/ResizeObserver/.test(e.message)){ ERRS.push({t:Date.now(), where:'عام', msg:e.message}); try{ log('خطأ غير متوقع: ' + e.message, null, 'err'); }catch(x){} } });
+window.addEventListener('unhandledrejection', e => { const m = e && e.reason && (e.reason.message || String(e.reason)); if(m && !/AbortError|The user aborted/.test(m)){ ERRS.push({t:Date.now(), where:'عام', msg:m}); try{ log('خطأ غير متوقع: ' + m, null, 'err'); }catch(x){} } });
 
 /* ==================== التشغيل ==================== */
 (async function init(){
