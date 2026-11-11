@@ -9,7 +9,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="icon-192.png">
 <script>
-var APP_VER = "202611120125";
+var APP_VER = "202611120140";
 if("serviceWorker" in navigator){ navigator.serviceWorker.register("sw.js", {updateViaCache:"none"}).then(function(r){ r.update(); }).catch(function(){}); }
 fetch("version.txt?t=" + Date.now(), {cache:"no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
   v = (v || "").trim();
@@ -1966,29 +1966,15 @@ table.trust-t tr.tg td{background:var(--surface-3); font-weight:600; font-size:1
   .story-ctl{display:none !important}
 }
 
-/* ============ حركة الدخول (عند تبديل الصفحة فقط) ============ */
+/* ============ حركة الدخول: خفيفة عمداً حتى تبقى اللوحة سلسة على الأجهزة المتوسطة ============ */
 @media (prefers-reduced-motion: no-preference){
-  body.anim .page.active > *{animation:rise .5s var(--ease) both}
-  body.anim .page.active > *:nth-child(2){animation-delay:.04s}
-  body.anim .page.active > *:nth-child(3){animation-delay:.08s}
-  body.anim .page.active > *:nth-child(4){animation-delay:.12s}
-  body.anim .page.active > *:nth-child(n+5){animation-delay:.16s}
-  @keyframes rise{from{opacity:0; transform:translateY(10px)}}
-  body.anim .hb-f, body.anim .sb-t, body.anim .pctb i, body.anim .vs-side .bar{animation:growx .7s var(--ease) both; transform-origin:right center}
-  body.anim .vs-side.m .bar{transform-origin:right center} body.anim .vs-side.j .bar{transform-origin:left center}
-  @keyframes growx{from{transform:scaleX(0)}}
-  body.anim .svgc .ln{stroke-dasharray:1; stroke-dashoffset:1; animation:draw 1s .15s var(--ease) forwards}
-  @keyframes draw{to{stroke-dashoffset:0}}
-  body.anim .svgc .ar, body.anim .svgc .pt{animation:fadein .6s .7s both}
-  body.anim .svgc .col{animation:growy .6s var(--ease) both; transform-box:fill-box; transform-origin:center bottom}
-  @keyframes growy{from{transform:scaleY(0)}}
-  body.anim .donut svg, body.anim .ring svg{animation:spinin .7s var(--ease) both}
-  @keyframes spinin{from{opacity:0; transform:rotate(-70deg) scale(.9)}}
-  body.anim .sstrip{animation:wipe 1s var(--ease) both}
-  body.anim .hstep{animation:rise .5s var(--ease) both} body.anim .hstep:nth-child(2){animation-delay:.07s} body.anim .hstep:nth-child(3){animation-delay:.14s} body.anim .hstep:nth-child(4){animation-delay:.21s} body.anim .hstep:nth-child(5){animation-delay:.28s}
-  @keyframes wipe{from{clip-path:inset(0 0 0 100%)} to{clip-path:inset(0 0 0 0)}}
+  body.anim .page.active{animation:pgin .22s ease-out}
+  @keyframes pgin{from{opacity:.35}}
+  @keyframes rise{from{opacity:0; transform:translateY(8px)}}
+  @keyframes hgin{from{stroke-dasharray:0 999}}
+  body.anim .hg{animation:hgin 1s var(--ease)}
 }
-@media (prefers-reduced-motion: reduce){ .flow .cur, .loadbar i{animation:none} }
+@media (prefers-reduced-motion: reduce){ .loadbar i{animation:none} }
 
 /* ============ الجوال واللوحي ============ */
 .mnav{display:none}
@@ -2054,6 +2040,23 @@ table.trust-t tr.tg td{background:var(--surface-3); font-weight:600; font-size:1
   .hero{-webkit-print-color-adjust:exact; print-color-adjust:exact}
   body{font-size:12px}
 }
+
+/* ============ الأداء: بلا تمويه خلفي ولا ظلال ثقيلة ولا حركات دائمة ============ */
+.topbar, .fbar, .mnav, .hp, #tip, .modal-bg, .ck-bg, .dropz, .max-scrim, .hero-share, .scrim, .toast{backdrop-filter:none !important; -webkit-backdrop-filter:none !important}
+.topbar, .fbar{background:var(--bg)}
+.mnav{background:var(--surface)}
+.modal-bg, .ck-bg, .max-scrim{background:rgba(5,14,22,.72)}
+.card::after, .kpi::after, .sstrip::after{display:none !important}
+body::before{position:absolute; height:620px}
+:root{--shadow:0 1px 2px rgba(15,28,43,.07)}
+:root[data-theme="dark"]{--shadow:0 1px 2px rgba(0,0,0,.4)}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){--shadow:0 1px 2px rgba(0,0,0,.4)} }
+.hero{box-shadow:none}
+.hp{background:linear-gradient(180deg, #102a3e, #0a1a28)}
+.hp h4::before{animation:none}
+.kpi, .card, .hstep, .alert{transition:none}
+.arc{transition:opacity .15s}
+.arc:hover{transform:none}
 
 </style>
 </head>
@@ -3077,7 +3080,9 @@ function rebuild(){
     const fix = x => { const v = x[f]; if(!v) return; const k = NAME_ALIASES[normKey(v)] ? normKey(NAME_ALIASES[normKey(v)]) : normKey(v); x[f] = canon.get(k) || v; };
     work.forEach(fix); visits.forEach(fix); items.forEach(fix);
   });
+  const _ids = new Set();
   for(const x of work){
+    if(_ids.has(x.id)) x.id = x.id + '~' + _ids.size; _ids.add(x.id);   /* صف مكرّر في الملف: معرّف مستقل حتى تُفتح تفاصيله */
     x.age = (x.ad !== null && x.ad !== undefined) ? TODAY - x.ad : null;
     if(x.s === 'صيانة'){
       x.late = (x.ds === 'لم يتم البدء' && x.age !== null && x.age > 5) ? 1 : 0;
@@ -3092,6 +3097,7 @@ function rebuild(){
   ALL.visits = visits; ALL.items = items; ALL.built = true;
   const days = work.map(x => x.ad).filter(d => d !== null && d !== undefined);
   ALL.minDay = days.length ? Math.min(...days.slice(0, 50000)) : TODAY - 180;
+  DATA_VER++;
   presetSync();
   histUpdate();
   render();
@@ -3235,7 +3241,7 @@ function isSel(dim, val){ return dim && F[dim] && F[dim].length === 1 && F[dim][
 /* بطاقة رسم مع زر عرض الجدول وتصدير البيانات */
 function card(o){
   const id = 'cd' + (++CARD_SEQ);
-  if(o.data) CARD_DATA[id] = {title:o.title, cols:o.data.cols, rows:o.data.rows};
+  if(o.data) CARD_DATA[id] = {title:o.title, cols:o.data.cols, rows:o.data.rows, pg:CUR};
   return `<div class="card ${o.cls || 'c6'}" id="${id}">
     <div class="card-h"><div class="t"><h3>${esc(o.title)}</h3>${o.sub ? `<div class="sub">${o.sub}</div>` : ''}</div>
     ${o.data ? `<button class="ibtn" data-tbl="${id}" title="عرض البيانات كجدول">جدول</button><button class="ibtn" data-xls="${id}" title="تصدير إلى إكسل">⤓ إكسل</button>` : ''}<button class="ibtn ix" data-max="${id}" title="تكبير البطاقة أو تصغيرها" aria-label="تكبير البطاقة">${icon('max')}</button></div>
@@ -3600,14 +3606,14 @@ const TABS = [
 const HIDDEN_TABS = ['help'];
 let CUR = safeLS('pdc_tab') || 'exec';
 if(!TABS.some(t => t.k === CUR) && HIDDEN_TABS.indexOf(CUR) < 0) CUR = 'exec';
-function goTab(k){ if(document.startViewTransition && !reducedMotion() && !PRES.on && k !== CUR && !goTab.busy){ goTab.busy = true; try{ document.startViewTransition(() => { try{ goTab(k); } finally { goTab.busy = false; } }); return; }catch(e){ goTab.busy = false; } }
-  CUR = k; safeLS('pdc_tab', k); $$('[data-tab]').forEach(b => b.classList.toggle('active', b.dataset.tab === k)); $$('.page').forEach(p => p.classList.toggle('active', p.id === 'pg-' + k)); document.body.classList.remove('side-open'); cardMaxClose(); closePop(); uiPageChanged(); render(); window.scrollTo({top:0}); uiAnimate(); }
+function goTab(k){
+  CUR = k; safeLS('pdc_tab', k); $$('[data-tab]').forEach(b => b.classList.toggle('active', b.dataset.tab === k)); $$('.page').forEach(p => p.classList.toggle('active', p.id === 'pg-' + k)); document.body.classList.remove('side-open'); cardMaxClose(); closePop(); uiPageChanged(); if(tabFresh(k)){ document.body.classList.remove('on-plan', 'on-hud'); } else render(); window.scrollTo({top:0}); uiAnimate(); }
 function render(){
   if(!ALL.built) return;
   $$('.page').forEach(p => p.classList.toggle('active', p.id === 'pg-' + CUR));
   applyFilters();
   renderFilterBar();
-  for(const k in CARD_DATA) delete CARD_DATA[k];
+  for(const k in CARD_DATA) if(CARD_DATA[k].pg === CUR || !document.getElementById(k)) delete CARD_DATA[k];
   const fn = {hud:renderHud, risk:renderRisk, todo:renderTodo, dq:renderDQ, trust:renderTrust, exec:renderExec, ops:renderOps, cons:renderCons, maint:renderMaint, qs:renderQS, map:renderMap, perf:renderPerf, eng:renderEng, reports:renderReports, builder:renderBuilder, charts:renderCharts, help:renderHelp, plan:renderPlan, fin:renderFin}[CUR];
   document.body.classList.toggle('on-plan', CUR === 'plan');
   document.body.classList.toggle('on-hud', CUR === 'hud');
@@ -3615,6 +3621,7 @@ function render(){
   if(!ALL.work.length && !ALL.visits.length && CUR !== 'help'){ $('#pg-' + CUR).innerHTML = onboarding(); return; }
   if(fn) safeRender(fn, CUR);
   if(CUR === 'qs') safeRender(qsExtras, 'qs');
+  TABKEY[CUR] = tabKey();
 }
 function ctxLine(){
   const parts = [];
@@ -5254,25 +5261,31 @@ function renderNav(){
 function uiPageChanged(){ const c = $('#crumbT'); if(c) c.textContent = tabTitle(CUR); document.title = tabTitle(CUR) + ' — لوحة مشاريع التوزيع'; }
 function reducedMotion(){ return matchMedia('(prefers-reduced-motion: reduce)').matches; }
 
+/* إعادة استخدام الصفحة المرسومة عند الرجوع إليها ما دامت البيانات والفلاتر لم تتغير */
+let DATA_VER = 0; const TABKEY = {}, CACHE_TABS = {exec:1, todo:1, risk:1, dq:1, fin:1, ops:1, cons:1, maint:1, qs:1, perf:1, eng:1, charts:1};
+function tabKey(){ return DATA_VER + '|' + JSON.stringify(F) + '|' + (document.documentElement.dataset.theme || ''); }
+function tabFresh(k){ const pg = $('#pg-' + k); return !!CACHE_TABS[k] && ALL.built && TABKEY[k] === tabKey() && !!pg && pg.childElementCount > 0; }
 /* حركة الدخول وعدّ الأرقام — عند تبديل الصفحة أو وصول بيانات جديدة فقط */
 let ANIM_T = null;
 function uiAnimate(){
   if(reducedMotion()) return;
-  document.body.classList.remove('anim'); void document.body.offsetWidth; document.body.classList.add('anim');
+  document.body.classList.add('anim');
   clearTimeout(ANIM_T); ANIM_T = setTimeout(() => document.body.classList.remove('anim'), 1900);
   countUp();
 }
 function countUp(){
   $$('.page.active .kv, .page.active .hstep .pv, .page.active .bigk .bv, .page.active .pstep .pv').forEach(el => {
+    if(el._cu) return;                                   /* عدّ جارٍ على العنصر نفسه: لا نبدأ آخر فوقه */
     const node = el.firstChild; if(!node || node.nodeType !== 3) return;
     const txt = node.nodeValue, m = txt.match(/^(\s*)([\d,]+(?:\.\d+)?)([\s\S]*)$/); if(!m) return;
     const target = parseFloat(m[2].replace(/,/g, '')); if(!isFinite(target) || !target) return;
     const dec = (m[2].split('.')[1] || '').length, t0 = performance.now(), dur = 750;
+    el._cu = 1;
     const step = now => {
-      if(!node.isConnected) return;
+      if(!node.isConnected){ el._cu = 0; return; }
       const p = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - p, 3);
       node.nodeValue = p < 1 ? m[1] + (target * e).toLocaleString('en-US', {minimumFractionDigits:dec, maximumFractionDigits:dec}) + m[3] : txt;
-      if(p < 1) requestAnimationFrame(step);
+      if(p < 1) requestAnimationFrame(step); else el._cu = 0;
     };
     requestAnimationFrame(step);
   });
@@ -5512,8 +5525,6 @@ function uiInit(){
   if(safeLS('pdc_side_min') === '1') document.body.classList.add('side-min');
   renderNav(); uiPageChanged();
   const tc = $('#todayChip'); if(tc) tc.textContent = new Date().toLocaleDateString('ar-SA-u-ca-gregory-nu-latn', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
-  /* إضاءة خفيفة تتبع المؤشر فوق البطاقات */
-  document.addEventListener('pointermove', e => { const c = e.target.closest && e.target.closest('.card,.kpi,.bigk'); if(!c) return; const r = c.getBoundingClientRect(); c.style.setProperty('--mx', (e.clientX - r.left) + 'px'); c.style.setProperty('--my', (e.clientY - r.top) + 'px'); }, {passive:true});
   const navClick = e => { const b = e.target.closest('[data-tab]'); if(b){ goTab(b.dataset.tab); return; } if(e.target.closest('#mnavMore')) document.body.classList.toggle('side-open'); };
   $('#nav').addEventListener('click', navClick); $('#mnav').addEventListener('click', navClick);
   $('#btnSideMin').addEventListener('click', () => { const on = document.body.classList.toggle('side-min'); safeLS('pdc_side_min', on ? '1' : '0'); setTimeout(() => { if(CUR === 'map' && MAP.m) MAP.m.invalidateSize(); }, 300); });
@@ -5790,8 +5801,11 @@ function hudMapStart(){
   Object.keys(REGION_CENTER).forEach(r => { const c = REGION_CENTER[r], [x, y] = P(c[0], c[1]); if(x < 0 || x > Wc || y < 0 || y > Hc) return; b.strokeStyle = 'rgba(185,220,75,.55)'; b.lineWidth = 1; b.beginPath(); b.arc(x, y, 15, 0, 6.3); b.stroke(); b.beginPath(); b.moveTo(x - 22, y); b.lineTo(x - 9, y); b.moveTo(x + 9, y); b.lineTo(x + 22, y); b.moveTo(x, y - 22); b.lineTo(x, y - 9); b.moveTo(x, y + 9); b.lineTo(x, y + 22); b.stroke(); b.font = '600 13px "Readex Pro",sans-serif'; b.textAlign = 'center'; b.lineWidth = 4; b.strokeStyle = 'rgba(5,13,21,.85)'; b.strokeText(r, x, y - 27); b.fillStyle = '#e8f3c4'; b.fillText(r, x, y - 27); b.textAlign = 'start'; });
   const pp = pulses.map(p => P(p[0], p[1]).concat([p[2], Math.random()]));
   const still = reducedMotion();
+  let last = 0;
   const frame = t => {
     if(!cv.isConnected || CUR !== 'hud') return;
+    if(document.hidden || t - last < 50){ HUD.raf = requestAnimationFrame(frame); return; }   /* 20 إطاراً في الثانية تكفي */
+    last = t;
     ctx.clearRect(0, 0, Wc, Hc); ctx.drawImage(base, 0, 0, Wc, Hc);
     const sweep = (t / 4200) % 1, sx = Wc * (1 - sweep);
     if(!still){ const gr = ctx.createLinearGradient(sx, 0, sx + 90, 0); gr.addColorStop(0, 'rgba(185,220,75,.09)'); gr.addColorStop(1, 'rgba(185,220,75,0)'); ctx.fillStyle = gr; ctx.fillRect(sx, 0, 90, Hc); }
@@ -5921,7 +5935,7 @@ function todoCard(o){
   const rows = o.all.slice(0, o.n || 12).map(o.row);
   return card({cls:o.cls || 'c6', title:o.title, sub:`<span class="badge ${o.all.length ? (o.tone || 'b-warn') : 'b-ok'}"><span class="num">${fmt(o.all.length)}</span></span> ` + o.sub + (o.all.length > rows.length ? ` — يظهر أول ${rows.length}، والتصدير يشمل الكل` : ''),
     body:o.all.length ? table(o.id, o.cols.map((t, i) => ({t, n:o.num && o.num.indexOf(i) > -1 ? 1 : 0})), rows, {maxh:330}) : emptyBox('لا شيء يحتاج متابعة هنا ضمن الفلاتر الحالية'),
-    data:o.all.length ? {cols:o.cols, rows:o.all.map(x => o.row(x).v)} : null});
+    data:o.all.length ? {cols:o.cols, rows:o.all.map(o.val || (x => o.row(x).v))} : null});
 }
 function renderTodo(){
   const pg = $('#pg-todo'), C = W.filter(isCons), M = W.filter(x => x.s === 'صيانة');
@@ -5939,6 +5953,7 @@ function renderTodo(){
   const stops = V.filter(v => v.sw && nn(v.d) && TODAY - v.d <= 14).sort((a, b) => b.d - a.d);
   const wRow = (x, extra) => ({click:x.id, h:[`<b>${esc(x.no)}</b>`, esc(x.r), esc(x.u), esc(x.ct)].concat(extra.map(e => e[0])), v:[x.no, x.r, x.u, x.ct].concat(extra.map(e => e[1]))});
   const wCols = ['رقم الأمر', 'المنطقة', 'المكتب / الدائرة', 'المقاول'];
+  const wv = f => x => [x.no, x.r, x.u, x.ct].concat(f(x));
   const k = (label, n, sub, color, anchor) => `<a class="kpi click" href="#${anchor}" style="--kc:${color};text-decoration:none;color:inherit" onclick="event.preventDefault();var t=document.getElementById('tw-${anchor}');if(t)t.closest('.card').scrollIntoView({behavior:'smooth',block:'center'})"><div class="kl">${label}</div><div class="kv num">${fmt(n)}</div><div class="ks">${sub}</div></a>`;
   pg.innerHTML = head('المتابعة اليومية', `<span class="badge b-run">ما يحتاج إجراءً اليوم — ${dayAr(TODAY)}</span>`) +
     `<div class="kpis">
@@ -5954,32 +5969,38 @@ function renderTodo(){
       ${k('إيقافات عمل خلال 14 يوماً', stops.length, 'من زيارات السلامة والجودة', 'var(--critical)', 'td-stops')}
     </div>
     <div class="grid">
-      ${todoCard({id:'td-soon', title:'أوامر ستتجاوز مدتها النظامية خلال 7 أيام', sub:'مرتّبة بالأقرب إلى التجاوز — انقر الصف لتفاصيل الأمر', tone:'b-warn', all:soon, cols:wCols.concat(['المدة', 'المتبقي (يوم)']), num:[4, 5], row:x => wRow(x, [[fmt(x.sla), x.sla], [`<span class="badge b-warn">${fmt(x.sla - x.age)}</span>`, x.sla - x.age]])})}
-      ${todoCard({id:'td-fresh', title:'أوامر دخلت التجاوز خلال آخر 7 أيام', sub:'تجاوزت مدتها للتوّ — المعالجة الآن أسهل من لاحقاً', tone:'b-err', all:fresh, cols:wCols.concat(['المدة', 'أيام التجاوز']), num:[4, 5], row:x => wRow(x, [[fmt(x.sla), x.sla], [`<span class="badge b-err">${fmt(x.age - x.sla)}</span>`, x.age - x.sla]])})}
+      ${todoCard({id:'td-soon', title:'أوامر ستتجاوز مدتها النظامية خلال 7 أيام', sub:'مرتّبة بالأقرب إلى التجاوز — انقر الصف لتفاصيل الأمر', tone:'b-warn', all:soon, cols:wCols.concat(['المدة', 'المتبقي (يوم)']), num:[4, 5], val:wv(x => [x.sla, x.sla - x.age]), row:x => wRow(x, [[fmt(x.sla), x.sla], [`<span class="badge b-warn">${fmt(x.sla - x.age)}</span>`, x.sla - x.age]])})}
+      ${todoCard({id:'td-fresh', title:'أوامر دخلت التجاوز خلال آخر 7 أيام', sub:'تجاوزت مدتها للتوّ — المعالجة الآن أسهل من لاحقاً', tone:'b-err', all:fresh, cols:wCols.concat(['المدة', 'أيام التجاوز']), num:[4, 5], val:wv(x => [x.sla, x.age - x.sla]), row:x => wRow(x, [[fmt(x.sla), x.sla], [`<span class="badge b-err">${fmt(x.age - x.sla)}</span>`, x.age - x.sla]])})}
     </div>
     <div class="grid">
-      ${todoCard({id:'td-wait', title:'أقدم الأعمال المنفَّذة التي تنتظر الاستلام', sub:'مرحلة «تم التنفيذ» مرتّبة بالأقدم تنفيذاً', tone:'b-run', all:wait, cols:wCols.concat(['منذ التنفيذ (يوم)', 'القيمة']), num:[4, 5], row:x => wRow(x, [[fmt(TODAY - x.ed), TODAY - x.ed], [money(x.v1), Math.round(x.v1 || 0)]])})}
-      ${todoCard({id:'td-ns', title:'مهام صيانة لم تبدأ', sub:'مرتّبة بالأقدم إسناداً', tone:'b-warn', all:ns, cols:wCols.concat(['منذ الإسناد (يوم)', 'مهندس المتابعة']), num:[4], row:x => wRow(x, [[fmt(TODAY - x.ad), TODAY - x.ad], [esc(x.pe || ''), x.pe || '']])})}
+      ${todoCard({id:'td-wait', title:'أقدم الأعمال المنفَّذة التي تنتظر الاستلام', sub:'مرحلة «تم التنفيذ» مرتّبة بالأقدم تنفيذاً', tone:'b-run', all:wait, cols:wCols.concat(['منذ التنفيذ (يوم)', 'القيمة']), num:[4, 5], val:wv(x => [TODAY - x.ed, Math.round(x.v1 || 0)]), row:x => wRow(x, [[fmt(TODAY - x.ed), TODAY - x.ed], [money(x.v1), Math.round(x.v1 || 0)]])})}
+      ${todoCard({id:'td-ns', title:'مهام صيانة لم تبدأ', sub:'مرتّبة بالأقدم إسناداً', tone:'b-warn', all:ns, cols:wCols.concat(['منذ الإسناد (يوم)', 'مهندس المتابعة']), num:[4], val:wv(x => [TODAY - x.ad, x.pe || '']), row:x => wRow(x, [[fmt(TODAY - x.ad), TODAY - x.ad], [esc(x.pe || ''), x.pe || '']])})}
     </div>
     <div class="grid">
       ${todoCard({id:'td-open', title:'بنود سلامة وجودة مفتوحة منذ أكثر من أسبوع', sub:'مرتّبة بالأقدم رصداً', tone:'b-err', all:openI, cols:['رقم الزيارة', 'المقاول', 'العمر (يوم)', 'البند'], num:[2], row:x => ({h:[esc(x.vid), esc(x.ct), `<span class="badge b-err">${fmt(TODAY - x.d)}</span>`, `<span title="${esc(x.desc || '')}">${esc(x.ty)}: ${esc((x.vn || x.desc || '').slice(0, 70))}</span>`], v:[x.vid, x.ct, TODAY - x.d, x.ty + ': ' + (x.vn || x.desc || '')]})})}
       ${todoCard({id:'td-und', title:'مخالفات لم تُخصم غراماتها', sub:'موقف الخصم «لم يتم» — مرتّبة بالأعلى مبلغاً', tone:'b-warn', all:und, cols:['رقم الزيارة', 'المقاول', 'المبلغ (ر.س)', 'المخالفة'], num:[2], row:x => ({h:[esc(x.vid), esc(x.ct), `<b class="num">${fmt(x.am)}</b>`, `<span title="${esc(x.desc || '')}">${esc((x.vn || x.desc || '').slice(0, 70))}</span>`], v:[x.vid, x.ct, x.am, x.vn || x.desc || '']})})}
     </div>
     <div class="grid">
-      ${todoCard({id:'td-docs', title:'أعمال منفَّذة لم يسلّم المقاول مستنداتها', sub:'سبب مباشر لتأخر الاستلام — مرتّبة بالأقدم تنفيذاً', tone:'b-warn', all:docs, cols:wCols.concat(['منذ التنفيذ (يوم)', 'القيمة']), num:[4, 5], row:x => wRow(x, [[nn(x.ed) ? fmt(TODAY - x.ed) : '—', nn(x.ed) ? TODAY - x.ed : ''], [money(x.v1), Math.round(x.v1 || 0)]])})}
-      ${todoCard({id:'td-cert', title:'أعمال مستلمة تنتظر شهادة الإنجاز', sub:'مرتّبة بالأقدم تنفيذاً', tone:'b-run', all:cert, cols:wCols.concat(['القطاع', 'القيمة']), num:[5], row:x => wRow(x, [[esc(x.s), x.s], [money(x.v1), Math.round(x.v1 || 0)]])})}
+      ${todoCard({id:'td-docs', title:'أعمال منفَّذة لم يسلّم المقاول مستنداتها', sub:'سبب مباشر لتأخر الاستلام — مرتّبة بالأقدم تنفيذاً', tone:'b-warn', all:docs, cols:wCols.concat(['منذ التنفيذ (يوم)', 'القيمة']), num:[4, 5], val:wv(x => [nn(x.ed) ? TODAY - x.ed : '', Math.round(x.v1 || 0)]), row:x => wRow(x, [[nn(x.ed) ? fmt(TODAY - x.ed) : '—', nn(x.ed) ? TODAY - x.ed : ''], [money(x.v1), Math.round(x.v1 || 0)]])})}
+      ${todoCard({id:'td-cert', title:'أعمال مستلمة تنتظر شهادة الإنجاز', sub:'مرتّبة بالأقدم تنفيذاً', tone:'b-run', all:cert, cols:wCols.concat(['القطاع', 'القيمة']), num:[5], val:wv(x => [x.s, Math.round(x.v1 || 0)]), row:x => wRow(x, [[esc(x.s), x.s], [money(x.v1), Math.round(x.v1 || 0)]])})}
     </div>
     <div class="grid">
-      ${todoCard({id:'td-pen', title:'أوامر عدّاد غرامتها جارٍ', sub:'تحت التنفيذ وحالة العدّاد «جارية» — مرتّبة بالأعلى أياماً', tone:'b-err', all:pen, cols:wCols.concat(['أيام الغرامة', 'القيمة']), num:[4, 5], row:x => wRow(x, [[`<span class="badge b-err">${fmt(x.pd)}</span>`, x.pd], [money(x.v1), Math.round(x.v1 || 0)]])})}
+      ${todoCard({id:'td-pen', title:'أوامر عدّاد غرامتها جارٍ', sub:'تحت التنفيذ وحالة العدّاد «جارية» — مرتّبة بالأعلى أياماً', tone:'b-err', all:pen, cols:wCols.concat(['أيام الغرامة', 'القيمة']), num:[4, 5], val:wv(x => [x.pd, Math.round(x.v1 || 0)]), row:x => wRow(x, [[`<span class="badge b-err">${fmt(x.pd)}</span>`, x.pd], [money(x.v1), Math.round(x.v1 || 0)]])})}
       ${todoCard({id:'td-stops', title:'إيقافات العمل خلال آخر 14 يوماً', sub:'زيارات سُجّل فيها إيقاف عمل — الأحدث أولاً', tone:'b-err', all:stops, cols:['رقم الزيارة', 'التاريخ', 'المنطقة', 'المقاول', 'الموقع', 'الراصد'], row:x => ({h:[esc(x.id), `<span class="num">${dayStr(x.d)}</span>`, esc(x.r), esc(x.ct), esc(x.loc || x.u || ''), esc(x.en || '')], v:[x.id, dayStr(x.d), x.r, x.ct, x.loc || x.u || '', x.en || '']})})}
     </div>`;
 }
 
 /* ---------- جودة البيانات ---------- */
+/* تعريف التكرار: أمر الإنشاءات = الرقم + نوع أمر العمل، ومهمة الصيانة = الرقم + وصف العمل (ما لا رقم له لا يُعدّ مكرّراً) */
+function dupKey(x){
+  if(!x.no || x.no === '—') return '';
+  return isCons(x) ? 'C|' + x.r + '|' + x.no + '|' + (x.wtc || x.tc || '') : 'M|' + x.r + '|' + x.no + '|' + normKey(x.desc || '');
+}
+function dupStats(arr){ const m = new Map(); arr.forEach(x => { const k = dupKey(x); if(k){ let g = m.get(k); if(!g) m.set(k, g = []); g.push(x); } }); const groups = Array.from(m.values()).filter(g => g.length > 1); return {groups, extra:groups.reduce((s, g) => s + g.length - 1, 0)}; }
 const DQ_W = [['بلا مقاول', x => x.ct === 'غير محدد'], ['بلا استشاري', x => x.cs === 'غير محدد'], ['بلا إحداثيات', x => !x.ll], ['بلا تاريخ إسناد', x => !nn(x.ad)], ['منفَّذ بلا تاريخ تنفيذ', x => x.st !== 'U' && !nn(x.ed)], ['تاريخ التنفيذ قبل الإسناد', x => nn(x.ed) && nn(x.ad) && x.ed < x.ad], ['قيمة صفرية أو فارغة', x => !x.v1]];
 const DQ_SETS = [
-  {k:'cons', name:'أوامر الإنشاءات', src:() => W.filter(isCons), rec:1, checks:DQ_W.concat([['بلا مدة نظامية', x => !x.sla], ['بلا مهندس مشرف', x => !x.eng], ['متجاوز بلا سبب تأخير مسجَّل', x => x.st === 'U' && x.sla && nn(x.age) && x.age > x.sla && !x.dr]])},
-  {k:'maint', name:'مهام الصيانة', src:() => W.filter(x => x.s === 'صيانة'), rec:1, checks:DQ_W.concat([['بلا مهندس متابعة', x => !x.pe], ['بلا رقم محطة', x => !x.stn]])},
+  {k:'cons', name:'أوامر الإنشاءات', src:() => W.filter(isCons), rec:1, checks:DQ_W.concat([['بلا مدة نظامية', x => !x.sla], ['بلا مهندس مشرف', x => !x.eng], ['متجاوز بلا سبب تأخير مسجَّل', x => x.st === 'U' && x.sla && nn(x.age) && x.age > x.sla && !x.dr], ['مكرّر: نفس الرقم ونوع أمر العمل', (x, ctx) => ctx.dup.get(dupKey(x)) > 1]])},
+  {k:'maint', name:'مهام الصيانة', src:() => W.filter(x => x.s === 'صيانة'), rec:1, checks:DQ_W.concat([['بلا مهندس متابعة', x => !x.pe], ['بلا رقم محطة', x => !x.stn], ['مكرّر: نفس الرقم ووصف العمل', (x, ctx) => !!dupKey(x) && ctx.dup.get(dupKey(x)) > 1]])},
   {k:'vis', name:'زيارات السلامة والجودة', src:() => V, cols:['رقم الزيارة', 'التاريخ', 'المنطقة', 'المقاول', 'الموقع'], row:x => [x.id, dayStr(x.d), x.r, x.ct, x.loc || ''], checks:[['بلا توقيت', x => !nn(x.hr)], ['بلا إحداثيات', x => !x.ll], ['بلا مقاول', x => x.ct === 'غير محدد'], ['بلا رقم أمر عمل', x => !x.no], ['بلا اسم المهندس', x => !x.en], ['بلا تاريخ', x => !nn(x.d)]]},
   {k:'items', name:'بنود المخالفات والملاحظات', src:() => I.filter(x => !x.empty), cols:['رقم الزيارة', 'التاريخ', 'المنطقة', 'النوع', 'المقاول', 'البند'], row:x => [x.vid, dayStr(x.d), x.r, x.ty, x.ct, (x.vn || x.desc || '').slice(0, 70)], checks:[['مغلق بلا تاريخ إغلاق', x => x.stt === 'مغلقة' && !nn(x.cld)], ['مخالفة بلا مبلغ', x => x.ty === 'مخالفة' && !x.am], ['مخالفة بلا قائد فريق', x => x.ty === 'مخالفة' && !x.tl], ['بلا تاريخ رصد', x => !nn(x.d)], ['بلا مقاول', x => x.ct === 'غير محدد'], ['بلا إجراء تصحيحي مطلوب', x => !x.cra]]}
 ];
@@ -5988,7 +6009,7 @@ function renderDQ(){
   const pg = $('#pg-dq'); let kp = '', cards = '';
   DQ_SETS.forEach(S => {
     const arr = S.src(), ctx = {dup:new Map()};
-    if(S.k === 'cons') arr.forEach(x => ctx.dup.set(x.r + '|' + x.no, (ctx.dup.get(x.r + '|' + x.no) || 0) + 1));
+    if(S.rec) arr.forEach(x => { const k = dupKey(x); if(k) ctx.dup.set(k, (ctx.dup.get(k) || 0) + 1); });
     const R = ['جدة', 'مكة'].map(r => arr.filter(x => x.r === r));
     let bad = 0; DQX[S.k] = {S, hits:{}};
     const rows = S.checks.map((c, i) => {
@@ -6073,8 +6094,9 @@ function integrity(){
   const co = Wk.filter(isCons).length, ma = Wk.filter(x => x.s === 'صيانة').length;
   add('اتساق الأرقام', 'إنشاءات + صيانة = الإجمالي', co + ma === Wk.length ? 'pass' : 'fail', fmt(co) + ' + ' + fmt(ma) + ' = ' + fmt(co + ma), 'لا عمل بلا قطاع');
   const ids = new Set(Wk.map(x => x.id));
-  const seen = new Set(), dup = []; Wk.forEach(x => { if(seen.has(x.id)) dup.push(x); else seen.add(x.id); });
-  add('اتساق الأرقام', 'لا سجلات مكرّرة في الملفات', !dup.length ? 'pass' : (dup.length > Wk.length * .001 ? 'fail' : 'warn'), dup.length ? fmt(dup.length) + ' صفاً مكرّراً: ' + dup.slice(0, 4).map(x => x.no + ' (' + x.r + ' ' + x.s + ')').join('، ') + (dup.length > 4 ? '…' : '') : 'لا تكرار', 'الصف المكرّر في الإكسل يُحسب مرتين — يُحذف من الملف المصدر');
+  const dc = dupStats(Wk.filter(isCons)), dm = dupStats(Wk.filter(x => x.s === 'صيانة'));
+  add('اتساق الأرقام', 'لا تكرار في أوامر الإنشاءات (الرقم + نوع أمر العمل)', dc.extra ? 'warn' : 'pass', dc.extra ? fmt(dc.extra) + ' صفاً مكرّراً: ' + dc.groups.slice(0, 4).map(g => g[0].no).join('، ') + (dc.groups.length > 4 ? '…' : '') : 'لا تكرار', 'الأمر المكرّر بنوعه يُحسب مرتين — التفاصيل في صفحة جودة البيانات');
+  add('اتساق الأرقام', 'لا تكرار في مهام الصيانة (الرقم + وصف العمل)', dm.extra ? 'warn' : 'pass', dm.extra ? fmt(dm.extra) + ' صفاً في ' + fmt(dm.groups.length) + ' مهمة متكررة' : 'لا تكرار', 'المهمة المكرّرة برقمها ووصفها تُحسب أكثر من مرة — التفاصيل في صفحة جودة البيانات');
   const bad = Wk.filter(x => STAGE_KEYS.indexOf(x.st) < 0).length;
   add('اتساق الأرقام', 'كل عمل له مرحلة معرَّفة', bad ? 'fail' : 'pass', fmt(bad) + ' عملاً بمرحلة غير معروفة', 'رمز إجراء جديد لم يُضف إلى قاموس المراحل يظهر هنا');
   add('اتساق الأرقام', 'الملغاة مستبعدة من المؤشرات', 'pass', fmt(ALL.cancelled.length) + ' سجلاً ملغى خارج الحساب', 'الملغى لا يدخل في أي نسبة أو مجموع');
