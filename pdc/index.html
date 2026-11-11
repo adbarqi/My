@@ -9,7 +9,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="icon-192.png">
 <script>
-var APP_VER = "202611112040";
+var APP_VER = "202611112130";
 if("serviceWorker" in navigator){ navigator.serviceWorker.register("sw.js", {updateViaCache:"none"}).then(function(r){ r.update(); }).catch(function(){}); }
 fetch("version.txt?t=" + Date.now(), {cache:"no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
   v = (v || "").trim();
@@ -1862,6 +1862,28 @@ body.anim .hp{animation:rise .5s var(--ease) both}
 .pf .kpis{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
 .pf-act{display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-top:12px}
 
+
+/* ============ الإصدار ٦ ============ */
+.snav .grp.gv{display:flex; align-items:center; justify-content:space-between}
+.snav .grp.gv button{width:20px; height:20px; padding:0; justify-content:center; border-radius:6px; font-size:13px; color:#8fa6ba; border:1px solid rgba(255,255,255,.14)}
+.snav .grp.gv button:hover{color:var(--live); border-color:var(--live); background:transparent}
+.snav button.vw .ic{color:#e2b93b}
+.snav button.vw > i{font-style:normal; margin-inline-start:auto; width:18px; height:18px; border-radius:5px; display:none; align-items:center; justify-content:center; color:#8fa6ba; flex:none}
+.snav button.vw:hover > i{display:inline-flex} .snav button.vw > i:hover{background:rgba(255,82,82,.2); color:#ff8a8a}
+body.side-min .snav .grp.gv button, body.side-min .snav button.vw > i{display:none}
+.dqc{cursor:pointer} .dqc:hover{outline:1.5px solid currentColor}
+.cmp{display:flex; flex-direction:column; gap:3px}
+.cmp-h, .cmp-r{display:grid; grid-template-columns:1fr minmax(120px,190px) 1fr; gap:12px; align-items:center}
+.cmp-h{font-size:13.5px; padding-bottom:8px; border-bottom:1px solid var(--grid); margin-bottom:4px} .cmp-h b:last-child{text-align:end}
+.cmp-r{padding:5px 6px; border-radius:9px; font-size:12px} .cmp-r:nth-child(odd){background:var(--surface-2)}
+.cmp-r > span{text-align:center; color:var(--text-2); font-size:11.4px}
+.cmp-v{display:flex; align-items:center; gap:8px; min-width:0} .cmp-v:first-child{flex-direction:row-reverse}
+.cmp-v i{height:8px; border-radius:5px; min-width:2px; opacity:.85; flex:none; max-width:calc(100% - 76px)}
+.cmp-v b{min-width:64px; font-weight:600; padding:1px 7px; border-radius:7px; text-align:center}
+.cmp-v.win b{background:color-mix(in srgb,var(--good) 18%,transparent); color:var(--good)}
+#pfCmp{max-width:220px}
+a.kpi{display:flex}
+
 /* ============ حركة الدخول (عند تبديل الصفحة فقط) ============ */
 @media (prefers-reduced-motion: no-preference){
   body.anim .page.active > *{animation:rise .5s var(--ease) both}
@@ -1979,6 +2001,8 @@ body.anim .hp{animation:rise .5s var(--ease) both}
 <div class="fbar"><div class="fbar-row" id="fbarRow"></div><div class="chips hidden" id="chips"></div></div>
 <main>
   <section class="page" id="pg-hud"></section>
+  <section class="page" id="pg-todo"></section>
+  <section class="page" id="pg-dq"></section>
   <section class="page" id="pg-risk"></section>
   <section class="page" id="pg-exec"></section>
   <section class="page" id="pg-cons"></section>
@@ -3458,7 +3482,9 @@ function closeModal(){ const m = $('#modalBg'); if(m) m.remove(); }
 const TABS = [
   {k:'hud', t:'مركز القيادة', i:'🛰️'},
   {k:'exec', t:'الملخص التنفيذي', i:'📊'},
+  {k:'todo', t:'المتابعة اليومية', i:'✅'},
   {k:'risk', t:'الالتزام والمخاطر', i:'⏳'},
+  {k:'dq', t:'جودة البيانات', i:'🧪'},
   {k:'fin', t:'المؤشرات المالية', i:'💰'},
   {k:'ops', t:'البيانات التشغيلية للإدارة', i:'📋'},
   {k:'cons', t:'الإنشاءات', i:'🏗️'},
@@ -3483,7 +3509,7 @@ function render(){
   applyFilters();
   renderFilterBar();
   for(const k in CARD_DATA) delete CARD_DATA[k];
-  const fn = {hud:renderHud, risk:renderRisk, exec:renderExec, ops:renderOps, cons:renderCons, maint:renderMaint, qs:renderQS, map:renderMap, perf:renderPerf, eng:renderEng, reports:renderReports, builder:renderBuilder, charts:renderCharts, help:renderHelp, plan:renderPlan, fin:renderFin}[CUR];
+  const fn = {hud:renderHud, risk:renderRisk, todo:renderTodo, dq:renderDQ, exec:renderExec, ops:renderOps, cons:renderCons, maint:renderMaint, qs:renderQS, map:renderMap, perf:renderPerf, eng:renderEng, reports:renderReports, builder:renderBuilder, charts:renderCharts, help:renderHelp, plan:renderPlan, fin:renderFin}[CUR];
   document.body.classList.toggle('on-plan', CUR === 'plan');
   document.body.classList.toggle('on-hud', CUR === 'hud');
   if(CUR === 'plan'){ fn(); return; }
@@ -4256,6 +4282,10 @@ function renderHelp(){
       <tr><td>معرفة ما تغيّر منذ آخر قراءة</td><td>تحفظ اللوحة لقطة يومية للأرقام الرئيسية في متصفحك، وتعرض الفرق عن آخر يوم سابق في لوحة الموجز وشريط مركز القيادة (يبدأ الظهور من اليوم التالي لأول قراءة)</td></tr>
       <tr><td>ملف كامل لمقاول أو استشاري</td><td>اكتب اسمه في لوح الأوامر (<kbd>Ctrl K</kbd>) واختره: تظهر أعماله ومراحله والتزامه بالمدد وغراماته ومخالفاته في نافذة واحدة، ومنها زر لتصفية اللوحة به. وتفتح النافذة نفسها من «قائمة المراقبة» في مركز القيادة</td></tr>
       <tr><td>إرسال موجز سريع</td><td>زر «مشاركة الموجز» في لوحة الموجز: ينسخ نصاً جاهزاً بالأرقام الحالية (وعلى الجوال يفتح قائمة المشاركة)</td></tr>
+      <tr><td>معرفة ما يحتاج إجراءً اليوم</td><td>صفحة «المتابعة اليومية»: الأوامر التي ستتجاوز مدتها خلال أسبوع، والتي تجاوزتها للتوّ، والمنفَّذ المنتظر للاستلام، وصيانة لم تبدأ، وبنود السلامة المفتوحة، والغرامات غير المخصومة — وكل قائمة تُصدَّر إلى إكسل</td></tr>
+      <tr><td>فحص نواقص الإدخال في الملفات</td><td>صفحة «جودة البيانات»: نسبة اكتمال كل ملف وعدد السجلات الناقصة في كل فحص لجدة ومكة، والنقر على أي خانة يعرض سجلاتها</td></tr>
+      <tr><td>حفظ عرض للرجوع إليه</td><td>زر ＋ بجانب «عروضي المحفوظة» في الشريط الجانبي يحفظ الصفحة الحالية بفلاترها باسم تختاره</td></tr>
+      <tr><td>مقارنة مقاولَين أو استشاريَّين</td><td>افتح ملف أحدهما ثم اختر الآخر من قائمة «قارن مع…»</td></tr>
       <tr><td>توسيع مساحة العرض</td><td>زر «طيّ القائمة» أسفل الشريط الجانبي</td></tr>
     </tbody></table>
     <p>«خط الإنجاز» أعلى الملخص التنفيذي يوضّح كم عملاً وصل إلى كل مرحلة من المراحل الخمس وأين تتوقف الأعمال: العمود الملوّن هو عدد الأعمال الموجودة الآن في المرحلة، والمساحة المظللة هي ما واصل إلى المراحل التالية.</p>
@@ -5103,18 +5133,18 @@ function exportReport(){
 
 
 /* ==================== واجهة الإصدار ٢: الأيقونات، التنقل، لوح الأوامر، وضع العرض، السحب والإفلات ==================== */
-const IC = {"exec": "<rect x=\"3\" y=\"3\" width=\"7\" height=\"9\" rx=\"1.5\"/><rect x=\"14\" y=\"3\" width=\"7\" height=\"5\" rx=\"1.5\"/><rect x=\"14\" y=\"12\" width=\"7\" height=\"9\" rx=\"1.5\"/><rect x=\"3\" y=\"16\" width=\"7\" height=\"5\" rx=\"1.5\"/>", "charts": "<path d=\"M3 21h18\"/><rect x=\"5\" y=\"11\" width=\"3.5\" height=\"7\" rx=\"1\"/><rect x=\"10.25\" y=\"5\" width=\"3.5\" height=\"13\" rx=\"1\"/><rect x=\"15.5\" y=\"8.5\" width=\"3.5\" height=\"9.5\" rx=\"1\"/>", "fin": "<rect x=\"2.5\" y=\"6\" width=\"19\" height=\"12\" rx=\"2.5\"/><circle cx=\"12\" cy=\"12\" r=\"2.6\"/><path d=\"M6.2 12h.01M17.8 12h.01\"/>", "ops": "<rect x=\"3\" y=\"4\" width=\"18\" height=\"16\" rx=\"2.5\"/><path d=\"M3 9.5h18M3 14.75h18M9.5 9.5V20\"/>", "cons": "<path d=\"M3 21h18M6 21V8l6-4.5L18 8v13M10 21v-5h4v5M10 11h.01M14 11h.01\"/>", "maint": "<path d=\"M14.7 6.3a4.2 4.2 0 0 0-5.3 5.3L3.2 17.8a2.1 2.1 0 0 0 3 3l6.2-6.2a4.2 4.2 0 0 0 5.3-5.3l-2.6 2.6-2.5-.5-.5-2.5z\"/>", "qs": "<path d=\"M12 3l8 3v6c0 4.6-3.2 8-8 9-4.8-1-8-4.4-8-9V6z\"/><path d=\"M8.8 12.2l2.2 2.2 4.2-4.4\"/>", "map": "<path d=\"M12 21.5s7-6.2 7-11.7A7 7 0 0 0 5 9.8c0 5.5 7 11.7 7 11.7z\"/><circle cx=\"12\" cy=\"9.8\" r=\"2.6\"/>", "plan": "<circle cx=\"9\" cy=\"8\" r=\"3.3\"/><path d=\"M2.8 20c0-3.4 2.8-6 6.2-6s6.2 2.6 6.2 6M16.2 5a3.3 3.3 0 0 1 0 6M18.2 14.6c1.8.9 3 2.9 3 5.4\"/>", "perf": "<circle cx=\"12\" cy=\"9\" r=\"5.5\"/><path d=\"M8.6 13.4L7 21l5-2.6 5 2.6-1.6-7.6\"/>", "eng": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><circle cx=\"12\" cy=\"12\" r=\"5\"/><circle cx=\"12\" cy=\"12\" r=\"1.2\"/>", "reports": "<path d=\"M14 3H7.5A2.5 2.5 0 0 0 5 5.5v13A2.5 2.5 0 0 0 7.5 21h9a2.5 2.5 0 0 0 2.500-2.500V8z\"/><path d=\"M14 3v5h5M9 13h6M9 17h4\"/>", "builder": "<path d=\"M4 6h9M19 6h1M4 12h3M13 12h7M4 18h11\"/><circle cx=\"16\" cy=\"6\" r=\"2.2\"/><circle cx=\"10\" cy=\"12\" r=\"2.2\"/><circle cx=\"18\" cy=\"18\" r=\"2.2\"/>", "menu": "<path d=\"M4 6.5h16M4 12h16M4 17.5h16\"/>", "search": "<circle cx=\"11\" cy=\"11\" r=\"6.5\"/><path d=\"M20 20l-4.2-4.2\"/>", "folder": "<path d=\"M3 7.5A2.5 2.5 0 0 1 5.5 5h3.6l2.2 2.5h7.2A2.5 2.5 0 0 1 21 10v7.5a2.5 2.5 0 0 1-2.500 2.500h-13A2.5 2.5 0 0 1 3 17.5z\"/>", "refresh": "<path d=\"M20 12a8 8 0 1 1-2.340-5.660M20 4v5h-5\"/>", "clock": "<circle cx=\"12\" cy=\"13\" r=\"8\"/><path d=\"M12 9v4l2.500 2.500M9 2h6\"/>", "play": "<path d=\"M7 4.500v15l12-7.500z\"/>", "pause": "<path d=\"M8 5v14M16 5v14\"/>", "stop": "<path d=\"M6 6l12 12M18 6L6 18\"/>", "x": "<path d=\"M6 6l12 12M18 6L6 18\"/>", "prev": "<path d=\"M9 5l7 7-7 7\"/>", "next": "<path d=\"M15 5l-7 7 7 7\"/>", "moon": "<path d=\"M20 14.500A8.500 8.500 0 0 1 9.500 4a7 7 0 1 0 10.500 10.500z\"/>", "help": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M9.500 9.300a2.600 2.600 0 0 1 5 .900c0 1.800-2.500 2.200-2.500 4M12 17.300h.01\"/>", "filter": "<path d=\"M4 5h16l-6 7.500V19l-4-2v-4.500z\"/>", "max": "<path d=\"M9 4H4v5M15 4h5v5M9 20H4v-5M15 20h5v-5\"/>", "chev": "<path d=\"M13 6l6 6-6 6M6 6l6 6-6 6\"/>", "screen": "<rect x=\"3\" y=\"4\" width=\"18\" height=\"12\" rx=\"2\"/><path d=\"M8 20h8M12 16v4M10 8.200v3.600l3.200-1.800z\"/>", "hud": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 12l5.500-5.500M12 3v2.500M12 7.500a4.500 4.500 0 1 0 4.500 4.500\"/>", "risk": "<path d=\"M12 3.500l9.500 16.500h-19z\"/><path d=\"M12 10v4.500M12 17.500h.01\"/>", "share": "<path d=\"M12 15V4M8 7.500L12 3.500l4 4M5 12v6.500A1.500 1.500 0 0 0 6.500 20h11a1.500 1.500 0 0 0 1.500-1.500V12\"/>"};
+const IC = {"exec": "<rect x=\"3\" y=\"3\" width=\"7\" height=\"9\" rx=\"1.5\"/><rect x=\"14\" y=\"3\" width=\"7\" height=\"5\" rx=\"1.5\"/><rect x=\"14\" y=\"12\" width=\"7\" height=\"9\" rx=\"1.5\"/><rect x=\"3\" y=\"16\" width=\"7\" height=\"5\" rx=\"1.5\"/>", "charts": "<path d=\"M3 21h18\"/><rect x=\"5\" y=\"11\" width=\"3.5\" height=\"7\" rx=\"1\"/><rect x=\"10.25\" y=\"5\" width=\"3.5\" height=\"13\" rx=\"1\"/><rect x=\"15.5\" y=\"8.5\" width=\"3.5\" height=\"9.5\" rx=\"1\"/>", "fin": "<rect x=\"2.5\" y=\"6\" width=\"19\" height=\"12\" rx=\"2.5\"/><circle cx=\"12\" cy=\"12\" r=\"2.6\"/><path d=\"M6.2 12h.01M17.8 12h.01\"/>", "ops": "<rect x=\"3\" y=\"4\" width=\"18\" height=\"16\" rx=\"2.5\"/><path d=\"M3 9.5h18M3 14.75h18M9.5 9.5V20\"/>", "cons": "<path d=\"M3 21h18M6 21V8l6-4.5L18 8v13M10 21v-5h4v5M10 11h.01M14 11h.01\"/>", "maint": "<path d=\"M14.7 6.3a4.2 4.2 0 0 0-5.3 5.3L3.2 17.8a2.1 2.1 0 0 0 3 3l6.2-6.2a4.2 4.2 0 0 0 5.3-5.3l-2.6 2.6-2.5-.5-.5-2.5z\"/>", "qs": "<path d=\"M12 3l8 3v6c0 4.6-3.2 8-8 9-4.8-1-8-4.4-8-9V6z\"/><path d=\"M8.8 12.2l2.2 2.2 4.2-4.4\"/>", "map": "<path d=\"M12 21.5s7-6.2 7-11.7A7 7 0 0 0 5 9.8c0 5.5 7 11.7 7 11.7z\"/><circle cx=\"12\" cy=\"9.8\" r=\"2.6\"/>", "plan": "<circle cx=\"9\" cy=\"8\" r=\"3.3\"/><path d=\"M2.8 20c0-3.4 2.8-6 6.2-6s6.2 2.6 6.2 6M16.2 5a3.3 3.3 0 0 1 0 6M18.2 14.6c1.8.9 3 2.9 3 5.4\"/>", "perf": "<circle cx=\"12\" cy=\"9\" r=\"5.5\"/><path d=\"M8.6 13.4L7 21l5-2.6 5 2.6-1.6-7.6\"/>", "eng": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><circle cx=\"12\" cy=\"12\" r=\"5\"/><circle cx=\"12\" cy=\"12\" r=\"1.2\"/>", "reports": "<path d=\"M14 3H7.5A2.5 2.5 0 0 0 5 5.5v13A2.5 2.5 0 0 0 7.5 21h9a2.5 2.5 0 0 0 2.500-2.500V8z\"/><path d=\"M14 3v5h5M9 13h6M9 17h4\"/>", "builder": "<path d=\"M4 6h9M19 6h1M4 12h3M13 12h7M4 18h11\"/><circle cx=\"16\" cy=\"6\" r=\"2.2\"/><circle cx=\"10\" cy=\"12\" r=\"2.2\"/><circle cx=\"18\" cy=\"18\" r=\"2.2\"/>", "menu": "<path d=\"M4 6.5h16M4 12h16M4 17.5h16\"/>", "search": "<circle cx=\"11\" cy=\"11\" r=\"6.5\"/><path d=\"M20 20l-4.2-4.2\"/>", "folder": "<path d=\"M3 7.5A2.5 2.5 0 0 1 5.5 5h3.6l2.2 2.5h7.2A2.5 2.5 0 0 1 21 10v7.5a2.5 2.5 0 0 1-2.500 2.500h-13A2.5 2.5 0 0 1 3 17.5z\"/>", "refresh": "<path d=\"M20 12a8 8 0 1 1-2.340-5.660M20 4v5h-5\"/>", "clock": "<circle cx=\"12\" cy=\"13\" r=\"8\"/><path d=\"M12 9v4l2.500 2.500M9 2h6\"/>", "play": "<path d=\"M7 4.500v15l12-7.500z\"/>", "pause": "<path d=\"M8 5v14M16 5v14\"/>", "stop": "<path d=\"M6 6l12 12M18 6L6 18\"/>", "x": "<path d=\"M6 6l12 12M18 6L6 18\"/>", "prev": "<path d=\"M9 5l7 7-7 7\"/>", "next": "<path d=\"M15 5l-7 7 7 7\"/>", "moon": "<path d=\"M20 14.500A8.500 8.500 0 0 1 9.500 4a7 7 0 1 0 10.500 10.500z\"/>", "help": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M9.500 9.300a2.600 2.600 0 0 1 5 .900c0 1.800-2.500 2.200-2.500 4M12 17.300h.01\"/>", "filter": "<path d=\"M4 5h16l-6 7.500V19l-4-2v-4.500z\"/>", "max": "<path d=\"M9 4H4v5M15 4h5v5M9 20H4v-5M15 20h5v-5\"/>", "chev": "<path d=\"M13 6l6 6-6 6M6 6l6 6-6 6\"/>", "screen": "<rect x=\"3\" y=\"4\" width=\"18\" height=\"12\" rx=\"2\"/><path d=\"M8 20h8M12 16v4M10 8.200v3.600l3.200-1.800z\"/>", "hud": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 12l5.500-5.500M12 3v2.500M12 7.500a4.500 4.500 0 1 0 4.500 4.500\"/>", "risk": "<path d=\"M12 3.500l9.500 16.500h-19z\"/><path d=\"M12 10v4.500M12 17.500h.01\"/>", "share": "<path d=\"M12 15V4M8 7.500L12 3.500l4 4M5 12v6.500A1.500 1.500 0 0 0 6.500 20h11a1.500 1.500 0 0 0 1.500-1.500V12\"/>", "todo": "<path d=\"M4 6.500l1.800 1.800L9 5M4 12.500l1.800 1.800L9 11M4 18.500l1.800 1.800L9 17M12.500 7H20M12.500 13H20M12.500 19H20\"/>", "dq": "<ellipse cx=\"11\" cy=\"6\" rx=\"7\" ry=\"3\"/><path d=\"M4 6v6c0 1.700 3.100 3 7 3M4 12v6c0 1.700 3.100 3 7 3M18 6v4M14.500 17.500l2.200 2.200 4.300-4.400\"/>", "star": "<path d=\"M12 3.500l2.600 5.400 5.900.800-4.300 4.100 1 5.900L12 16.900 6.800 19.700l1-5.900L3.500 9.700l5.900-.800z\"/>"};
 function icon(k){ return `<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">${IC[k] || ''}</svg>`; }
 const NAV_GROUPS = [
-  ['نظرة عامة', ['hud','exec','risk','charts','fin','ops']],
+  ['نظرة عامة', ['hud','exec','todo','risk','charts','fin','ops']],
   ['القطاعات', ['cons','maint','qs','map']],
   ['الأطراف والكوادر', ['perf','eng','plan']],
-  ['الأدوات', ['reports','builder']]
+  ['الأدوات', ['reports','builder','dq']]
 ];
 const MNAV = [['hud','القيادة'],['exec','الملخص'],['risk','المخاطر'],['qs','السلامة']];
 function tabTitle(k){ const t = TABS.find(t => t.k === k); return t ? t.t : (k === 'help' ? 'دليل الاستخدام' : ''); }
 function renderNav(){
-  $('#nav').innerHTML = NAV_GROUPS.map(([g, ks]) => `<div class="grp">${g}</div>` + ks.map(k => `<button data-tab="${k}" class="${k === CUR ? 'active' : ''}" title="${esc(tabTitle(k))}">${icon(k)}<span>${esc(tabTitle(k))}</span></button>`).join('')).join('');
+  $('#nav').innerHTML = NAV_GROUPS.map(([g, ks]) => `<div class="grp">${g}</div>` + ks.map(k => `<button data-tab="${k}" class="${k === CUR ? 'active' : ''}" title="${esc(tabTitle(k))}">${icon(k)}<span>${esc(tabTitle(k))}</span></button>`).join('')).join('') + navViews();
   $('#mnav').innerHTML = MNAV.map(([k, t]) => `<button data-tab="${k}" class="${k === CUR ? 'active' : ''}">${icon(k)}<span>${t}</span></button>`).join('') + `<button id="mnavMore">${icon('menu')}<span>المزيد</span></button>`;
 }
 function uiPageChanged(){ const c = $('#crumbT'); if(c) c.textContent = tabTitle(CUR); document.title = tabTitle(CUR) + ' — لوحة مشاريع التوزيع'; }
@@ -5293,12 +5323,14 @@ function ckBuild(q){
   q = q.trim(); const nq = normKey(q), out = [];
   if(/^[\d\-\/]{3,}$/.test(q)) out.push({g:'بحث', ic:'search', t:`ابحث عن «${q}» في أرقام الأوامر والمهام وأوامر الشراء`, run:() => lookup(q)});
   TABS.filter(t => !nq || normKey(t.t).indexOf(nq) > -1).forEach(t => out.push({g:'الصفحات', ic:t.k, t:t.t, run:() => goTab(t.k)}));
+  viewsGet().forEach((v, i) => { if(!nq || normKey(v.name).indexOf(nq) > -1) out.push({g:'عروضي المحفوظة', ic:'star', t:v.name, s:tabTitle(v.tab), run:() => viewApply(i)}); });
   const acts = [
     ['refresh', 'تحديث كل الملفات الآن', () => $('#btnRefreshAll').click()],
     ['folder', 'اختيار ملفات الإكسل', () => linkMany()],
     ['clock', 'مراقبة التحديث', () => openMonitor()],
     ['play', 'وضع العرض على الشاشة', () => presStart()],
     ['moon', 'تبديل الوضع الليلي / النهاري', () => $('#btnTheme').click()],
+    ['star', 'حفظ العرض الحالي (الصفحة + الفلاتر)', () => viewAsk()],
     ['x', 'مسح كل الفلاتر', () => clearFilters()],
     ['help', 'دليل الاستخدام', () => goTab('help')]
   ];
@@ -5752,7 +5784,7 @@ function profile(dim, name){
       <div class="card c6" style="box-shadow:none"><div class="card-h"><div class="t"><h3>أين يعمل؟</h3><div class="sub">أكثر المكاتب والدوائر أعمالاً</div></div></div>${hbars(mapToBars(countBy(A, x => x.u), 6, {color:'var(--s1)'}), {})}</div>
       <div class="card c6" style="box-shadow:none"><div class="card-h"><div class="t"><h3>أكثر المخالفات تكراراً</h3><div class="sub">من سجل السلامة والجودة</div></div></div>${hbars(mapToBars(countBy(viol, x => x.vn || x.desc || 'غير محدد'), 6, {color:'var(--critical)'}), {})}</div>
     </div>
-    <div class="pf-act"><button class="btn pri" data-pf="${dim}|${esc(name)}">تصفية اللوحة كلها بهذا ${kind}</button><span class="note" style="margin:0">الأرقام هنا من كل البيانات دون فلاتر</span></div>
+    <div class="pf-act"><button class="btn pri" data-pf="${dim}|${esc(name)}">تصفية اللوحة كلها بهذا ${kind}</button><select class="inp" id="pfCmp" data-me="${dim}|${esc(name)}"><option value="">قارن مع…</option>${sortedEntries(countBy(ALL.work, x => x[dim]), 60).filter(e => e[0] !== name && e[0] !== 'غير محدد').map(e => `<option value="${esc(e[0])}">${esc(e[0])}</option>`).join('')}</select><span class="note" style="margin:0">الأرقام هنا من كل البيانات دون فلاتر</span></div>
   </div>`;
   openModal('ملف ' + kind + ' — ' + esc(name), html, 'wide');
 }
@@ -5776,6 +5808,130 @@ document.addEventListener('click', e => {
   if((el = e.target.closest('[data-pf]'))){ const i = el.dataset.pf.indexOf('|'); closeModal(); setFilter(el.dataset.pf.slice(0, i), [el.dataset.pf.slice(i + 1)]); return; }
   if((el = e.target.closest('[data-prof]'))){ e.preventDefault(); e.stopPropagation(); const i = el.dataset.prof.indexOf('|'); profile(el.dataset.prof.slice(0, i), el.dataset.prof.slice(i + 1)); }
 }, true);
+
+/* ==================== الإصدار ٦: المتابعة اليومية + جودة البيانات + العروض المحفوظة + المقارنة ==================== */
+const nn = v => v !== null && v !== undefined;
+function todoCard(o){
+  const rows = o.all.slice(0, o.n || 12).map(o.row);
+  return card({cls:o.cls || 'c6', title:o.title, sub:`<span class="badge ${o.all.length ? (o.tone || 'b-warn') : 'b-ok'}"><span class="num">${fmt(o.all.length)}</span></span> ` + o.sub + (o.all.length > rows.length ? ` — يظهر أول ${rows.length}، والتصدير يشمل الكل` : ''),
+    body:o.all.length ? table(o.id, o.cols.map((t, i) => ({t, n:o.num && o.num.indexOf(i) > -1 ? 1 : 0})), rows, {maxh:330}) : emptyBox('لا شيء يحتاج متابعة هنا ضمن الفلاتر الحالية'),
+    data:o.all.length ? {cols:o.cols, rows:o.all.map(x => o.row(x).v)} : null});
+}
+function renderTodo(){
+  const pg = $('#pg-todo'), C = W.filter(isCons), M = W.filter(x => x.s === 'صيانة');
+  if(!W.length && !I.length){ pg.innerHTML = head('المتابعة اليومية') + emptyBox(); return; }
+  const open = C.filter(x => x.st === 'U' && x.sla && nn(x.age));
+  const soon = open.filter(x => x.sla - x.age >= 0 && x.sla - x.age <= 7).sort((a, b) => (a.sla - a.age) - (b.sla - b.age));
+  const fresh = open.filter(x => x.age - x.sla > 0 && x.age - x.sla <= 7).sort((a, b) => (a.age - a.sla) - (b.age - b.sla));
+  const wait = W.filter(x => x.st === 'A' && nn(x.ed)).sort((a, b) => a.ed - b.ed);
+  const ns = M.filter(x => x.ds === 'لم يتم البدء' && nn(x.ad)).sort((a, b) => a.ad - b.ad);
+  const openI = I.filter(x => !x.empty && x.stt === 'مفتوحة' && nn(x.d) && TODAY - x.d > 7).sort((a, b) => a.d - b.d);
+  const und = I.filter(x => x.ty === 'مخالفة' && x.am > 0 && x.ded !== 'تم').sort((a, b) => b.am - a.am);
+  const wRow = (x, extra) => ({click:x.id, h:[`<b>${esc(x.no)}</b>`, esc(x.r), esc(x.u), esc(x.ct)].concat(extra.map(e => e[0])), v:[x.no, x.r, x.u, x.ct].concat(extra.map(e => e[1]))});
+  const wCols = ['رقم الأمر', 'المنطقة', 'المكتب / الدائرة', 'المقاول'];
+  const k = (label, n, sub, color, anchor) => `<a class="kpi click" href="#${anchor}" style="--kc:${color};text-decoration:none;color:inherit" onclick="event.preventDefault();var t=document.getElementById('tw-${anchor}');if(t)t.closest('.card').scrollIntoView({behavior:'smooth',block:'center'})"><div class="kl">${label}</div><div class="kv num">${fmt(n)}</div><div class="ks">${sub}</div></a>`;
+  pg.innerHTML = head('المتابعة اليومية', `<span class="badge b-run">ما يحتاج إجراءً اليوم — ${dayAr(TODAY)}</span>`) +
+    `<div class="kpis">
+      ${k('ستتجاوز مدتها خلال أسبوع', soon.length, 'أوامر إنشاءات يمكن تداركها الآن', 'var(--warning)', 'td-soon')}
+      ${k('دخلت التجاوز حديثاً', fresh.length, 'تجاوزت مدتها خلال آخر 7 أيام', 'var(--serious)', 'td-fresh')}
+      ${k('منفَّذة تنتظر الاستلام', wait.length, 'لم تستلمها إدارة الكهرباء بعد', 'var(--st-a)', 'td-wait')}
+      ${k('صيانة لم تبدأ', ns.length, 'مهام حالتها «لم يتم البدء»', 'var(--s8)', 'td-ns')}
+      ${k('بنود سلامة مفتوحة منذ أكثر من أسبوع', openI.length, 'ملاحظات ومخالفات لم تُغلق', 'var(--critical)', 'td-open')}
+      ${k('غرامات لم تُخصم', und.length, `<span class="num">${fmt(sumBy(und, x => x.am))}</span> ر.س`, 'var(--s4)', 'td-und')}
+    </div>
+    <div class="grid">
+      ${todoCard({id:'td-soon', title:'أوامر ستتجاوز مدتها النظامية خلال 7 أيام', sub:'مرتّبة بالأقرب إلى التجاوز — انقر الصف لتفاصيل الأمر', tone:'b-warn', all:soon, cols:wCols.concat(['المدة', 'المتبقي (يوم)']), num:[4, 5], row:x => wRow(x, [[fmt(x.sla), x.sla], [`<span class="badge b-warn">${fmt(x.sla - x.age)}</span>`, x.sla - x.age]])})}
+      ${todoCard({id:'td-fresh', title:'أوامر دخلت التجاوز خلال آخر 7 أيام', sub:'تجاوزت مدتها للتوّ — المعالجة الآن أسهل من لاحقاً', tone:'b-err', all:fresh, cols:wCols.concat(['المدة', 'أيام التجاوز']), num:[4, 5], row:x => wRow(x, [[fmt(x.sla), x.sla], [`<span class="badge b-err">${fmt(x.age - x.sla)}</span>`, x.age - x.sla]])})}
+    </div>
+    <div class="grid">
+      ${todoCard({id:'td-wait', title:'أقدم الأعمال المنفَّذة التي تنتظر الاستلام', sub:'مرحلة «تم التنفيذ» مرتّبة بالأقدم تنفيذاً', tone:'b-run', all:wait, cols:wCols.concat(['منذ التنفيذ (يوم)', 'القيمة']), num:[4, 5], row:x => wRow(x, [[fmt(TODAY - x.ed), TODAY - x.ed], [money(x.v1), Math.round(x.v1 || 0)]])})}
+      ${todoCard({id:'td-ns', title:'مهام صيانة لم تبدأ', sub:'مرتّبة بالأقدم إسناداً', tone:'b-warn', all:ns, cols:wCols.concat(['منذ الإسناد (يوم)', 'مهندس المتابعة']), num:[4], row:x => wRow(x, [[fmt(TODAY - x.ad), TODAY - x.ad], [esc(x.pe || ''), x.pe || '']])})}
+    </div>
+    <div class="grid">
+      ${todoCard({id:'td-open', title:'بنود سلامة وجودة مفتوحة منذ أكثر من أسبوع', sub:'مرتّبة بالأقدم رصداً', tone:'b-err', all:openI, cols:['رقم الزيارة', 'المقاول', 'العمر (يوم)', 'البند'], num:[2], row:x => ({h:[esc(x.vid), esc(x.ct), `<span class="badge b-err">${fmt(TODAY - x.d)}</span>`, `<span title="${esc(x.desc || '')}">${esc(x.ty)}: ${esc((x.vn || x.desc || '').slice(0, 70))}</span>`], v:[x.vid, x.ct, TODAY - x.d, x.ty + ': ' + (x.vn || x.desc || '')]})})}
+      ${todoCard({id:'td-und', title:'مخالفات لم تُخصم غراماتها', sub:'موقف الخصم «لم يتم» — مرتّبة بالأعلى مبلغاً', tone:'b-warn', all:und, cols:['رقم الزيارة', 'المقاول', 'المبلغ (ر.س)', 'المخالفة'], num:[2], row:x => ({h:[esc(x.vid), esc(x.ct), `<b class="num">${fmt(x.am)}</b>`, `<span title="${esc(x.desc || '')}">${esc((x.vn || x.desc || '').slice(0, 70))}</span>`], v:[x.vid, x.ct, x.am, x.vn || x.desc || '']})})}
+    </div>`;
+}
+
+/* ---------- جودة البيانات ---------- */
+const DQ_W = [['بلا مقاول', x => x.ct === 'غير محدد'], ['بلا استشاري', x => x.cs === 'غير محدد'], ['بلا إحداثيات', x => !x.ll], ['بلا تاريخ إسناد', x => !nn(x.ad)], ['منفَّذ بلا تاريخ تنفيذ', x => x.st !== 'U' && !nn(x.ed)], ['تاريخ التنفيذ قبل الإسناد', x => nn(x.ed) && nn(x.ad) && x.ed < x.ad], ['قيمة صفرية أو فارغة', x => !x.v1]];
+const DQ_SETS = [
+  {k:'cons', name:'أوامر الإنشاءات', src:() => W.filter(isCons), rec:1, checks:DQ_W.concat([['بلا مدة نظامية', x => !x.sla], ['بلا مهندس مشرف', x => !x.eng], ['متجاوز بلا سبب تأخير مسجَّل', x => x.st === 'U' && x.sla && nn(x.age) && x.age > x.sla && !x.dr]])},
+  {k:'maint', name:'مهام الصيانة', src:() => W.filter(x => x.s === 'صيانة'), rec:1, checks:DQ_W.concat([['بلا مهندس متابعة', x => !x.pe], ['بلا رقم محطة', x => !x.stn]])},
+  {k:'vis', name:'زيارات السلامة والجودة', src:() => V, cols:['رقم الزيارة', 'التاريخ', 'المنطقة', 'المقاول', 'الموقع'], row:x => [x.id, dayStr(x.d), x.r, x.ct, x.loc || ''], checks:[['بلا توقيت', x => !nn(x.hr)], ['بلا إحداثيات', x => !x.ll], ['بلا مقاول', x => x.ct === 'غير محدد'], ['بلا رقم أمر عمل', x => !x.no], ['بلا اسم المهندس', x => !x.en], ['بلا تاريخ', x => !nn(x.d)]]},
+  {k:'items', name:'بنود المخالفات والملاحظات', src:() => I.filter(x => !x.empty), cols:['رقم الزيارة', 'التاريخ', 'المنطقة', 'النوع', 'المقاول', 'البند'], row:x => [x.vid, dayStr(x.d), x.r, x.ty, x.ct, (x.vn || x.desc || '').slice(0, 70)], checks:[['مغلق بلا تاريخ إغلاق', x => x.stt === 'مغلقة' && !nn(x.cld)], ['مخالفة بلا مبلغ', x => x.ty === 'مخالفة' && !x.am], ['مخالفة بلا قائد فريق', x => x.ty === 'مخالفة' && !x.tl], ['بلا تاريخ رصد', x => !nn(x.d)], ['بلا مقاول', x => x.ct === 'غير محدد'], ['بلا إجراء تصحيحي مطلوب', x => !x.cra]]}
+];
+const DQX = {};
+function renderDQ(){
+  const pg = $('#pg-dq'); let kp = '', cards = '';
+  DQ_SETS.forEach(S => {
+    const arr = S.src(), ctx = {dup:new Map()};
+    if(S.k === 'cons') arr.forEach(x => ctx.dup.set(x.r + '|' + x.no, (ctx.dup.get(x.r + '|' + x.no) || 0) + 1));
+    const R = ['جدة', 'مكة'].map(r => arr.filter(x => x.r === r));
+    let bad = 0; DQX[S.k] = {S, hits:{}};
+    const rows = S.checks.map((c, i) => {
+      const cells = R.map((a, ri) => { const h = a.filter(x => c[1](x, ctx)); DQX[S.k].hits[i + '|' + ri] = h; bad += h.length; const p = pct(h.length, a.length); return {n:h.length, p, t:a.length}; });
+      const cell = (o, ri) => o.t ? `<span class="badge ${o.p > 20 ? 'b-err' : o.p > 5 ? 'b-warn' : o.n ? 'b-mute' : 'b-ok'} ${o.n ? 'dqc' : ''}" ${o.n ? `data-dq="${S.k}|${i}|${ri}" title="عرض السجلات"` : ''}><span class="num">${fmt(o.n)}</span> • <span class="num">${Math.round(o.p * 10) / 10}%</span></span>` : '—';
+      return {h:[esc(c[0]), cell(cells[0], 0), cell(cells[1], 1), `<div class="mbar" style="min-width:90px"><span style="width:${Math.min(100, pct(cells[0].n + cells[1].n, arr.length))}%;background:var(--serious)"></span></div>`], v:[c[0], cells[0].n, cells[1].n, cells[0].n + cells[1].n]};
+    });
+    const score = arr.length ? 100 - bad / (arr.length * S.checks.length) * 100 : null;
+    kp += kpi({label:'اكتمال ' + S.name, value:score === null ? '—' : (Math.round(score * 10) / 10) + '%', sub:`<span class="num">${fmt(arr.length)}</span> سجلاً • <span class="num">${S.checks.length}</span> فحوص`, p:score === null ? undefined : score, color:score === null ? 'var(--muted)' : score >= 95 ? 'var(--good)' : score >= 85 ? 'var(--warning)' : 'var(--critical)'});
+    cards += card({cls:'c6', title:S.name, sub:`${fmt(arr.length)} سجلاً — جدة ${fmt(R[0].length)} • مكة ${fmt(R[1].length)} — انقر أي خانة ملوّنة لعرض سجلاتها`, body:arr.length ? table('dq-' + S.k, [{t:'الفحص'}, {t:'جدة', n:1}, {t:'مكة', n:1}, {t:'الحجم', nosort:1}], rows, {}) : emptyBox(), data:arr.length ? {cols:['الفحص', 'جدة', 'مكة', 'الإجمالي'], rows:rows.map(r => r.v)} : null});
+  });
+  pg.innerHTML = head('جودة البيانات', '<span class="badge b-run">فحوص آلية على ما تقرؤه اللوحة — تتأثر بالفلاتر</span>') + `<div class="kpis">${kp}</div><div class="grid">${cards}</div>
+    <p class="note">نسبة الاكتمال = نسبة الخانات السليمة من مجموع (عدد السجلات × عدد الفحوص). الأحمر: أكثر من 20% من السجلات، والأصفر: أكثر من 5%. القيمة الصفرية في مهام الصيانة قد تكون صحيحة لبعض الأنواع.</p>`;
+}
+function dqShow(key){
+  const [k, i, ri] = key.split('|'), d = DQX[k]; if(!d) return;
+  const hits = d.hits[i + '|' + ri] || [], S = d.S, shown = hits.slice(0, 400);
+  const body = S.rec ? simpleTableClick(['رقم الأمر', 'المكتب / الدائرة', 'المقاول', 'الاستشاري', 'المرحلة', 'تاريخ الإسناد'], shown.map(x => ({id:x.id, c:[x.no, x.u, x.ct, x.cs, STAGE_NAME[x.st] || '', dayStr(x.ad)]})))
+    : `<div class="tbl-wrap" style="max-height:360px">${simpleTable(S.cols, shown.map(S.row))}</div>`;
+  openModal(`${esc(S.name)} — ${esc(S.checks[i][0])} — ${ri === '0' ? 'جدة' : 'مكة'}`, `<div class="note" style="margin:0 0 10px"><span class="num">${fmt(hits.length)}</span> سجلاً${hits.length > shown.length ? ' — يظهر أول ' + shown.length : ''}${S.rec ? ' • انقر الصف لتفاصيل الأمر' : ''}</div>${body}`, 'wide');
+}
+
+/* ---------- العروض المحفوظة (صفحة + فلاتر باسم) ---------- */
+function viewsGet(){ try{ return JSON.parse(safeLS('pdc_views') || '[]') || []; }catch(e){ return []; } }
+function viewsSet(v){ safeLS('pdc_views', JSON.stringify(v)); renderNav(); }
+function viewAsk(){
+  openModal('حفظ العرض الحالي', `<p class="note" style="margin:0 0 10px">يحفظ الصفحة الحالية «${esc(tabTitle(CUR))}» مع الفلاتر المطبّقة (${esc(ctxLine())}) لتعود إليها بنقرة من الشريط الجانبي أو لوح الأوامر.</p>
+    <div style="display:flex;gap:8px"><input class="inp" id="viewName" maxlength="40" placeholder="اسم العرض — مثل: متأخرات جدة" style="flex:1;min-width:0"><button class="btn pri" id="viewOk">حفظ</button></div>`, 'sm');
+  const inp = $('#viewName'), ok = () => { const name = inp.value.trim(); if(!name){ inp.focus(); return; } const v = viewsGet().filter(x => x.name !== name); v.push({name, tab:CUR, F:JSON.parse(JSON.stringify(F))}); viewsSet(v); closeModal(); toast('حُفظ العرض «' + esc(name) + '»'); };
+  $('#viewOk').addEventListener('click', ok); inp.addEventListener('keydown', e => { if(e.key === 'Enter') ok(); }); setTimeout(() => inp.focus(), 50);
+}
+function viewApply(i){
+  const v = viewsGet()[i]; if(!v) return;
+  for(const d in DIMS) F[d] = [];
+  Object.assign(F, v.F); for(const d in DIMS) if(!Array.isArray(F[d])) F[d] = [];
+  saveFilters(); goTab(TABS.some(t => t.k === v.tab) ? v.tab : 'exec');
+}
+function navViews(){
+  const v = viewsGet();
+  return `<div class="grp gv">عروضي المحفوظة<button data-viewadd title="حفظ الصفحة الحالية بفلاترها كعرض">＋</button></div>` + v.map((x, i) => `<button class="vw" data-view="${i}" title="${esc(tabTitle(x.tab))}">${icon('star')}<span>${esc(x.name)}</span><i data-viewdel="${i}" title="حذف العرض">×</i></button>`).join('');
+}
+
+/* ---------- مقارنة مقاولَين أو استشاريَّين ---------- */
+function entStats(dim, name){
+  const A = ALL.work.filter(x => x[dim] === name), c = stageCounts(A), sl = A.map(slaInfo).filter(Boolean), so = sl.filter(i => i.open), sd = sl.filter(i => !i.open);
+  const Vv = ALL.visits.filter(v => v[dim] === name), viol = ALL.items.filter(x => x[dim] === name && !x.empty && x.ty === 'مخالفة');
+  return {n:c.n, U:c.U, done:pct(c.n - c.U, c.n), closed:pct(c.C, c.n), late:pct(A.filter(x => x.late).length, c.n), val:sumBy(A, x => x.v1), over:so.length ? pct(so.filter(i => i.over).length, so.length) : null, ontime:sd.length ? pct(sd.filter(i => !i.over).length, sd.length) : null,
+    pd:sumBy(A.filter(isCons), x => x.pd || 0), vis:Vv.length, viol:viol.length, fines:sumBy(viol, x => x.am), vper:Vv.length ? viol.length / Vv.length * 100 : null};
+}
+function compare(dim, a, b){
+  const A = entStats(dim, a), B = entStats(dim, b), pf = v => v === null ? '—' : (Math.round(v * 10) / 10) + '%';
+  const M = [['عدد الأعمال', 'n', fmt, 0], ['تحت التنفيذ', 'U', fmt, 0], ['الإنجاز التنفيذي', 'done', pf, 1], ['نسبة المقفلة', 'closed', pf, 1], ['نسبة التأخر', 'late', pf, -1], ['القيمة (ر.س)', 'val', money, 0], ['تحت التنفيذ ومتجاوز للمدة', 'over', pf, -1], ['نُفّذ ضمن المدة', 'ontime', pf, 1], ['أيام الغرامة', 'pd', fmt, -1], ['زيارات السلامة والجودة', 'vis', fmt, 0], ['المخالفات', 'viol', fmt, -1], ['مخالفات لكل 100 زيارة', 'vper', v => v === null ? '—' : fmt1(v), -1], ['غرامات المخالفات (ر.س)', 'fines', fmt, -1]];
+  const rows = M.map(([l, k, f, dir]) => { const x = A[k], y = B[k], mx = Math.max(x || 0, y || 0) || 1; const win = dir && nn(x) && nn(y) && x !== y ? ((x > y) === (dir > 0) ? 'a' : 'b') : '';
+    return `<div class="cmp-r"><div class="cmp-v ${win === 'a' ? 'win' : ''}"><b class="num">${f(x)}</b><i style="width:${(x || 0) / mx * 100}%;background:var(--s1)"></i></div><span>${l}</span><div class="cmp-v ${win === 'b' ? 'win' : ''}"><i style="width:${(y || 0) / mx * 100}%;background:var(--s7)"></i><b class="num">${f(y)}</b></div></div>`; }).join('');
+  openModal('مقارنة — ' + esc(a) + ' و' + esc(b), `<div class="cmp"><div class="cmp-h"><b style="color:var(--s1)">${esc(a)}</b><span></span><b style="color:var(--s7)">${esc(b)}</b></div>${rows}</div><p class="note" style="margin:10px 0 0">الخانة المظلّلة بالأخضر هي الأفضل في المؤشر. الأرقام من كل البيانات دون فلاتر.</p>
+    <div class="pf-act"><button class="btn" data-prof="${dim}|${esc(a)}">ملف ${esc(a)}</button><button class="btn" data-prof="${dim}|${esc(b)}">ملف ${esc(b)}</button></div>`, 'wide');
+}
+document.addEventListener('click', e => {
+  let el;
+  if((el = e.target.closest('[data-dq]'))){ dqShow(el.dataset.dq); return; }
+  if((el = e.target.closest('[data-viewdel]'))){ e.stopPropagation(); e.preventDefault(); const v = viewsGet(); v.splice(Number(el.dataset.viewdel), 1); viewsSet(v); return; }
+  if((el = e.target.closest('[data-viewadd]'))){ e.stopPropagation(); viewAsk(); return; }
+  if((el = e.target.closest('[data-view]'))){ viewApply(Number(el.dataset.view)); return; }
+}, true);
+document.addEventListener('change', e => { if(e.target.id === 'pfCmp' && e.target.value){ const [dim, a] = e.target.dataset.me.split('|'); compare(dim, a, e.target.value); } });
 
 /* ==================== التشغيل ==================== */
 (async function init(){
