@@ -9,7 +9,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="icon-192.png">
 <script>
-var APP_VER = "202611120200";
+var APP_VER = "202611170900";
 if("serviceWorker" in navigator){ navigator.serviceWorker.register("sw.js", {updateViaCache:"none"}).then(function(r){ r.update(); }).catch(function(){}); }
 fetch("version.txt?t=" + Date.now(), {cache:"no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
   v = (v || "").trim();
@@ -2078,6 +2078,16 @@ body:not(.fx) .arc:hover{transform:none}
 body.fx .kpi.click:hover, body.fx .hstep:hover{will-change:transform}
 body.side-min #btnFx span{display:none} body.side-min #btnFx{justify-content:center}
 @media(max-width:900px){ #btnFx{display:none} }
+
+
+.rk-launch{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px}
+.rk-lc{display:flex; flex-direction:column; gap:12px; padding:16px 18px; border-radius:var(--radius,14px); background:var(--surface); border:1px solid var(--border); border-inline-start:4px solid var(--primary,#0f4c81)}
+.rk-lt b{display:block; font-size:16px; font-weight:600; margin-bottom:4px}
+.rk-lt small{color:var(--muted); line-height:1.7}
+.rk-lo{display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap; margin-top:auto}
+.rk-lo label{display:flex; flex-direction:column; gap:3px; font-size:11.5px; color:var(--muted)}
+.rk-lo .btn{margin-inline-start:auto}
+@media(max-width:900px){ .rk-launch{grid-template-columns:1fr} body.rk-open .rp-bar .hint{display:none} body.rk-open .rp-bar{padding:8px 10px; gap:6px} body.rk-open .rp-bar b{font-size:12px} }
 
 </style>
 </head>
@@ -5243,7 +5253,7 @@ function renderReports(){
       ${rows.map(r => `<tr style="${s.boldPrefix && String(r[0]).indexOf(s.boldPrefix) === 0 || (s.boldPrefix && String(r[1] || '').indexOf(s.boldPrefix) === 0) ? 'font-weight:800;background:var(--surface-3)' : ''}">${r.map(v => `<td class="${typeof v === 'number' ? 'n num' : ''}">${esc(typeof v === 'number' ? fmt1(v) : v)}</td>`).join('')}</tr>`).join('') || `<tr><td colspan="${s.cols.length}" class="empty">لا توجد بيانات</td></tr>`}
       </tbody></table></div>${s.rows.length > lim ? `<div class="note">تظهر أول ${lim} صف في المعاينة والطباعة — ملف الإكسل يحوي جميع الصفوف (${fmt(s.rows.length)})</div>` : ''}`;
   }).join('');
-  pg.innerHTML = head('التقارير') + `<div class="rep-layout">
+  pg.innerHTML = head('التقارير') + rkLauncher() + `<div class="rep-layout">
     <div class="rep-list">${REPORTS.map(r => `<button class="rep-item ${REP.cur === r.k ? 'on' : ''}" data-rep="${r.k}"><b>${esc(r.t)}</b><small>${esc(r.d)}</small></button>`).join('')}
       <div class="note">جميع التقارير تخضع للفلاتر العامة في الشريط العلوي.</div></div>
     <div><div class="rep-tools">${pivTools}<span style="margin-inline-start:auto"></span>
@@ -5469,6 +5479,8 @@ function ckBuild(q){
     ['folder', 'اختيار ملفات الإكسل', () => linkMany()],
     ['clock', 'مراقبة التحديث', () => openMonitor()],
     ['play', 'الإحاطة التنفيذية (عرض للإدارة)', () => storyOpen()],
+    ['reports', 'التقرير الشهري للأداء (12 شريحة)', () => rkOpen('monthly')],
+    ['reports', 'التقرير المالي', () => rkOpen('finance')],
     ['screen', 'وضع العرض على الشاشة', () => presStart()],
     ['moon', 'تبديل الوضع الليلي / النهاري', () => $('#btnTheme').click()],
     ['fx', 'تبديل المؤثرات البصرية (تلقائية / كاملة / خفيفة)', () => fxCycle()],
@@ -6294,6 +6306,495 @@ function fxSample(){
   window.addEventListener('scroll', fxSample, {passive:true});
   document.addEventListener('click', e => { if(e.target.closest('#btnFx')) fxCycle(); });
 })();
+
+/* ==================== تقارير الإدارة: الأداء الشهري + المالي (قوالب العرض) ==================== */
+const RKC = {ink:'#0B2545', ink2:'#42526B', mut:'#7B8798', line:'#E2E7EE', soft:'#F3F5F9', gold:'#C8A24A',
+  U:'#E3A008', A:'#2F6FDE', T:'#D9679A', S:'#7B55D6', C:'#1B9A59', red:'#C5362B', pos:'#15794B', neg:'#B3261E', teal:'#0E8C8C'};
+const RK_ST = [['U','تحت التنفيذ'], ['A','تم التنفيذ'], ['T','مستلمة من إدارة الكهرباء'], ['S','أصدرت شهادة الإنجاز'], ['C','مقفلة']];
+const RK_MS = [['C','منجز'], ['A','جاري التنفيذ'], ['red','لم يبدأ']];
+const rkE = s => String(s === null || s === undefined ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]);
+const rkN = n => (n === null || n === undefined || isNaN(n)) ? '—' : Math.round(n).toLocaleString('en-US');
+const rkR1 = v => { const r = Math.round(v * 10) / 10; return String(r); };
+const rkP = (a, b) => b ? rkR1(a / b * 100) + '%' : '—';
+const rkPv = v => (v === null || v === undefined || isNaN(v)) ? '—' : rkR1(v) + '%';
+function rkK(v){
+  if(v === null || v === undefined || isNaN(v)) return '';
+  const a = Math.abs(v), s = v < 0 ? '-' : '';
+  if(a >= 1e6) return s + rkR1(a / 1e6) + 'M';
+  if(a >= 1e3) return s + rkR1(a / 1e3) + 'K';
+  return s + Math.round(a);
+}
+function rkAxis(all){
+  const hi = Math.max.apply(null, all.concat([1])) * 1.06, mn = Math.min(0, Math.min.apply(null, all));
+  if(mn >= 0) return [0, rkNice(hi), 4];
+  const step = rkNice((hi - mn) / 4);
+  const lo = -Math.ceil(-mn / step) * step, n = Math.max(4, Math.ceil((hi - lo) / step)); return [lo, lo + step * n, n];
+}
+function rkNice(m){
+  if(m <= 0) return 1;
+  const p = Math.pow(10, Math.floor(Math.log10(m))), f = m / p;
+  const n = f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 4 ? 4 : f <= 5 ? 5 : f <= 8 ? 8 : 10;
+  return n * p;
+}
+
+/* ---------- مكوّنات ---------- */
+function rkCard(title, body, o){ o = o || {}; return `<section class="rk-card ${o.cls || ''}" style="${o.style || ''}">${title ? `<h3>${title}${o.sub ? `<small>${o.sub}</small>` : ''}</h3>` : ''}${body}</section>`; }
+function rkKpi(l, v, s, c){ const len = String(v).replace(/<[^>]*>/g, '').length; return `<div class="rk-kpi ${len > 9 ? 'l3' : len > 6 ? 'l2' : ''}" style="--c:${c || RKC.ink}"><span>${l}</span><b>${v}</b>${s ? `<i>${s}</i>` : ''}</div>`; }
+function rkSeg(parts, o){
+  o = o || {}; const tot = parts.reduce((s, p) => s + Math.max(0, p[1]), 0) || 1;
+  return `<div class="rk-seg" style="height:${o.h || 14}px">${parts.map(p => p[1] > 0 ? `<i style="flex:${p[1]};background:${p[2]}">${o.lab && p[1] / tot > .07 ? rkP(p[1], tot) : ''}</i>` : '').join('')}</div>`;
+}
+/* مسار المراحل: شريط نسبي + أعمدة بالأرقام */
+function rkPipe(keys, vals, o){
+  o = o || {}; const tot = vals.reduce((s, v) => s + v, 0);
+  const big = Math.max.apply(null, vals) >= 10000; return `<div class="rk-pipe ${o.cls || ''} ${big ? 'k5' : ''}">${rkSeg(keys.map((k, i) => [k[1], vals[i], RKC[k[0]]]), {h:o.h || 12})}
+    <div class="rk-pipe-g" style="grid-template-columns:repeat(${keys.length},1fr)">${keys.map((k, i) => `<div style="--c:${RKC[k[0]]}"><em>${k[1]}</em><b>${rkN(vals[i])}</b><span>${rkP(vals[i], tot)}</span></div>`).join('')}</div></div>`;
+}
+function rkBars(rows, o){
+  o = o || {}; const mx = Math.max.apply(null, rows.map(r => r[1]).concat([1]));
+  return `<div class="rk-bars ${rows.length <= 3 ? 'xl' : rows.length <= 6 ? 'lg' : ''}">${rows.map((r, i) => `<div><span title="${rkE(r[0])}">${rkE(r[0])}</span><u><i style="width:${Math.max(1.5, r[1] / mx * 100)}%;background:${r[2] || o.color || RKC.ink}"></i></u><b>${o.fmt ? o.fmt(r[1]) : rkN(r[1])}</b></div>`).join('')}</div>`;
+}
+function rkTable(cols, rows, o){
+  o = o || {};
+  const th = o.head || `<tr>${cols.map(c => `<th class="${c.c || ''}" style="${c.w ? 'width:' + c.w : ''}">${c.t}</th>`).join('')}</tr>`;
+  return `<table class="rk-t ${o.cls || ''} ${o.stretch ? (rows.length <= 5 ? 'st airy' : rows.length <= 8 ? 'st' : '') : ''}"><thead>${th}</thead><tbody>${rows.map(r => `<tr class="${r.cls || ''}">${(r.v || r).map((v, i) => `<td class="${(cols[i] && cols[i].c) || ''}">${v}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+}
+function rkMeter(v, c){ return `<span class="rk-m"><u><i style="width:${Math.max(0, Math.min(100, v))}%;background:${c || RKC.A}"></i></u><b>${rkPv(v)}</b></span>`; }
+function rkLegend(items){ return `<div class="rk-leg">${items.map(i => `<span><i style="background:${i[1]}${i[2] ? ';height:3px;border-radius:0' : ''}"></i>${i[0]}</span>`).join('')}</div>`; }
+function rkDonut(parts, o){
+  o = o || {}; const sz = o.size || 150, r = sz / 2 - 13, cx = sz / 2, C = 2 * Math.PI * r, tot = parts.reduce((s, p) => s + p[1], 0) || 1;
+  let acc = 0;
+  const arcs = parts.map(p => { const len = p[1] / tot * C, s = `<circle cx="${cx}" cy="${cx}" r="${r}" fill="none" stroke="${p[2]}" stroke-width="20" stroke-dasharray="${Math.max(0, len - 1.5)} ${C}" stroke-dashoffset="${-acc}" transform="rotate(-90 ${cx} ${cx})"/>`; acc += len; return p[1] > 0 ? s : ''; }).join('');
+  return `<svg class="rk-dn" width="${sz}" height="${sz}" viewBox="0 0 ${sz} ${sz}"><circle cx="${cx}" cy="${cx}" r="${r}" fill="none" stroke="${RKC.soft}" stroke-width="20"/>${arcs}<text x="${cx}" y="${cx + 4}" text-anchor="middle" font-size="${o.fs || 28}" font-weight="600" fill="${RKC.ink}">${o.center || ''}</text><text x="${cx}" y="${cx + 22}" text-anchor="middle" font-size="11" fill="${RKC.mut}">${o.label || ''}</text></svg>`;
+}
+function rkStatList(parts){
+  const tot = parts.reduce((s, p) => s + p[1], 0);
+  return `<div class="rk-sl">${parts.map(p => `<div><i style="background:${p[2]}"></i><span>${p[0]}</span><b>${rkN(p[1])}</b><em>${rkP(p[1], tot)}</em></div>`).join('')}</div>`;
+}
+const RK_CH = [];
+function rkChart(fn, o){ RK_CH.push(fn); return `<div class="rk-chw" data-ch="${RK_CH.length - 1}" style="min-height:${(o && o.min) || 120}px"></div>`; }
+function rkFit(root){ (root || document).querySelectorAll('.rk-chw').forEach(el => { const fn = RK_CH[+el.dataset.ch]; if(!fn) return; el.innerHTML = ''; const w = el.clientWidth, h = el.clientHeight; el.innerHTML = fn(Math.max(200, w), Math.max(110, h)); }); }
+/* أعمدة مجمّعة */
+function rkCols(cats, series, o){ return rkChart((w, h) => rkColsSvg(cats, series, Object.assign({}, o, {w, h})), o); }
+function rkColsSvg(cats, series, o){
+  o = o || {}; const W = o.w || 560, H = o.h || 250, pl = 40, pr = 8, pt = 20, pb = 26, iw = W - pl - pr, ih = H - pt - pb;
+  const all = series.flatMap(s => s.vals), [lo, mx, nt] = rkAxis(all);
+  const  y = v => pt + ih - (v - lo) / (mx - lo) * ih, f = o.fmt || rkK;
+  const gw = iw / cats.length, bw = Math.min(46, gw * .78 / series.length);
+  let g = '';
+  for(let i = 0; i <= nt; i++){ const v = lo + (mx - lo) * i / nt; g += `<line x1="${pl}" x2="${W - pr}" y1="${y(v)}" y2="${y(v)}" stroke="${RKC.line}"/><text x="${pl - 6}" y="${y(v) + 3.5}" text-anchor="end" font-size="10" fill="${RKC.mut}">${f(v) || 0}</text>`; }
+  let b = '';
+  cats.forEach((c, ci) => {
+    const x0 = pl + gw * ci + (gw - bw * series.length) / 2;
+    series.forEach((s, si) => {
+      const v = s.vals[ci]; if(v === null || v === undefined) return;
+      const x = x0 + si * bw, yy = Math.min(y(v), y(0)), hh = Math.abs(y(v) - y(0));
+      if(v) b += `<rect x="${x + 1.5}" y="${yy}" width="${bw - 3}" height="${Math.max(1, hh)}" rx="2.5" fill="${s.color}"/>`;
+      if(v || o.zero) b += `<text x="${x + bw / 2}" y="${v < 0 ? yy + hh + 11 : yy - 4}" text-anchor="middle" font-size="${o.lfs || 10.5}" font-weight="600" fill="${v < 0 ? RKC.neg : RKC.ink}">${f(v) || 0}</text>`;
+    });
+    b += `<text x="${pl + gw * ci + gw / 2}" y="${H - 8}" text-anchor="middle" font-size="10.5" fill="${RKC.ink2}">${c}</text>`;
+  });
+  return `<svg class="rk-ch" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" style="direction:ltr">${g}${b}</svg>`;
+}
+/* خطوط */
+function rkLines(cats, series, o){ return rkChart((w, h) => rkLinesSvg(cats, series, Object.assign({}, o, {w, h})), o); }
+function rkLinesSvg(cats, series, o){
+  o = o || {}; const W = o.w || 560, H = o.h || 250, pl = 40, pr = 16, pt = 22, pb = 34, iw = W - pl - pr, ih = H - pt - pb;
+  const all = series.flatMap(s => s.vals), [lo, mx, nt] = rkAxis(all);
+  const  y = v => pt + ih - (v - lo) / (mx - lo) * ih, f = o.fmt || rkK;
+  const x = i => pl + (cats.length > 1 ? iw * (i + .5) / cats.length : iw / 2);
+  let g = '';
+  for(let i = 0; i <= nt; i++){ const v = lo + (mx - lo) * i / nt; g += `<line x1="${pl}" x2="${W - pr}" y1="${y(v)}" y2="${y(v)}" stroke="${RKC.line}"/><text x="${pl - 6}" y="${y(v) + 3.5}" text-anchor="end" font-size="10" fill="${RKC.mut}">${f(v) || 0}</text>`; }
+  cats.forEach((c, i) => { g += `<text x="${x(i)}" y="${H - 8}" text-anchor="middle" font-size="10.5" fill="${RKC.ink2}">${c}</text>`; });
+  let b = '';
+  series.forEach((s, si) => {
+    const pts = s.vals.map((v, i) => [x(i), y(v)]);
+    const d = pts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
+    if(s.area) b += `<path d="${d} L${pts[pts.length - 1][0]} ${y(lo)} L${pts[0][0]} ${y(lo)} Z" fill="${s.color}" opacity=".1"/>`;
+    b += `<path d="${d}" fill="none" stroke="${s.color}" stroke-width="2.4" stroke-linejoin="round" ${s.dash ? 'stroke-dasharray="5 4"' : ''}/>`;
+    pts.forEach((p, i) => {
+      if(o.nolab){ b += `<circle cx="${p[0]}" cy="${p[1]}" r="3" fill="#fff" stroke="${s.color}" stroke-width="2"/>`; return; }
+      const v = s.vals[i], up = s.below ? 14 : -8;
+      b += `<circle cx="${p[0]}" cy="${p[1]}" r="3.2" fill="#fff" stroke="${s.color}" stroke-width="2"/><text x="${p[0]}" y="${p[1] + up}" text-anchor="middle" font-size="10" font-weight="600" fill="${s.color}" stroke="#fff" stroke-width="3" paint-order="stroke">${f(v) || 0}</text>`;
+    });
+  });
+  return `<svg class="rk-ch" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" style="direction:ltr">${g}${b}</svg>`;
+}
+function rkDelta(a, b, good){
+  if(a === null || b === null) return {d:'—', p:'—', cls:'', ar:''};
+  const d = b - a, up = d > 0, ok = d === 0 ? '' : ((good === 'down') === !up ? 'ok' : 'bad');
+  return {d:(d > 0 ? '+' : '') + rkN(d), p:a ? (Math.abs(d / a) > 9.99 ? (d > 0 ? '+' : '−') + '999%+' : (d > 0 ? '+' : '') + rkR1(d / a * 100) + '%') : '—', cls:ok, ar:d === 0 ? '●' : up ? '▲' : '▼'};
+}
+function rkChg(prev, cur){
+  if(prev === null || prev === undefined || !prev) return '<span class="rk-mu">—</span>';
+  const d = (cur - prev) / prev * 100;
+  return `<span class="rk-chg ${d > 0 ? 'u' : d < 0 ? 'd' : ''}">${d > 0 ? '▲' : d < 0 ? '▼' : '●'} ${Math.abs(d) > 999 ? '+999' : rkR1(Math.abs(d))}%</span>`;
+}
+
+/* ---------- الإطار ---------- */
+function rkSlide(D, n, title, sub, body){
+  return `<article class="rk-s"><header class="rk-hd"><div><h2>${title}</h2><p>${sub || ''}</p></div><div class="rk-tags"><span>${rkE(D.region)} · ${rkE(D.month)}</span>${D.sample ? '<span class="smp">نموذج توضيحي ببيانات تجريبية</span>' : ''}</div></header>
+    <div class="rk-bd">${body}</div>
+    <footer class="rk-ft"><span>الشركة السعودية لتطوير المشاريع — قطاع الإشراف</span><span>داخلي</span><b>${n}</b></footer></article>`;
+}
+function rkPage(D, n, title, body, tag){
+  return `<article class="rk-p"><header class="rk-hd"><div><h2>${title}</h2><p>التقرير المالي · منطقة ${rkE(D.region)}${tag ? ' · ' + tag : ''}</p></div><div class="rk-tags"><span>${rkE(D.period)}</span>${D.sample ? '<span class="smp">نموذج توضيحي ببيانات تجريبية — للشكل فقط</span>' : ''}</div></header>
+    <div class="rk-bd">${body}</div>
+    <footer class="rk-ft"><span>الشركة السعودية لتطوير المشاريع — إدارة مشاريع التوزيع — ${rkE(D.date)}</span><span>${rkE(D.period)}</span><b>صفحة ${n}</b></footer></article>`;
+}
+
+/* ==================== التقرير الشهري للأداء (١٢ شريحة) ==================== */
+function rkMonthly(D){
+  const S = []; RK_CH.length = 0;
+  /* 1 الغلاف */
+  S.push(`<article class="rk-s rk-cover"><div class="rk-cv-mark">${D.logo ? `<img src="${D.logo}" alt="PDC">` : 'PDC'}</div>
+    <div class="rk-cv-t"><p>قطاع الإشراف · إدارة مشاريع التوزيع</p><h1>التقرير الشهري للأداء</h1><h2>${rkE(D.region)} — عقد التوزيع الموحد</h2><hr><p class="per">الفترة: ${rkE(D.month)} · تراكمي حتى ${rkE(D.cum)}</p></div>
+    <div class="rk-cv-f"><span>داخلي — مقيد</span>${D.sample ? '<span>نموذج توضيحي ببيانات تجريبية</span>' : ''}</div></article>`);
+
+  /* 2 دورة الحياة */
+  const life = (L, title) => rkCard(title, `<div class="rk-life"><div class="tot ${L.n >= 10000 ? 'k5' : L.n >= 1000 ? 'k4' : ''}"><b>${rkN(L.n)}</b><span>إجمالي الأوامر</span></div>
+      <div class="rk-k4">${rkKpi('المنفَّذة', rkN(L.exec), rkP(L.exec, L.n) + ' من الإجمالي', RKC.A)}${rkKpi('تحت التنفيذ', rkN(L.under), rkP(L.under, L.n) + ' من الإجمالي', RKC.U)}${rkKpi('الإنشاءات', rkN(L.cons), rkP(L.cons, L.n) + ' من الإجمالي', RKC.ink)}${rkKpi('الصيانة والعمليات', rkN(L.maint), rkP(L.maint, L.n) + ' من الإجمالي', RKC.S)}</div></div>
+      <h4>توزيع الأوامر على المراحل الخمس</h4>${rkPipe(RK_ST, L.st, {h:22, cls:'big'})}`, {cls:'grow'});
+  S.push(rkSlide(D, 2, 'نظرة عامة على دورة حياة الأوامر', 'المراحل الخمس: تحت التنفيذ ← تم التنفيذ ← مستلمة ← شهادة الإنجاز ← مقفلة',
+    `<div class="rk-g2">${life(D.life.cum, 'دورة الحياة — تراكمي حتى ' + rkE(D.cum))}${life(D.life.mon, 'دورة الحياة — أوامر ' + rkE(D.month) + ' <small>المسندة خلال الشهر</small>')}</div>`));
+
+  /* 3 المقارنة الشهرية */
+  const cmpRows = D.cmp.map(r => { const x = rkDelta(r.a, r.b, r.good); const mx = Math.max(r.a, r.b, 1);
+    return {v:[`<b>${r.t}</b>`, rkN(r.a), `<b class="big">${rkN(r.b)}</b>`, `<span class="rk-duo"><i style="width:${r.a / mx * 100}%"></i><i class="b" style="width:${r.b / mx * 100}%"></i></span>`, `<span class="rk-dl ${x.cls}">${x.d}</span>`, `<span class="rk-dl ${x.cls}">${x.p}</span>`, `<span class="rk-ar ${x.cls}">${x.ar}</span>`]}; });
+  S.push(rkSlide(D, 3, 'مقارنة الأداء الشهري', `${rkE(D.prev)} مقابل ${rkE(D.month)} · الأعمال المنجزة والمسندة خلال كل شهر`,
+    rkTable([{t:'المؤشر', c:'r'}, {t:rkE(D.prev), w:'120px'}, {t:rkE(D.month), w:'120px'}, {t:'مقارنة بصرية', w:'190px'}, {t:'التغير', w:'90px'}, {t:'التغير %', w:'100px'}, {t:'الاتجاه', w:'80px'}], cmpRows, {cls:'cmp'}) +
+    `<p class="rk-note"><span class="rk-ar ok">▲▼</span> أخضر عند التحسن و<span class="rk-ar bad">▲▼</span> أحمر عند التراجع حسب طبيعة المؤشر ${D.cmpNote ? ' · ' + D.cmpNote : ''}</p>`));
+
+  /* 4 إحصاءات التنفيذ والزيارات */
+  const q = D.qs, qrow = (ic, t, c, cells) => `<div class="rk-qr" style="--c:${c}"><div class="h">${ic}<b>${t}</b></div>${cells.map(x => `<div><span>${x[0]}</span><b>${x[1]}</b></div>`).join('')}</div>`;
+  const IC = {stop:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M6 12h12"/></svg>', saf:'<svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></svg>', qual:'<svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></svg>', vis:'<svg viewBox="0 0 24 24"><path d="M12 21s-7-6-7-11a7 7 0 0114 0c0 5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>'};
+  S.push(rkSlide(D, 4, 'إحصاءات التنفيذ والزيارات الميدانية', 'تراكمي حتى نهاية الشهر · الزيارات خلال الشهر',
+    `<div class="rk-g2">${rkCard('إحصاءات التنفيذ', `<div class="rk-col"><div><h4>الإنشاءات <b>${rkN(D.cons.n)}</b> أمراً</h4>${rkPipe(RK_ST, D.cons.st, {h:20, cls:'big'})}</div><div><h4>الصيانة <b>${rkN(D.maint.n)}</b> مهمة</h4>${rkPipe(RK_MS, D.maint.ds, {h:20, cls:'big'})}</div></div>`, {cls:'grow'})}
+     ${rkCard('الزيارات الميدانية — ' + rkE(D.month), `<div class="rk-qs">
+        ${qrow(IC.vis, 'الزيارات الميدانية', RKC.ink, [['العدد', rkN(q.vis.n)], ['بها مخالفات', rkN(q.vis.withv)], ['الغرامات (ر.س)', rkN(q.vis.fines)]])}
+        ${qrow(IC.saf, 'مخالفات السلامة', RKC.red, [['العدد', rkN(q.saf.n)], ['المعدل لكل زيارة', rkPv(q.saf.rate)], ['نسبة الالتزام', rkPv(q.saf.comp)]])}
+        ${qrow(IC.qual, 'مخالفات الجودة', RKC.U, [['العدد', rkN(q.qual.n)], ['المعدل لكل زيارة', rkPv(q.qual.rate)], ['نسبة الالتزام', rkPv(q.qual.comp)]])}
+        ${qrow(IC.stop, 'إيقاف العمل', RKC.T, [['العدد', rkN(q.stop.n)], ['المعدل لكل زيارة', rkPv(q.stop.rate)], ['نسبة الالتزام', rkPv(q.stop.comp)]])}</div>`, {cls:'grow'})}</div>`));
+
+  /* 5 الإنشاءات — تفاصيل */
+  const c = D.cdet;
+  S.push(rkSlide(D, 5, 'الإنشاءات — تفاصيل الأوامر', 'تراكمي حتى نهاية الشهر',
+    `<div class="rk-k4 wide">${rkKpi('إجمالي أوامر العمل', rkN(c.n), 'أمر إنشاءات', RKC.ink)}${rkKpi('توصيلات', rkN(c.conn), rkP(c.conn, c.n), RKC.A)}${rkKpi('مشاريع', rkN(c.proj), rkP(c.proj, c.n), RKC.S)}${rkKpi('نسبة التنفيذ', rkP(c.execN, c.n), rkN(c.execN) + ' أمراً منفَّذاً', RKC.C)}</div>
+     <div class="rk-g3">${rkCard('الأوامر حسب المقاول', rkBars(c.byCt, {color:RKC.ink}), {cls:'grow', sub:c.ctNote || ''})}
+     ${rkCard('حالة الأوامر', `<div class="rk-dw">${rkDonut(RK_ST.map((k, i) => [k[1], D.cons.st[i], RKC[k[0]]]), {center:rkN(c.n), label:'أمر', size:200, fs:c.n > 9999 ? 26 : 34})}</div>${rkStatList(RK_ST.map((k, i) => [k[1], D.cons.st[i], RKC[k[0]]]))}`, {cls:'grow'})}
+     ${rkCard('الأوامر حسب نوع العمل', rkBars(c.byType, {color:RKC.teal}), {cls:'grow'})}</div>`));
+
+  /* 6 بطاقة أداء المقاولين — إنشاءات */
+  const p = D.cperf;
+  S.push(rkSlide(D, 6, 'الإنشاءات — بطاقة أداء المقاولين', 'التسليم والتأخير والتصاريح والمستندات',
+    `<div class="rk-k5">${rkKpi('أوامر تتطلب تصريحاً', rkN(p.need), '', RKC.ink)}${rkKpi('تصاريح صادرة', rkN(p.issued), rkP(p.issued, p.need), RKC.C)}${rkKpi('تصاريح قيد الإجراء', rkN(p.proc), rkP(p.proc, p.need), RKC.U)}${rkKpi('أوامر منفَّذة', rkN(p.execOrders), '', RKC.A)}${rkKpi('مستندات مسلَّمة', rkN(p.docs), rkP(p.docs, p.execOrders) + ' من المنفَّذة', RKC.S)}</div>` +
+    rkCard('', rkTable([{t:'المقاول', c:'r'}, {t:'الأوامر'}, {t:'المنفَّذ'}, {t:'نسبة التنفيذ'}, {t:'ضمن المدة'}, {t:'مستلمة فأعلى'}, {t:'تأخر إغلاق'}, {t:'التصاريح<br>الصادرة / المطلوبة'}, {t:'تسليم المستندات'}],
+      p.rows.map(r => [`<b>${rkE(r.ct)}</b>`, rkN(r.n), rkN(r.ex), rkMeter(r.exP, RKC.A), rkMeter(r.inTime, RKC.C), rkMeter(r.recv, RKC.S), `<span class="rk-pill ${r.lc ? 'bad' : ''}">${rkN(r.lc)}</span>`, `<b>${rkN(r.pi)}</b> / ${rkN(r.pr)}`, rkMeter(r.docs, RKC.teal)]), {cls:'perf', stretch:1}) + (p.note ? `<p class="rk-note">${p.note}</p>` : ''), {cls:'grow'})));
+
+  /* 7 الصيانة — تفاصيل */
+  const m = D.mdet;
+  S.push(rkSlide(D, 7, 'العمليات والصيانة — تفاصيل المهام', 'تراكمي حتى نهاية الشهر',
+    `<div class="rk-k4 wide">${rkKpi('إجمالي المهام', rkN(m.n), 'مهمة صيانة', RKC.ink)}${rkKpi('طارئ', rkN(m.em), rkP(m.em, m.n), RKC.red)}${rkKpi('مجدول', rkN(m.sch), rkP(m.sch, m.n), RKC.A)}${rkKpi('نسبة الإنجاز', rkP(m.done, m.n), rkN(m.done) + ' مهمة منجزة', RKC.C)}</div>
+     <div class="rk-g3">${rkCard('المهام حسب المقاول', rkBars(m.byCt, {color:RKC.ink}), {cls:'grow', sub:m.ctNote || ''})}
+     ${rkCard('حالة المهام', `<div class="rk-dw">${rkDonut(RK_MS.map((k, i) => [k[1], D.maint.ds[i], RKC[k[0]]]), {center:rkN(m.n), label:'مهمة', size:200, fs:m.n > 9999 ? 26 : 34})}</div>${rkStatList(RK_MS.map((k, i) => [k[1], D.maint.ds[i], RKC[k[0]]]))}`, {cls:'grow'})}
+     ${rkCard('المهام حسب النوع', rkBars(m.byType, {color:RKC.teal}), {cls:'grow'})}</div>`));
+
+  /* 8 الصيانة — التسليم والأرشفة */
+  const mp = D.mperf;
+  S.push(rkSlide(D, 8, 'العمليات والصيانة — التسليم والأرشفة وملف الأعطال', 'بطاقة أداء مقاولي الصيانة',
+    rkCard('', rkTable([{t:'المقاول', c:'r'}, {t:'المهام'}, {t:'المنجز'}, {t:'نسبة الإنجاز'}, {t:'طارئ'}, {t:'مجدول'}, {t:'سُلّم للصيانة'}, {t:'نسبة التسليم'}, {t:'لم يبدأ > 5 أيام'}],
+      mp.rows.map(r => [`<b>${rkE(r.ct)}</b>`, rkN(r.n), rkN(r.done), rkMeter(r.n ? r.done / r.n * 100 : 0, RKC.C), rkN(r.em), rkN(r.sch), rkN(r.hand), rkMeter(r.handP, RKC.teal), `<span class="rk-pill ${r.ns5 ? 'bad' : ''}">${rkN(r.ns5)}</span>`]), {cls:'perf', stretch:1}), {cls:'grow'}) +
+    `<div class="rk-g2 fill">${rkCard('أرشفة المستندات', `<div class="rk-k3">${rkKpi('المهام المنجزة', rkN(mp.doneN), '', RKC.ink)}${rkKpi('سُلّمت للصيانة', rkN(mp.hand), rkP(mp.hand, mp.doneN), RKC.C)}${rkKpi('غير مسلَّمة', rkN(mp.doneN - mp.hand), rkP(mp.doneN - mp.hand, mp.doneN), RKC.red)}</div>${rkSeg([['سُلّمت', mp.hand, RKC.C], ['غير مسلَّمة', mp.doneN - mp.hand, RKC.red]], {h:22, lab:1})}${rkLegend([['سُلّمت للصيانة', RKC.C], ['غير مسلَّمة', RKC.red]])}`, {cls:'grow'})}
+     ${rkCard('أكثر أوصاف الأعطال تكراراً', rkBars(mp.faults, {color:RKC.red}), {cls:'grow'})}</div>`));
+
+  /* 9 السلامة والجودة */
+  const sf = D.sq.saf, ql = D.sq.qual;
+  const sqCol = (title, c, kp, t1, top, byCt) => rkCard(title, `<div class="rk-k4 tight">${kp}</div><div class="rk-g2 in"><div><h4>${t1}</h4>${top.length ? rkBars(top, {color:c}) : '<p class="rk-mu">لا يوجد</p>'}</div><div><h4>المخالفات حسب المقاول</h4>${byCt.length ? rkBars(byCt, {color:RKC.ink}) : '<p class="rk-mu">لا يوجد</p>'}</div></div>`, {cls:'grow', style:'--hc:' + c});
+  S.push(rkSlide(D, 9, 'السلامة والجودة', 'الزيارات والمخالفات خلال ' + rkE(D.month),
+    `<div class="rk-g2">${sqCol('السلامة', RKC.red, rkKpi('المخالفات', rkN(sf.viol), '', RKC.red) + rkKpi('إيقاف العمل', rkN(sf.stop), '', RKC.T) + rkKpi('الالتزام', rkPv(sf.comp), 'لكل زيارة', RKC.C) + rkKpi('الزيارات', rkN(sf.vis), '', RKC.ink), 'أكثر المخالفات رصداً', sf.top, sf.byCt)}
+     ${sqCol('الجودة', RKC.U, rkKpi('المخالفات', rkN(ql.viol), '', RKC.U) + rkKpi('ملاحظات مغلقة', rkN(ql.closed), rkPv(ql.closedP), RKC.A) + rkKpi('الالتزام', rkPv(ql.comp), 'لكل زيارة', RKC.C) + rkKpi('غرامات (ر.س)', rkN(ql.fines), '', RKC.ink), 'أكثر الملاحظات رصداً', ql.top, ql.byCt)}</div>`));
+
+  /* 10 تقييم المقاولين */
+  const ev = D.eval, gcls = g => /ممتاز|جيد/.test(g) ? 'ok' : /مقبول/.test(g) ? 'mid' : 'bad', scol = v => v >= 70 ? RKC.C : v >= 60 ? RKC.U : RKC.red;
+  S.push(rkSlide(D, 10, 'تقييم المقاولين', rkE(ev.weights),
+    `<div class="rk-g73">${rkCard('بطاقة التقييم', rkTable([{t:'#', w:'40px'}, {t:'المقاول', c:'r'}, {t:'الأعمال'}, {t:'التنفيذ'}, {t:'الجودة'}, {t:'السلامة'}, {t:'الإجمالي'}, {t:'التقييم'}],
+        ev.rows.map((r, i) => [`<span class="rk-rk">${i + 1}</span>`, `<b>${rkE(r.ct)}</b>`, rkN(r.n), r.ex.toFixed(1), r.q.toFixed(1), r.s.toFixed(1), `<b class="big" style="color:${scol(r.total)}">${r.total.toFixed(1)}</b>`, `<span class="rk-pill ${gcls(r.grade)}">${r.grade}</span>`]), {cls:'perf', stretch:1}) + `<p class="rk-note">${rkE(ev.note || '')}</p>`, {cls:'grow'})}
+     ${rkCard('الترتيب العام', rkBars(ev.rows.map(r => [r.ct, r.total, scol(r.total)]), {fmt:v => v.toFixed(1)}) + rkLegend([['70 فأعلى', RKC.C], ['60 – 69.9', RKC.U], ['أقل من 60', RKC.red]]), {cls:'grow'})}</div>`));
+
+  /* 11 الملخص المالي */
+  const f = D.fin;
+  S.push(rkSlide(D, 11, 'الملخص المالي', `قيمة PDC (الدخل) ومصروف الاستشاري و PMSS · ${rkE(D.month)}`,
+    `<div class="rk-k6">${rkKpi('إسناد الشهر — PDC', rkN(f.assignV), rkN(f.assignN) + ' أمراً', RKC.A)}${rkKpi('إقفال الشهر — PDC', rkN(f.closeV), rkN(f.closeN) + ' أمراً', RKC.C)}${rkKpi('مصروف الاستشاري', rkN(f.cons), 'على أوامر الشهر', RKC.S)}${rkKpi('مصروف PMSS', rkN(f.pmss), 'تكلفة الموظفين', RKC.T)}${rkKpi('الربح المتوقع', `<span style="color:${f.profit < 0 ? RKC.neg : RKC.pos}">${rkN(f.profit)}</span>`, 'الشهر السابق ' + rkN(f.prevProfit), RKC.pos)}${rkKpi('المتبقي المفتوح', rkN(f.open), 'أمراً (تراكمي)', RKC.U)}</div>
+     <div class="rk-g2 fill">${rkCard(`الإسناد والإقفال — آخر ${f.months.length} أشهر`, rkCols(f.months, [{vals:f.assigned, color:RKC.ink}, {vals:f.closed, color:RKC.C}], {fmt:rkN}) + rkLegend([['مسندة', RKC.ink], ['مقفلة', RKC.C]]), {cls:'grow'})}
+     ${rkCard('الدخل والمصروف والربح (ر.س)', rkCols(f.months, [{vals:f.income, color:RKC.A}, {vals:f.expense, color:RKC.S}, {vals:f.profitM, color:RKC.C}], {lfs:10}) + rkLegend([['دخل PDC', RKC.A], ['استشاري + PMSS', RKC.S], ['الربح', RKC.C]]), {cls:'grow'})}</div>`));
+
+  /* 12 المستهدفات والتوصيات */
+  const t = D.tg;
+  S.push(rkSlide(D, 12, 'مستهدفات الشهر القادم والتوصيات', 'مستهدفات مقترحة من اتجاه الأشهر السابقة — للاعتماد',
+    `<div class="rk-g64">${rkCard('المستهدفات', rkTable([{t:'المؤشر', c:'r'}, {t:rkE(D.prev)}, {t:rkE(D.month)}, {t:'مستهدف الشهر القادم'}, {t:'الأساس'}, {t:'الحالة'}],
+        t.rows.map(r => [`<b>${r.t}</b>`, rkN(r.a), rkN(r.b), `<b class="big">${rkN(r.target)}</b>`, r.basis, `<span class="rk-pill ${r.ok ? 'ok' : 'bad'}">${r.ok ? '✓ تحقق' : '✗ لم يتحقق'}</span>`]), {cls:'perf', stretch:1}), {cls:'grow'})}
+     ${rkCard('التوصيات', `<ol class="rk-rec">${t.recs.map(x => `<li>${rkE(x)}</li>`).join('')}</ol>`, {cls:'grow'})}</div>`));
+  return S;
+}
+
+/* ==================== التقرير المالي ==================== */
+function rkFinance(D){
+  RK_CH.length = 0; const P = [], sum = (a, f) => a.reduce((s, x) => s + (f(x) || 0), 0);
+  const cats = D.cats, grp = g => cats.filter(x => x.grp === g);
+  const tot = a => ({a:[0, 1, 2, 3].map(i => sum(a, x => x.a[i])), c:[0, 1, 2, 3].map(i => sum(a, x => x.c[i]))});
+  const T = tot(cats), k = D.kp;
+  /* 1 الملخص */
+  const crow = (t, x, cls) => ({cls, v:[`<b>${t}</b>`, rkN(x.a[0]), rkN(x.a[1]), rkN(x.a[2]), rkN(x.a[3]), rkN(x.c[0]), rkN(x.c[1]), rkN(x.c[2]), rkN(x.c[3]), rkMeter(x.a[0] ? x.c[0] / x.a[0] * 100 : 0, RKC.C)]});
+  const rows1 = [];
+  [['c', 'إجمالي إنشاءات'], ['m', 'إجمالي صيانة']].forEach(g => { const a = grp(g[0]); if(!a.length) return; a.forEach(x => rows1.push(crow(rkE(x.t), x))); rows1.push(crow(g[1], tot(a), 'sub')); });
+  rows1.push(crow('الإجمالي', T, 'tot'));
+  const head1 = `<tr><th rowspan="2" class="r">الفئة</th><th colspan="4" class="ga">المسندة</th><th colspan="5" class="gc">المقفلة</th></tr><tr><th class="ga">العدد</th><th class="ga">المقاول</th><th class="ga">PDC</th><th class="ga">مصروف الاستشاري</th><th class="gc">العدد</th><th class="gc">المقاول</th><th class="gc">PDC</th><th class="gc">مصروف الاستشاري</th><th class="gc" style="width:120px">نسبة الإقفال</th></tr>`;
+  const cl = T.c[2], op = T.a[2] - T.c[2];
+  P.push(rkPage(D, 1, 'الملخص المالي',
+    `<div class="rk-k6">${rkKpi('قيمة المقاول (مرجعي)', rkN(k.ct), 'ر.س', RKC.ink)}${rkKpi('قيمة PDC (الدخل)', rkN(k.pdc), rkP(k.pdc, k.ct) + ' من قيمة المقاول', RKC.A)}${rkKpi('مصروف الاستشاري', rkN(k.cons), rkP(k.cons, k.ct) + ' من قيمة المقاول', RKC.S)}${rkKpi('مصروف PMSS', rkN(k.pmss), 'تكلفة الموظفين', RKC.T)}${rkKpi('الربح المتوقع', `<span style="color:${k.profit < 0 ? RKC.neg : RKC.pos}">${rkN(k.profit)}</span>`, 'PDC − الاستشاري − PMSS', RKC.pos)}${rkKpi('نسبة الإقفال', rkP(k.closeN, k.n), `${rkN(k.closeN)} من ${rkN(k.n)} أمر`, RKC.U)}</div>` +
+    rkCard('إجمالي أوامر العمل المسندة والمقفلة حسب الفئة — العدد والمبالغ والمصاريف (ر.س)', rkTable([], rows1, {head:head1, cls:'fin'}) +
+      `<div class="rk-pm"><b>مصروف PMSS (تكلفة الموظفين)</b><span>إنشاءات ${rkN(D.pmssSplit.c)}</span><span>عمليات وصيانة ${rkN(D.pmssSplit.m)}</span><span class="t">الإجمالي ${rkN(k.pmss)} ر.س</span></div>${D.note ? `<p class="rk-note" style="padding-top:6px">${rkE(D.note)}</p>` : ''}`, {sub:'المقفلة = أوامر في مرحلة مقفلة', cls:'grow'}) +
+    `<div class="rk-g2">${rkCard('توزيع قيمة PDC بين المسندة والمقفلة', rkSeg([['مقفلة', cl, RKC.C], ['مسندة غير مقفلة', op, RKC.U]], {h:26, lab:1}) + `<div class="rk-sl row">${[['مقفلة', cl, RKC.C], ['مسندة غير مقفلة', op, RKC.U]].map(x => `<div><i style="background:${x[2]}"></i><span>${x[0]}</span><b>${rkN(x[1])}</b></div>`).join('')}</div>`)}
+     ${rkCard('أين تذهب قيمة PDC (دخل الأوامر المسندة)', rkSeg([['استشاري', k.cons, RKC.S], ['PMSS', k.pmss, RKC.T], ['الربح المتوقع', Math.max(0, k.profit), RKC.C]], {h:26, lab:1}) + `<div class="rk-sl row">${[['استشاري', k.cons, RKC.S], ['PMSS', k.pmss, RKC.T], ['الربح المتوقع', k.profit, RKC.C]].map(x => `<div><i style="background:${x[2]}"></i><span>${x[0]}</span><b>${rkN(x[1])}</b></div>`).join('')}</div>`)}</div>`));
+
+  /* 2 الإسناد والإقفال الشهري */
+  const M = D.months; let cum = 0;
+  M.forEach(x => { x.net = x.apdc - x.acons - x.pmss; cum += x.an - x.cn; x.open = cum; });
+  const ml = M.map(x => x.m);
+  const rows2 = M.map((x, i) => ({v:[`<b>${x.m}</b>`, rkN(x.an), i ? rkChg(M[i - 1].an, x.an) : '<span class="rk-mu">—</span>', rkN(x.apdc), rkN(x.acons), rkN(x.cn), i ? rkChg(M[i - 1].cn, x.cn) : '<span class="rk-mu">—</span>', rkN(x.cpdc), rkN(x.ccons), rkN(x.pmss), `<b style="color:${x.net < 0 ? RKC.neg : RKC.pos}">${rkN(x.net)}</b>`, `<b>${rkN(x.open)}</b>`]}));
+  rows2.push({cls:'tot', v:['<b>الإجمالي</b>', rkN(sum(M, x => x.an)), '', rkN(sum(M, x => x.apdc)), rkN(sum(M, x => x.acons)), rkN(sum(M, x => x.cn)), '', rkN(sum(M, x => x.cpdc)), rkN(sum(M, x => x.ccons)), rkN(sum(M, x => x.pmss)), rkN(sum(M, x => x.net)), rkN(cum)]});
+  const head2 = `<tr><th rowspan="2" class="r">الشهر</th><th colspan="4" class="ga">الإسناد</th><th colspan="4" class="gc">الإقفال</th><th rowspan="2" class="gp">مصروف PMSS</th><th rowspan="2" class="gp">صافي الربح المتوقع</th><th rowspan="2" class="gp">المتبقي المفتوح</th></tr><tr><th class="ga">العدد</th><th class="ga">التغير</th><th class="ga">قيمة PDC</th><th class="ga">مصروف الاستشاري</th><th class="gc">العدد</th><th class="gc">التغير</th><th class="gc">قيمة PDC</th><th class="gc">مصروف الاستشاري</th></tr>`;
+  P.push(rkPage(D, 2, 'الإسناد والإقفال الشهري',
+    rkCard('الجدول الشهري التفصيلي (ر.س)', rkTable([], rows2, {head:head2, cls:'fin'}), {sub:'الإسناد حسب تاريخ الإسناد · الإقفال حسب تاريخ الانتهاء للأعمال المقفلة'}) +
+    `<div class="rk-g2 fill">${rkCard('الإسناد مقابل الإقفال (عدد الأوامر)', rkCols(ml, [{vals:M.map(x => x.an), color:RKC.ink}, {vals:M.map(x => x.cn), color:RKC.C}], {fmt:rkN}) + rkLegend([['مسندة', RKC.ink], ['مقفلة', RKC.C]]), {cls:'grow'})}
+     ${rkCard('قيمة PDC: المسندة مقابل المقفلة (ر.س)', rkCols(ml, [{vals:M.map(x => x.apdc), color:RKC.A}, {vals:M.map(x => x.cpdc), color:RKC.C}], {}) + rkLegend([['مسندة', RKC.A], ['مقفلة', RKC.C]]), {cls:'grow'})}</div>`));
+
+  /* 3 الاتجاهات */
+  const L = M[M.length - 1], Pv = M.length > 1 ? M[M.length - 2] : null;
+  const chTxt = (a, b) => !a ? '—' : (b >= a ? '▲ ' : '▼ ') + rkR1(Math.abs((b - a) / a * 100)) + '%';
+  const read = D.read || [
+    `الإسناد في ${L.m}: ${rkN(L.an)} أمراً${Pv ? ` مقابل ${rkN(Pv.an)} في ${Pv.m} (${chTxt(Pv.an, L.an)})` : ''}.`,
+    `الإقفال في ${L.m}: ${rkN(L.cn)} أمراً${Pv ? ` مقابل ${rkN(Pv.cn)} (${chTxt(Pv.cn, L.cn)})` : ''}.`,
+    `المتبقي المفتوح التراكمي ${rkN(cum)} أمراً — ${cum > 0 ? 'الإسناد يسبق الإقفال' : 'الإقفال يواكب الإسناد'}.`,
+    `نسبة الإقفال التراكمية ${rkP(k.closeN, k.n)}.`];
+  P.push(rkPage(D, 3, 'اتجاهات الإسناد والإقفال والمصاريف',
+    `<div class="rk-g2 fill">${rkCard('اتجاه الإسناد والإقفال الشهري (عدد)', rkLines(ml, [{vals:M.map(x => x.an), color:RKC.ink}, {vals:M.map(x => x.cn), color:RKC.C, below:1}], {fmt:rkN}) + rkLegend([['مسندة', RKC.ink], ['مقفلة', RKC.C]]), {cls:'grow'})}
+     ${rkCard('المتبقي المفتوح التراكمي (مسندة − مقفلة)', rkLines(ml, [{vals:M.map(x => x.open), color:RKC.red, area:1}], {fmt:rkN}) + rkLegend([['المتبقي المفتوح', RKC.red]]), {cls:'grow'})}</div>
+     <div class="rk-g2 fill">${rkCard('مصروف PMSS الشهري (ر.س)', rkCols(ml, [{vals:M.map(x => x.pmss), color:RKC.T}], {}) + rkLegend([['PMSS', RKC.T]]), {cls:'grow'})}
+     ${rkCard('الدخل والمصاريف والربح المتوقع شهرياً (ر.س)', rkLines(ml, [{vals:M.map(x => x.apdc), color:RKC.A}, {vals:M.map(x => x.acons + x.pmss), color:RKC.S}, {vals:M.map(x => x.net), color:RKC.C, dash:1, below:1}], {}) + rkLegend([['دخل PDC', RKC.A], ['مصروف الاستشاري + PMSS', RKC.S], ['الربح المتوقع', RKC.C]]), {cls:'grow'})}</div>` +
+    rkCard('قراءة الاتجاه', `<ul class="rk-read">${read.map(x => `<li>${rkE(x)}</li>`).join('')}</ul>`)));
+
+  /* 4 مقارنة الاستشاريين */
+  const SB = D.subs, consTot = sum(SB, x => x.a[3]) + (D.subOther ? D.subOther.a[3] : 0);
+  const palette = [RKC.ink, RKC.S, RKC.teal, RKC.U, RKC.T, RKC.A, RKC.C, RKC.red];
+  const srow = (x, cls, share) => ({cls, v:[`<b>${rkE(x.name)}</b>`, rkN(x.a[0]), rkN(x.a[1]), rkN(x.a[2]), rkN(x.a[3]), rkN(x.c[0]), rkN(x.c[1]), rkN(x.c[2]), rkP(x.c[0], x.a[0]), share === null ? '<b>100%</b>' : rkMeter(consTot ? x.a[3] / consTot * 100 : 0, RKC.S)]});
+  const allS = SB.concat(D.subOther ? [D.subOther] : []);
+  const rows4 = allS.map(x => srow(x, '', 1));
+  rows4.push(srow({name:'الإجمالي', a:[0, 1, 2, 3].map(i => sum(allS, x => x.a[i])), c:[0, 1, 2].map(i => sum(allS, x => x.c[i]))}, 'tot', null));
+  const head4 = `<tr><th rowspan="2" class="r">الاستشاري الفرعي</th><th colspan="4" class="ga">المسندة</th><th colspan="4" class="gc">المقفلة</th><th rowspan="2" class="gp" style="width:130px">حصة من المصروف</th></tr><tr><th class="ga">العدد</th><th class="ga">المقاول</th><th class="ga">PDC</th><th class="ga">المصروف</th><th class="gc">العدد</th><th class="gc">PDC</th><th class="gc">المصروف</th><th class="gc">نسبة الإقفال</th></tr>`;
+  const subVals = s => ml.map(mm => { const r = s.months.find(y => y.m === mm); return r ? r.cons : 0; });
+  P.push(rkPage(D, 4, 'الاستشاريون الفرعيون — مقارنة مالية',
+    rkCard('الإسناد والإقفال والمصروف لكل استشاري فرعي (ر.س)', rkTable([], rows4, {head:head4, cls:'fin'})) +
+    rkCard('مصروف الاستشاري الشهري لكل استشاري (ر.س)', rkLines(ml, SB.map((s, i) => ({vals:subVals(s), color:palette[i % palette.length], below:i % 2})), {nolab:SB.length > 3}) + rkLegend(SB.map((s, i) => [rkE(s.name), palette[i % palette.length]])), {cls:'grow'})));
+
+  /* 5… صفحة لكل استشاري */
+  SB.forEach((s, i) => {
+    const ms = s.months.map(x => x.m); let rem = 0;
+    const head5 = `<tr><th class="r">الفئة</th><th class="ga">مسندة</th><th class="ga">PDC</th><th class="ga">المصروف</th><th class="gc">مقفلة</th><th class="gc">PDC</th><th class="gc">المصروف</th><th class="gc">نسبة الإقفال</th></tr>`;
+    const cr = s.cats.map(x => [`<b>${rkE(x.t)}</b>`, rkN(x.n), rkN(x.pdc), rkN(x.cons), rkN(x.cn), rkN(x.cpdc), rkN(x.ccons), rkP(x.cn, x.n)]);
+    cr.push({cls:'tot', v:['<b>الإجمالي</b>', rkN(s.a[0]), rkN(s.a[2]), rkN(s.a[3]), rkN(s.c[0]), rkN(s.c[1]), rkN(s.c[2]), rkP(s.c[0], s.a[0])]});
+    const mr = s.months.map(x => { rem += x.n - x.cn; return [`<b>${x.m}</b>`, rkN(x.n), rkN(x.pdc), rkN(x.cons), rkN(x.cn), rkN(x.cpdc), rkN(x.ccons), `<b>${rkN(rem)}</b>`]; });
+    P.push(rkPage(D, 5 + i, rkE(s.name),
+      `<div class="rk-k6">${rkKpi('الأوامر المسندة', rkN(s.a[0]), `إنشاءات ${rkN(s.cN)} · صيانة ${rkN(s.mN)}`, RKC.ink)}${rkKpi('قيمة PDC', rkN(s.a[2]), 'ر.س', RKC.A)}${rkKpi('مصروف الاستشاري', rkN(s.a[3]), rkP(s.a[3], consTot) + ' من إجمالي المصروف', RKC.S)}${rkKpi('المقفلة', rkN(s.c[0]), rkP(s.c[0], s.a[0]), RKC.C)}${rkKpi('قيمة المقفلة PDC', rkN(s.c[1]), 'ر.س', RKC.teal)}${rkKpi('المتبقي المفتوح', rkN(s.a[0] - s.c[0]), rkN(s.a[2] - s.c[1]) + ' ر.س PDC', RKC.U)}</div>
+       <div class="rk-g2">${rkCard('حسب الفئة (ر.س)', rkTable([], cr, {head:head5, cls:'fin sm'}), {cls:'grow'})}${rkCard('الإسناد والإقفال الشهري (ر.س)', rkTable([], mr, {head:head5.replace('الفئة', 'الشهر').replace('نسبة الإقفال', 'المتبقي'), cls:'fin sm'}), {cls:'grow'})}</div>
+       <div class="rk-g2 fill">${rkCard('اتجاه الإسناد والإقفال (عدد)', rkLines(ms, [{vals:s.months.map(x => x.n), color:RKC.ink}, {vals:s.months.map(x => x.cn), color:RKC.C, below:1}], {fmt:rkN}) + rkLegend([['مسندة', RKC.ink], ['مقفلة', RKC.C]]), {cls:'grow'})}
+       ${rkCard('مصروف الاستشاري ودخل PDC (ر.س)', rkCols(ms, [{vals:s.months.map(x => x.pdc), color:RKC.A}, {vals:s.months.map(x => x.cons), color:RKC.S}], {}) + rkLegend([['دخل PDC', RKC.A], ['المصروف', RKC.S]]), {cls:'grow'})}</div>`, `استشاري فرعي ${i + 1} من ${SB.length}`));
+  });
+  return P;
+}
+
+/* ==================== تقارير الإدارة: حساب البيانات الفعلية + الفتح والطباعة ==================== */
+const RK_MN = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+const RK_FIRST = '2026-05';
+const RK_CSS = "/* ==================== تقارير الإدارة (قوالب العرض) ==================== */\n.rk{--ink:#0B2545;--ink2:#42526B;--mut:#7B8798;--line:#E2E7EE;--soft:#F3F5F9;--gold:#C8A24A;direction:rtl;color:var(--ink);font-family:\"Readex Pro\",\"Segoe UI\",Tahoma,sans-serif;font-variant-numeric:tabular-nums;-webkit-print-color-adjust:exact;print-color-adjust:exact}\n.rk *{box-sizing:border-box}\n.rk-s,.rk-p{position:relative;background:#fff;overflow:hidden;display:flex;flex-direction:column;margin:0 auto 18px;box-shadow:0 4px 22px rgba(11,37,69,.16);break-after:page;page-break-after:always;font-size:12.5px;line-height:1.45;text-align:right}\n.rk-s{width:1280px;height:720px}\n.rk-p{width:1122px;height:793px}\n.rk-hd{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;padding:22px 40px 14px;position:relative}\n.rk-p .rk-hd{padding:20px 34px 12px}\n.rk-hd::after{content:\"\";position:absolute;inset-inline:40px;bottom:0;height:2px;background:linear-gradient(to left,var(--gold) 0 84px,var(--ink) 84px)}\n.rk-p .rk-hd::after{inset-inline:34px}\n.rk-hd h2{margin:0;font-size:27px;font-weight:600;letter-spacing:0;line-height:1.25}\n.rk-p .rk-hd h2{font-size:23px}\n.rk-hd p{margin:3px 0 0;font-size:12.5px;color:var(--mut)}\n.rk-tags{display:flex;gap:8px;align-items:center;flex-shrink:0;padding-bottom:3px}\n.rk-tags span{font-size:11.5px;padding:4px 12px;border-radius:99px;background:var(--soft);color:var(--ink2);font-weight:500;white-space:nowrap}\n.rk-tags .smp{background:#FBF3DC;color:#7A5A00}\n.rk-bd{flex:1;min-height:0;padding:16px 40px 10px;display:flex;flex-direction:column;gap:14px}\n.rk-p .rk-bd{padding:13px 34px 8px;gap:11px}\n.rk-ft{display:flex;justify-content:space-between;align-items:center;padding:0 40px 12px;font-size:10.5px;color:var(--mut)}\n.rk-p .rk-ft{padding:0 34px 10px}\n.rk-ft b{font-weight:600;color:var(--ink);min-width:26px;text-align:left}\n/* الغلاف */\n.rk-cover{background:var(--ink);color:#fff;display:grid;grid-template-columns:1fr 420px;align-items:center}\n.rk-cover::before{content:\"\";position:absolute;inset-block:0;left:420px;width:1px;background:rgba(255,255,255,.14)}\n.rk-cv-t{padding:0 72px 0 40px}\n.rk-cv-t p{margin:0;font-size:17px;color:#B9C6DA}\n.rk-cv-t h1{margin:14px 0 8px;font-size:64px;font-weight:600;line-height:1.2;letter-spacing:0}\n.rk-cv-t h2{margin:0;font-size:25px;font-weight:300;color:#E8EEF7}\n.rk-cv-t hr{border:0;height:3px;width:120px;background:var(--gold);margin:30px 0 18px auto}\n.rk-cv-t .per{font-size:16px;color:#fff}\n.rk-cv-mark{order:2;display:grid;place-items:center;font-size:104px;font-weight:700;letter-spacing:6px;color:#fff;direction:ltr}\n.rk-cv-mark img{max-width:250px;max-height:250px;background:#fff;border-radius:22px;padding:22px}\n.rk-cv-f{position:absolute;bottom:26px;inset-inline:72px 40px;display:flex;gap:18px;font-size:12px;color:var(--gold)}\n/* شبكات */\n.rk-g2,.rk-g3,.rk-g73,.rk-g64{display:grid;gap:14px;min-height:0}\n.rk-g2{grid-template-columns:1fr 1fr}.rk-g3{grid-template-columns:1fr 1fr 1fr}.rk-g73{grid-template-columns:1.9fr 1fr}.rk-g64{grid-template-columns:1.55fr 1fr}\n.rk-bd>.rk-g2,.rk-bd>.rk-g3,.rk-bd>.rk-g73,.rk-bd>.rk-g64{flex:1}\n.rk-p .rk-bd>.rk-g2{flex:0 0 auto}.rk-p .rk-bd>.rk-g2.fill{flex:1}\n.rk-g2.in{gap:22px;flex:1}\n.rk-card{border:1px solid var(--line);border-radius:12px;padding:14px 18px;background:#fff;min-width:0;display:flex;flex-direction:column}\n.rk-p .rk-card{padding:10px 14px;border-radius:10px}\n.rk-card>h3{margin:0 0 12px;font-size:15px;font-weight:600;display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding-inline-start:10px;border-inline-start:3px solid var(--hc,var(--gold))}\n.rk-p .rk-card>h3{font-size:13px;margin-bottom:8px}\n.rk-card h3 small{font-size:11px;font-weight:400;color:var(--mut)}\n.rk-card h4{margin:0 0 8px;font-size:12.5px;font-weight:500;color:var(--ink2)}\n.rk-card h4 b{font-size:20px;font-weight:600;color:var(--ink);margin:0 4px}\n.rk-card h4.sp{margin-top:auto;padding-top:14px}\n.rk-card.grow{flex:1}\n/* مؤشرات */\n.rk-kpi{background:var(--soft);border-radius:10px;padding:10px 14px;border-inline-start:4px solid var(--c);min-width:0;display:flex;flex-direction:column;justify-content:center}\n.rk-kpi span{font-size:11.5px;color:var(--ink2)}\n.rk-kpi b{font-size:28px;font-weight:600;line-height:1.25;white-space:nowrap}\n.rk-kpi i{font-style:normal;font-size:11px;color:var(--mut)}\n.rk-k3,.rk-k4,.rk-k5,.rk-k6{display:grid;gap:10px}\n.rk-k3{grid-template-columns:repeat(3,1fr);margin-bottom:14px}.rk-k4{grid-template-columns:1fr 1fr}.rk-k4.wide,.rk-k4.tight{grid-template-columns:repeat(4,1fr)}.rk-k5{grid-template-columns:repeat(5,1fr)}.rk-k6{grid-template-columns:repeat(6,1fr)}\n.rk-k4.wide .rk-kpi b,.rk-k5 .rk-kpi b{font-size:32px}\n.rk-k4.tight{margin-bottom:16px}.rk-k4.tight .rk-kpi{padding:8px 11px}.rk-k4.tight .rk-kpi b{font-size:24px}\n.rk-k6 .rk-kpi b{font-size:21px}.rk-k6 .rk-kpi{padding:9px 12px}\n.rk-p .rk-k6 .rk-kpi b{font-size:19px}\n/* دورة الحياة */\n.rk-life{display:grid;grid-template-columns:150px 1fr;gap:16px;margin-bottom:auto}\n.rk-life .tot{background:var(--ink);color:#fff;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center}\n.rk-life .tot b{font-size:54px;font-weight:600;line-height:1.1}.rk-life .tot span{font-size:12px;color:#C7D2E3}\n.rk-life+h4{margin-top:18px}\n.rk-seg{display:flex;gap:2px;border-radius:6px;overflow:hidden;direction:rtl}\n.rk-seg i{display:flex;align-items:center;justify-content:center;color:#fff;font-style:normal;font-size:11.5px;font-weight:600;min-width:3px}\n.rk-pipe-g{display:grid;gap:8px;margin-top:10px}\n.rk-pipe-g div{border-top:3px solid var(--c);padding:7px 2px 0;display:flex;flex-direction:column}\n.rk-pipe-g em{font-style:normal;font-size:11px;color:var(--ink2);min-height:32px;line-height:1.35}\n.rk-pipe-g b{font-size:25px;font-weight:600;line-height:1.2}\n.rk-pipe-g span{font-size:11.5px;color:var(--mut)}\n/* أشرطة أفقية */\n.rk-bars{display:flex;flex-direction:column;gap:9px}\n.rk-bars>div{display:grid;grid-template-columns:minmax(90px,42%) 1fr auto;gap:10px;align-items:center}\n.rk-bars span{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}\n.rk-bars u{height:14px;background:var(--soft);border-radius:4px;overflow:hidden;display:block;text-decoration:none}\n.rk-bars u i{display:block;height:100%;border-radius:4px}\n.rk-bars b{font-size:13px;font-weight:600;min-width:34px;text-align:left}\n/* جداول */\n.rk-t{width:100%;border-collapse:collapse;font-size:12.5px}\n.rk-t th{font-size:11.5px;font-weight:500;color:var(--ink2);background:var(--soft);padding:9px 8px;text-align:center;line-height:1.35}\n.rk-t td{padding:9px 8px;text-align:center;border-bottom:1px solid var(--line);white-space:nowrap}\n.rk-t .r{text-align:right}\n.rk-t tbody tr:last-child td{border-bottom:0}\n.rk-t b.big{font-size:15px;font-weight:600}\n.rk-t.cmp td{padding:8.5px 10px;font-size:13px}.rk-t.cmp th{padding:10px;background:var(--ink);color:#fff}\n.rk-t.cmp th:first-child{border-radius:0 8px 8px 0}.rk-t.cmp th:last-child{border-radius:8px 0 0 8px}\n.rk-t.perf td{padding:12px 8px;font-size:13px}\n.rk-t.fin{font-size:11.5px}.rk-t.fin th{padding:6px 6px;font-size:10.5px}.rk-t.fin td{padding:6.5px 6px}\n.rk-t.fin.sm td{padding:5.5px 5px;font-size:11px}\n.rk-t .ga{background:#E8F0FC}.rk-t .gc{background:#E4F4EB}.rk-t .gp{background:#F3ECFB}\n.rk-t tr.sub td{background:var(--soft);font-weight:600}\n.rk-t tr.tot td{background:var(--ink);color:#fff;font-weight:600;border-bottom:0}\n.rk-t tr.tot td:first-child{border-radius:0 7px 7px 0}.rk-t tr.tot td:last-child{border-radius:7px 0 0 7px}\n.rk-t tr.tot .rk-m b{color:#fff}.rk-t tr.tot .rk-m u{background:rgba(255,255,255,.25)}\n.rk-duo{display:flex;flex-direction:column;gap:3px;direction:rtl}\n.rk-duo i{height:6px;border-radius:3px;background:#C3CCDA;min-width:2px}.rk-duo i.b{background:var(--ink)}\n.rk-dl{font-weight:600}.rk-dl.ok,.rk-ar.ok{color:#15794B}.rk-dl.bad,.rk-ar.bad{color:#B3261E}\n.rk-ar{font-size:13px}\n.rk-m{display:inline-flex;align-items:center;gap:7px;direction:rtl}\n.rk-m u{width:58px;height:7px;border-radius:4px;background:var(--soft);overflow:hidden;display:block}\n.rk-t tr:not(.tot) .rk-m u{background:#E9EDF3}\n.rk-m u i{display:block;height:100%;border-radius:4px}\n.rk-m b{font-weight:600;min-width:44px;text-align:left}\n.rk-pill{display:inline-block;padding:2px 12px;border-radius:99px;background:var(--soft);font-weight:600;font-size:12px}\n.rk-pill.bad{background:#FBE9E7;color:#B3261E}.rk-pill.ok{background:#E4F4EB;color:#15794B}.rk-pill.mid{background:#FBF3DC;color:#7A5A00}\n.rk-rk{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--ink);color:#fff;font-size:12px;font-weight:600}\n.rk-chg{font-weight:600;font-size:11px;color:var(--mut)}.rk-chg.u{color:#15794B}.rk-chg.d{color:#B3261E}\n.rk-mu{color:var(--mut)}\n.rk-note{margin:0;font-size:11px;color:var(--mut)}\n.rk-card .rk-note{margin-top:auto;padding-top:10px}\n/* الزيارات */\n.rk-qs{display:flex;flex-direction:column;gap:10px;flex:1}\n.rk-qr{flex:1;display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;align-items:center;background:var(--soft);border-radius:10px;border-inline-start:4px solid var(--c);padding:8px 16px}\n.rk-qr .h{display:flex;align-items:center;gap:10px}\n.rk-qr .h svg{width:26px;height:26px;fill:none;stroke:var(--c);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}\n.rk-qr .h b{font-size:14.5px;font-weight:600}\n.rk-qr>div:not(.h){display:flex;flex-direction:column;align-items:center}\n.rk-qr span{font-size:11px;color:var(--mut)}.rk-qr>div:not(.h) b{font-size:23px;font-weight:600}\n/* دونت + قائمة حالات */\n.rk-dw{display:grid;place-items:center;margin-bottom:10px}\n.rk-sl{display:flex;flex-direction:column;gap:7px}\n.rk-sl>div{display:grid;grid-template-columns:12px 1fr auto 52px;gap:8px;align-items:center;font-size:12px}\n.rk-sl i{width:10px;height:10px;border-radius:3px}\n.rk-sl b{font-weight:600;font-size:13.5px}.rk-sl em{font-style:normal;color:var(--mut);text-align:left}\n.rk-sl.row{flex-direction:row;gap:26px;margin-top:9px}.rk-sl.row>div{display:flex}\n.rk-leg{display:flex;gap:18px;justify-content:center;font-size:11.5px;color:var(--ink2);margin-top:4px;flex-wrap:wrap}\n.rk-leg span{display:inline-flex;align-items:center;gap:6px}\n.rk-leg i{width:11px;height:11px;border-radius:3px;display:inline-block}\n.rk-chw{flex:1;min-height:0;overflow:hidden}.rk-ch{display:block}\n.rk-card .rk-ch text{font-family:inherit}\n/* توصيات */\n.rk-rec{margin:0;padding:0;list-style:none;counter-reset:r;display:flex;flex-direction:column;gap:12px;flex:1;justify-content:space-around}\n.rk-rec li{counter-increment:r;display:grid;grid-template-columns:34px 1fr;gap:12px;align-items:center;font-size:14px;line-height:1.6}\n.rk-rec li::before{content:counter(r);width:34px;height:34px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;font-weight:600;font-size:15px}\n.rk-read{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:5px 26px;font-size:12px}\n.rk-read li{padding-inline-start:14px;position:relative}\n.rk-read li::before{content:\"\";position:absolute;inset-inline-start:0;top:7px;width:6px;height:6px;border-radius:50%;background:var(--gold)}\n.rk-pm{display:flex;gap:22px;align-items:center;margin-top:8px;padding:7px 12px;border-radius:7px;background:#FCEFF4;font-size:11.5px}\n.rk-pm b{font-weight:600}.rk-pm .t{margin-inline-start:auto;font-weight:600}\n\n.rk-dl,.rk-m b,.rk-kpi b,.rk-t td b,.rk-sl b{direction:ltr;unicode-bidi:isolate}\n.rk-t td{unicode-bidi:plaintext}\n.rk-t td.r{unicode-bidi:normal}\n.rk-bars.lg{gap:14px}.rk-bars.lg u{height:20px}.rk-bars.lg span{font-size:13px}.rk-bars.lg b{font-size:15px}\n.rk-bars.xl{gap:20px}.rk-bars.xl u{height:28px;border-radius:6px}.rk-bars.xl u i{border-radius:6px}.rk-bars.xl span{font-size:14.5px}.rk-bars.xl b{font-size:19px}\n.rk-card>.rk-t.st{flex:1}\n.rk-t.st{height:100%}\n.rk-t.airy td{font-size:15px}.rk-t.airy th{font-size:12.5px;padding:12px 8px}.rk-t.airy b.big{font-size:20px}\n.rk-t.airy .rk-m u{width:84px;height:9px}.rk-t.airy .rk-pill{font-size:13.5px;padding:4px 16px}.rk-t.airy .rk-rk{width:30px;height:30px;font-size:14px}\n.rk-life{flex:1;max-height:270px}\n.rk-life .rk-kpi b{font-size:34px}.rk-life .tot b{font-size:64px}\n.rk-pipe.big .rk-pipe-g{margin-top:14px}.rk-pipe.big .rk-pipe-g b{font-size:38px}.rk-pipe.big .rk-pipe-g em{font-size:12.5px;min-height:36px}.rk-pipe.big .rk-pipe-g span{font-size:13px}\n.rk-col{flex:1;display:flex;flex-direction:column;justify-content:space-around;gap:16px}\n.rk-dw{flex:1}\n.rk-g3 .rk-sl>div{font-size:13px}.rk-g3 .rk-sl b{font-size:15px}\n.rk-t.fin.sm{font-size:10.5px}.rk-t.fin.sm td{padding:5.5px 3px;font-size:10.5px}.rk-t.fin.sm th{padding:6px 3px;font-size:10px}\n.rk-k3 .rk-kpi b{font-size:32px}\n.rk-bars>div{grid-template-columns:46% 1fr auto}\n.rk-bars span{white-space:normal;overflow:visible;line-height:1.3}\n.rk-k4.tight .rk-kpi{padding:12px 14px}.rk-k4.tight .rk-kpi b{font-size:30px}\n.rk-g2.in{align-content:start;flex:0 1 auto}\n\n.rk-wrap{padding:16px 0 40px}\n@media print{.rk-wrap{padding:0;zoom:1 !important}.rk-s,.rk-p{margin:0;box-shadow:none}.rk-s:last-child,.rk-p:last-child{break-after:auto;page-break-after:auto}}\n.rk-kpi.l2 b{font-size:.82em}.rk-kpi.l3 b{font-size:.68em}\n.rk-kpi b{font-size:28px}\n.rk-kpi.l2 b,.rk-kpi.l3 b{zoom:1}\n.rk-life .tot.k4 b{font-size:46px}.rk-life .tot.k5 b{font-size:36px}\n.rk-pipe.big.k5 .rk-pipe-g b{font-size:26px}\n.rk-bars span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}\n.rk-kpi.l2 b{font-size:22px !important}.rk-kpi.l3 b{font-size:18px !important}\n.rk-k4.wide .rk-kpi.l2 b,.rk-k5 .rk-kpi.l2 b,.rk-life .rk-kpi.l2 b{font-size:28px !important}\n.rk-k6 .rk-kpi.l2 b{font-size:20px !important}.rk-k6 .rk-kpi.l3 b{font-size:17px !important}\n.rk-p .rk-k6 .rk-kpi.l2 b{font-size:18.5px !important}.rk-p .rk-k6 .rk-kpi.l3 b{font-size:16px !important}\n";
+const RKS = {reg:safeLS('pdc_rk_reg') || 'جدة', ym:''};
+const rkYm = d => (d === null || d === undefined) ? null : dayStr(d).slice(0, 7);
+const rkYmLbl = ym => RK_MN[+ym.slice(5) - 1] + ' ' + ym.slice(0, 4);
+const rkYmShort = ym => RK_MN[+ym.slice(5) - 1] + ' ' + ym.slice(2, 4);
+function rkYmStart(ym){ const p = ym.split('-').map(Number); return Math.floor(Date.UTC(p[0], p[1] - 1, 1) / 86400000); }
+function rkYmEnd(ym){ const p = ym.split('-').map(Number); return Math.floor(Date.UTC(p[0], p[1], 0) / 86400000); }
+function rkYmAdd(ym, k){ const p = ym.split('-').map(Number), d = new Date(Date.UTC(p[0], p[1] - 1 + k, 1)); return d.toISOString().slice(0, 7); }
+function rkMonths(){ const out = [], last = rkYm(TODAY); for(let m = RK_FIRST; m <= last && out.length < 60; m = rkYmAdd(m, 1)) out.push(m); return out.length ? out : [last]; }
+function rkDefaultYm(){ const ms = rkMonths(); return ms.length > 1 ? ms[ms.length - 2] : ms[0]; }
+const rkIn = (d, ym) => d !== null && d !== undefined && rkYm(d) === ym;
+const rkCloseDay = x => (x.ed !== null && x.ed !== undefined) ? x.ed : x.ad;
+function rkTop(arr, f, n){ const m = new Map(); arr.forEach(x => { const k = f(x); if(!k || k === 'غير محدد') return; m.set(k, (m.get(k) || 0) + 1); }); return Array.from(m.entries()).sort((a, b) => b[1] - a[1]).slice(0, n || 8); }
+function rkStaff(reg, from, to){
+  const o = {c:0, m:0}; if(!ALL.plan || to < from) return o;
+  ALL.plan.staff.forEach(x => {
+    if(x.st === 'شاغر') return;
+    const c = finStaffCostInRange(x, from, to); if(!c) return;
+    const t = finStaffType(x);
+    finStaffCity(x).forEach(([city, sh]) => { if(reg !== 'الكل' && city !== reg) return; o.c += c * sh * t.wo; o.m += c * sh * t.om; });
+  });
+  return o;
+}
+const rkRegName = reg => reg === 'الكل' ? 'مكة وجدة' : reg;
+const rkLogo = () => { const l = document.getElementById('logoSrc'); return l ? l.getAttribute('src') : ''; };
+
+/* ---------- التقرير الشهري للأداء ---------- */
+function rkDataMonthly(reg, ym){
+  const inR = x => reg === 'الكل' || x.r === reg;
+  const Wk = ALL.work.filter(inR), Vs = ALL.visits.filter(inR), It = ALL.items.filter(inR);
+  const end = rkYmEnd(ym), pym = rkYmAdd(ym, -1);
+  const cumW = Wk.filter(x => x.ad === null || x.ad === undefined || x.ad <= end), monW = Wk.filter(x => rkIn(x.ad, ym));
+  const isC = x => x.s === 'إنشاءات', cnt = (a, f) => { let n = 0; for(const x of a) if(f(x)) n++; return n; };
+  const life = a => { const st = RK_ST.map(k => cnt(a, x => x.st === k[0])); return {n:a.length, under:st[0], exec:a.length - st[0], cons:cnt(a, isC), maint:cnt(a, x => !isC(x)), st}; };
+  const isSaf = x => x.ty === 'مخالفة' && x.cg === 'سلامة', isQual = x => x.ty === 'مخالفة' && x.cg === 'جودة';
+  const mm = m => {
+    const e = rkYmEnd(m);
+    return {consEx:cnt(Wk, x => isC(x) && x.st !== 'U' && rkIn(x.ed, m)), mDone:cnt(Wk, x => !isC(x) && x.ds === 'منجز' && rkIn(x.ed, m)),
+      aC:cnt(Wk, x => isC(x) && rkIn(x.ad, m)), aM:cnt(Wk, x => !isC(x) && rkIn(x.ad, m)), closed:cnt(Wk, x => x.st === 'C' && rkIn(rkCloseDay(x), m)),
+      permits:cnt(Wk, x => isC(x) && x.pm === 'تم الإصدار' && (x.pmd === null || x.pmd === undefined || x.pmd <= e)),
+      vis:cnt(Vs, x => rkIn(x.d, m)), saf:cnt(It, x => isSaf(x) && rkIn(x.d, m)), stop:cnt(Vs, x => x.sw && rkIn(x.d, m)), qual:cnt(It, x => isQual(x) && rkIn(x.d, m))};
+  };
+  const A = mm(pym), B = mm(ym);
+  const cmp = [['أوامر الإنشاءات المنفَّذة خلال الشهر', 'consEx'], ['مهام الصيانة المنجزة خلال الشهر', 'mDone'], ['إجمالي الأعمال المنجزة خلال الشهر', x => x.consEx + x.mDone], ['أوامر الإنشاءات المسندة خلال الشهر', 'aC'], ['مهام الصيانة المسندة خلال الشهر', 'aM'], ['إجمالي الأوامر المسندة الجديدة', x => x.aC + x.aM], ['الأوامر المقفلة خلال الشهر', 'closed'], ['التصاريح الصادرة (تراكمي)', 'permits'], ['الزيارات الميدانية', 'vis'], ['مخالفات السلامة المسجلة', 'saf', 'down'], ['إيقاف العمل', 'stop', 'down'], ['مخالفات الجودة المسجلة', 'qual', 'down']]
+    .map(r => { const g = typeof r[1] === 'function' ? r[1] : x => x[r[1]]; return {t:r[0], a:g(A), b:g(B), good:r[2]}; });
+
+  const cW = cumW.filter(isC), mW = cumW.filter(x => !isC(x));
+  const cons = {n:cW.length, st:RK_ST.map(k => cnt(cW, x => x.st === k[0]))};
+  const maint = {n:mW.length, ds:['منجز', 'جاري التنفيذ', 'لم يتم البدء'].map(k => cnt(mW, x => x.ds === k))};
+  const vM = Vs.filter(x => rkIn(x.d, ym)), iM = It.filter(x => rkIn(x.d, ym));
+  const rate = n => vM.length ? n / vM.length * 100 : null, comp = n => vM.length ? Math.max(0, 100 - n / vM.length * 100) : null;
+  const safN = cnt(iM, isSaf), qualN = cnt(iM, isQual), stopN = cnt(vM, x => x.sw), fines = vM.reduce((s, x) => s + (x.f || 0), 0);
+  const qs = {stop:{n:stopN, rate:rate(stopN), comp:comp(stopN)}, saf:{n:safN, rate:rate(safN), comp:comp(safN)}, qual:{n:qualN, rate:rate(qualN), comp:comp(qualN)}, vis:{n:vM.length, withv:cnt(vM, x => x.hv), fines}};
+
+  const execN = cons.n - cons.st[0];
+  const ctAllC = rkTop(cW, x => x.ct, 999), ctAllM = rkTop(mW, x => x.ct, 999);
+  const cdet = {n:cons.n, conn:cnt(cW, x => x.sec === 'توصيلات'), proj:cnt(cW, x => x.sec === 'مشاريع'), execN, byCt:ctAllC.slice(0, 9), ctNote:ctAllC.length > 9 ? `أعلى 9 من ${ctAllC.length}` : '', byType:rkTop(cW, x => x.cat, 9)};
+  const delivered = x => x.dc && x.dc !== 'لم تُسلّم من المقاول';
+  const need = cnt(cW, x => x.np === 'نعم'), issued = cnt(cW, x => x.np === 'نعم' && x.pm === 'تم الإصدار');
+  const docsN = cnt(cW, x => x.st !== 'U' && delivered(x));
+  const cperf = {need, issued, proc:need - issued, execOrders:execN, docs:docsN, note:ctAllC.length > 8 ? `يعرض الجدول أعلى 8 مقاولين من ${ctAllC.length} حسب عدد الأوامر.` : '',
+    rows:ctAllC.slice(0, 8).map(([ct, n]) => { const a = cW.filter(x => x.ct === ct), ex = cnt(a, x => x.st !== 'U');
+      return {ct, n, ex, exP:pct(ex, n), inTime:pct(n - cnt(a, x => x.late), n), recv:pct(cnt(a, x => x.st === 'T' || x.st === 'S' || x.st === 'C'), n), lc:cnt(a, x => x.lc), pi:cnt(a, x => x.np === 'نعم' && x.pm === 'تم الإصدار'), pr:cnt(a, x => x.np === 'نعم'), docs:pct(cnt(a, x => x.st !== 'U' && delivered(x)), ex)}; })};
+  const handed = x => x.ds === 'منجز' && x.ar === 'تم الرفع للصيانة', ns5 = x => x.ds === 'لم يتم البدء' && x.ad !== null && x.ad !== undefined && TODAY - x.ad > 5;
+  const mdet = {n:maint.n, em:cnt(mW, x => x.em === 'طارئ'), sch:cnt(mW, x => x.em === 'مجدول'), done:maint.ds[0], byCt:ctAllM.slice(0, 9), ctNote:ctAllM.length > 9 ? `أعلى 9 من ${ctAllM.length}` : '', byType:rkTop(mW, x => x.cat, 9)};
+  const mperf = {doneN:maint.ds[0], hand:cnt(mW, handed), faults:rkTop(mW, x => x.wt, 4),
+    rows:ctAllM.slice(0, 5).map(([ct, n]) => { const a = mW.filter(x => x.ct === ct), done = cnt(a, x => x.ds === 'منجز'), hand = cnt(a, handed);
+      return {ct, n, done, em:cnt(a, x => x.em === 'طارئ'), sch:cnt(a, x => x.em === 'مجدول'), hand, handP:pct(hand, done), ns5:cnt(a, ns5)}; })};
+  const qItems = iM.filter(x => x.cg === 'جودة');
+  const sq = {saf:{viol:safN, stop:stopN, comp:comp(safN), vis:vM.length, top:rkTop(iM.filter(isSaf), x => x.vn || x.ac, 5), byCt:rkTop(iM.filter(isSaf), x => x.ct, 5)},
+    qual:{viol:qualN, closed:cnt(qItems, x => x.stt === 'مغلقة'), closedP:qItems.length ? pct(cnt(qItems, x => x.stt === 'مغلقة'), qItems.length) : null, comp:comp(qualN), fines, top:rkTop(qItems, x => x.vn || x.ac, 5), byCt:rkTop(iM.filter(isQual), x => x.ct, 5)}};
+
+  /* التقييم */
+  const vCum = Vs.filter(x => x.d === null || x.d === undefined || x.d <= end), iCum = It.filter(x => x.d === null || x.d === undefined || x.d <= end);
+  const grade = t => t >= 90 ? 'ممتاز' : t >= 80 ? 'جيد جداً' : t >= 70 ? 'جيد' : t >= 60 ? 'مقبول' : 'يحتاج تحسين';
+  const evRows = rkTop(cumW, x => x.ct, 8).map(([ct, n]) => {
+    const a = cumW.filter(x => x.ct === ct), v = cnt(vCum, x => x.ct === ct);
+    const ex = pct(cnt(a, x => x.st !== 'U'), n);
+    const q = v ? Math.max(0, 100 - cnt(iCum, x => x.ct === ct && isQual(x)) / v * 100) : 100, s = v ? Math.max(0, 100 - cnt(iCum, x => x.ct === ct && isSaf(x)) / v * 100) : 100;
+    const total = ex * .33 + q * .44 + s * .23;
+    return {ct, n, ex, q, s, total, grade:grade(total)};
+  }).sort((a, b) => b.total - a.total);
+
+  /* المالي */
+  const FW = Wk.filter(x => x.ad !== null && x.ad !== undefined && x.ad >= FIN_FLOOR);
+  const fm = m => { const a = FW.filter(x => rkIn(x.ad, m)), c = FW.filter(x => x.st === 'C' && rkIn(rkCloseDay(x), m)), st = rkStaff(reg, rkYmStart(m), Math.min(rkYmEnd(m), TODAY));
+    const apdc = finSum(a, 'f2'), acons = finSum(a, 'f3'), pm = st.c + st.m; return {an:a.length, apdc, acons, cn:c.length, cpdc:finSum(c, 'f2'), pmss:pm, net:apdc - acons - pm}; };
+  const fms = []; for(let m = ym, i = 0; i < 6 && m >= RK_FIRST; m = rkYmAdd(m, -1), i++) fms.unshift(m);
+  if(!fms.length) fms.push(ym);
+  const FM = fms.map(fm), cur = FM[FM.length - 1], prv = fm(pym);
+  const fin = {assignV:cur.apdc, assignN:cur.an, closeV:cur.cpdc, closeN:cur.cn, cons:cur.acons, pmss:cur.pmss, profit:cur.net, prevProfit:prv.net,
+    open:cnt(FW, x => x.ad <= end) - cnt(FW, x => x.st === 'C' && rkCloseDay(x) <= end),
+    months:fms.map(rkYmShort), assigned:FM.map(x => x.an), closed:FM.map(x => x.cn), income:FM.map(x => x.apdc), expense:FM.map(x => x.acons + x.pmss), profitM:FM.map(x => x.net)};
+
+  /* المستهدفات */
+  const hist = [rkYmAdd(ym, -2), pym, ym].map(m => m === pym ? A : m === ym ? B : mm(m));
+  const avg = (g, upto) => { const v = hist.slice(0, upto).map(g); return v.reduce((s, x) => s + x, 0) / v.length; };
+  const tRow = (t, g, basis, calc, lowGood) => { const target = calc(g, 3), prevT = calc(g, 2), b = g(B); return {t, a:g(A), b, target, basis, ok:lowGood ? b <= prevT : b >= prevT}; };
+  const up5 = (g, k) => Math.ceil(avg(g, k) * 1.05);
+  const tg = {rows:[tRow('الأعمال المنجزة خلال الشهر', x => x.consEx + x.mDone, 'متوسط الاتجاه + 5%', up5), tRow('الأوامر المقفلة خلال الشهر', x => x.closed, 'متوسط الاتجاه + 5%', up5),
+      tRow('الأوامر المسندة الجديدة', x => x.aC + x.aM, 'ثبات الإسناد', (g, k) => Math.round(avg(g, k))), tRow('مخالفات السلامة', x => x.saf, 'خفض 10%', (g, k) => Math.floor(g(hist[k - 1]) * .9), 1)],
+    recs:[]};
+  const L = life(cumW), low = cperf.rows.slice().sort((a, b) => a.exP - b.exP)[0], ns5N = cnt(mW, ns5);
+  const topV = rkTop(iM.filter(x => x.ty === 'مخالفة'), x => x.ct, 1)[0];
+  tg.recs = [`خفض الأوامر تحت التنفيذ (${fmt(L.under)} أمراً) بمتابعة أسبوعية مع المقاولين الأقل نسبة تنفيذ${low ? ' — أدناهم: ' + low.ct : ''}.`,
+    `معالجة ${fmt(ns5N)} مهمة صيانة لم تبدأ منذ أكثر من 5 أيام.`,
+    `رفع نسبة تسليم المستندات (${fpct(docsN, execN)} من المنفَّذ حالياً) وأرشفتها وربطها بالاستحقاق المالي.`,
+    `ورش عمل للسلامة والجودة للمقاولين الأعلى مخالفات${topV ? ' — الأعلى هذا الشهر: ' + topV[0] : ''}.`];
+
+  return {region:rkRegName(reg), month:rkYmLbl(ym), prev:rkYmLbl(pym), cum:dayStr(Math.min(end, TODAY)).split('-').reverse().join('-'), sample:false, logo:rkLogo(),
+    life:{cum:L, mon:life(monW)}, cmp, cmpNote:'المراحل حسب وضعها الحالي في الملفات', cons, maint, qs, cdet, cperf, mdet, mperf, sq,
+    eval:{weights:'التنفيذ 33% · الجودة 44% · السلامة 23% (الأوزان المعتمدة 30/40/20 بعد استبعاد محور التعاون غير المتاح آلياً)', note:'التنفيذ = نسبة الأعمال المنفَّذة · الجودة والسلامة = 100 − (المخالفات لكل زيارة × 100) تراكمياً · أعلى 8 مقاولين حسب عدد الأعمال', rows:evRows},
+    fin, tg};
+}
+
+/* ---------- التقرير المالي ---------- */
+function rkDataFinance(reg){
+  const inR = x => reg === 'الكل' || x.r === reg;
+  const FW = ALL.work.filter(x => inR(x) && x.ad !== null && x.ad !== undefined && x.ad >= FIN_FLOOR && x.ad <= TODAY);
+  const agg = a => [a.length, finSum(a, 'f1'), finSum(a, 'f2'), finSum(a, 'f3')], cl = a => a.filter(x => x.st === 'C');
+  const ms = rkMonths(), first = ms[0], last = ms[ms.length - 1];
+  const cm = x => { const m = rkYm(rkCloseDay(x)); return m < first ? first : m > last ? last : m; };
+  const grp = (a, f) => { const m = new Map(); a.forEach(x => { const k = f(x) || 'غير محدد'; if(!m.has(k)) m.set(k, []); m.get(k).push(x); }); return Array.from(m.entries()).sort((p, q) => q[1].length - p[1].length); };
+  const C = FW.filter(x => x.s === 'إنشاءات'), M = FW.filter(x => x.s !== 'إنشاءات');
+  const cats = grp(C, x => x.cat).map(([t, a]) => ({t, grp:'c', a:agg(a), c:agg(cl(a))})).concat(grp(M, x => x.cat).map(([t, a]) => ({t, grp:'m', a:agg(a), c:agg(cl(a))})));
+  const split = {c:0, m:0};
+  const months = ms.map(m => { const a = FW.filter(x => rkIn(x.ad, m)), c = FW.filter(x => x.st === 'C' && cm(x) === m), st = rkStaff(reg, rkYmStart(m), Math.min(rkYmEnd(m), TODAY));
+    split.c += st.c; split.m += st.m;
+    return {m:rkYmShort(m), an:a.length, apdc:finSum(a, 'f2'), acons:finSum(a, 'f3'), cn:c.length, cpdc:finSum(c, 'f2'), ccons:finSum(c, 'f3'), pmss:st.c + st.m}; });
+  const T = agg(FW), pm = split.c + split.m;
+  const mkSub = (name, a) => {
+    const c = cl(a), mrows = ms.map(m => { const x = a.filter(y => rkIn(y.ad, m)), z = c.filter(y => cm(y) === m); return {m:rkYmShort(m), n:x.length, pdc:finSum(x, 'f2'), cons:finSum(x, 'f3'), cn:z.length, cpdc:finSum(z, 'f2'), ccons:finSum(z, 'f3')}; });
+    while(mrows.length > 1 && !mrows[mrows.length - 1].n && !mrows[mrows.length - 1].cn) mrows.pop();
+    return {name, cN:a.filter(x => x.s === 'إنشاءات').length, mN:a.filter(x => x.s !== 'إنشاءات').length, a:agg(a), c:[c.length, finSum(c, 'f2'), finSum(c, 'f3')],
+      cats:grp(a, x => (x.s === 'إنشاءات' ? 'إنشاءات — ' : 'صيانة — ') + (x.cat || 'غير محدد')).map(([t, b]) => { const z = cl(b); return {t, n:b.length, pdc:finSum(b, 'f2'), cons:finSum(b, 'f3'), cn:z.length, cpdc:finSum(z, 'f2'), ccons:finSum(z, 'f3')}; }), months:mrows};
+  };
+  const isReal = k => k && !/غير محدد|بدون استشاري/.test(k);
+  const bySub = grp(FW, x => x.cs), subs = bySub.filter(([k]) => isReal(k)).map(([k, a]) => mkSub(k, a));
+  const oth = FW.filter(x => !isReal(x.cs));
+  const noPdc = FW.filter(x => x.f2 === null || x.f2 === undefined).length, est = FW.filter(x => { finConsultant(x); return x.f3e; }).length;
+  const now = new Date(TODAY * 86400000);
+  return {region:rkRegName(reg), period:'من 1 مايو 2026 حتى اليوم', date:`${now.getUTCDate()} ${RK_MN[now.getUTCMonth()]} ${now.getUTCFullYear()}`, sample:false,
+    kp:{ct:T[1], pdc:T[2], cons:T[3], pmss:pm, profit:T[2] - T[3] - pm, closeN:cl(FW).length, n:FW.length}, cats, pmssSplit:split, months, subs,
+    subOther:oth.length ? (o => ({name:'غير محدد / بدون استشاري', a:o.a, c:o.c}))(mkSub('', oth)) : null,
+    note:[noPdc ? `${fmt(noPdc)} عملاً بلا قيمة PDC مسجَّلة في الملفات (تُحسب صفراً)` : '', est ? `مصروف الاستشاري مقدَّر بنسبة العقد لـ ${fmt(est)} عملاً لا تحمل قيمة مسجَّلة` : '', ALL.plan ? '' : 'ملف دائرة التخطيط غير محمَّل — مصروف PMSS صفر'].filter(Boolean).join(' · ')};
+}
+
+/* ---------- الفتح والطباعة ---------- */
+function rkOpen(kind){
+  if(!ALL.work || !ALL.work.length){ toast('حمّل ملفات الإكسل أولاً ثم افتح التقرير'); return; }
+  let pages, w, h, title;
+  try{
+    if(kind === 'monthly'){ const D = rkDataMonthly(RKS.reg, RKS.ym || rkDefaultYm()); pages = rkMonthly(D); w = 1280; h = 720; title = `التقرير الشهري للأداء — ${D.region} — ${D.month}`; }
+    else { const D = rkDataFinance(RKS.reg); pages = rkFinance(D); w = 1122; h = 793; title = `التقرير المالي — ${D.region}`; }
+  }catch(e){ console.error(e); openModal('تعذّر بناء التقرير', '<p>' + esc(e.message) + '</p>', 'sm'); return; }
+  let box = document.getElementById('repView');
+  if(!box){ box = document.createElement('div'); box.id = 'repView'; document.body.appendChild(box); }
+  box.innerHTML = `<style id="rkPg">@media print{@page{size:${w}px ${h}px; margin:0}}</style><div class="rp-bar"><b>${esc(title)}</b><span class="sp"></span><span class="hint">${pages.length} صفحة • اختر «حفظ كـ PDF» من نافذة الطباعة</span><button class="btn pri" onclick="window.print()">طباعة / حفظ PDF</button><button class="btn" onclick="closePerfReport()">إغلاق</button></div><div id="rkHost"></div>`;
+  /* عزل تنسيق التقرير عن تنسيق اللوحة */
+  const root = document.getElementById('rkHost').attachShadow({mode:'open'});
+  root.innerHTML = `<style>${RK_CSS}</style><div class="rk rk-wrap" id="rkWrap">${pages.join('')}</div>`;
+  document.body.classList.add('rp-open', 'rk-open'); box.scrollTop = 0;
+  const wrap = root.getElementById('rkWrap');
+  const fit = () => { wrap.style.zoom = 1; rkFit(wrap); wrap.style.zoom = Math.min(1, (window.innerWidth - 16) / w); };
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(fit); else fit();
+}
+const rkClose0 = closePerfReport;
+closePerfReport = function(){ rkClose0(); if(document.body.classList.contains('rk-open')){ document.body.classList.remove('rk-open'); const b = document.getElementById('repView'); if(b) b.innerHTML = ''; } };
+function rkSet(k, v){ RKS[k] = v; if(k === 'reg') safeLS('pdc_rk_reg', v); }
+function rkLauncher(){
+  const ms = rkMonths().slice().reverse(), ym = RKS.ym || rkDefaultYm();
+  const regSel = `<label>المنطقة<select class="inp" onchange="rkSet('reg',this.value);renderReports()">${[['جدة', 'جدة'], ['مكة', 'مكة'], ['الكل', 'مكة وجدة']].map(r => `<option value="${r[0]}" ${RKS.reg === r[0] ? 'selected' : ''}>${r[1]}</option>`).join('')}</select></label>`;
+  return `<div class="rk-launch">
+    <div class="rk-lc"><div class="rk-lt"><b>التقرير الشهري للأداء</b><small>عرض من 12 شريحة: دورة حياة الأوامر، مقارنة الشهرين، الإنشاءات والصيانة، السلامة والجودة، تقييم المقاولين، الملخص المالي والمستهدفات</small></div>
+      <div class="rk-lo">${regSel}<label>الشهر<select class="inp" onchange="rkSet('ym',this.value)">${ms.map(m => `<option value="${m}" ${m === ym ? 'selected' : ''}>${rkYmLbl(m)}</option>`).join('')}</select></label><button class="btn pri" onclick="rkOpen('monthly')">فتح التقرير</button></div></div>
+    <div class="rk-lc"><div class="rk-lt"><b>التقرير المالي</b><small>الملخص المالي، الإسناد والإقفال الشهري، الاتجاهات، مقارنة الاستشاريين الفرعيين وصفحة لكل استشاري — من 1 مايو 2026 حتى اليوم</small></div>
+      <div class="rk-lo">${regSel}<button class="btn pri" onclick="rkOpen('finance')">فتح التقرير</button></div></div>
+  </div><div class="note" style="margin:-4px 0 12px">تقريرا الإدارة يُحسبان من الملفات المحمَّلة مباشرة حسب المنطقة والشهر المختارين، ولا يتأثران بالفلاتر العامة.</div>`;
+}
 
 /* ==================== التشغيل ==================== */
 (async function init(){
