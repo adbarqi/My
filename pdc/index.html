@@ -9,7 +9,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="icon-192.png">
 <script>
-var APP_VER = "202611171500";
+var APP_VER = "202611171530";
 if("serviceWorker" in navigator){ navigator.serviceWorker.register("sw.js", {updateViaCache:"none"}).then(function(r){ r.update(); }).catch(function(){}); }
 fetch("version.txt?t=" + Date.now(), {cache:"no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
   v = (v || "").trim();
@@ -2125,6 +2125,7 @@ body.side-min #btnFx span{display:none} body.side-min #btnFx{justify-content:cen
 .qt-g{display:flex; align-items:center; gap:8px; font-size:12px; color:var(--muted)}
 .qt-n{flex-basis:100%; font-size:11.5px; color:var(--muted)}.qt-n b{color:var(--text)}
 .qt-ps{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px}
+.qt-ps.three{grid-template-columns:1fr 1fr 1fr}.qt-ps.three .qt-p .g{grid-template-columns:repeat(2,1fr)}
 .qt-p{border:1px solid var(--border); border-radius:12px; padding:12px 14px; border-inline-start:4px solid var(--kc)}
 .qt-p .h{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:10px}.qt-p .h b{font-size:14px}.qt-p .h span{font-size:11.5px; color:var(--muted)}
 .qt-p .g{display:grid; grid-template-columns:repeat(4,1fr); gap:10px 12px}
@@ -2500,7 +2501,10 @@ var PDCEngine = (function(){
         empty: str(o['النشاط (للملاحظات)']) === 'زيارة بدون ملاحظة' ? 1 : 0
       });
     });
-    return {visits: visits, items: items};
+    var engineers = [], we = wb.Sheets['Engineers'];
+    if(we){ trimWidth(XLSX, we, 0, 6); var te = rowsFromSheet(XLSX, we, 'EngineerID', 6) || rowsFromSheet(XLSX, we, 'EngineerName', 6);
+      if(te) te.rows.forEach(function(o){ var n = str(o['EngineerName']); if(n) engineers.push({n: n, co: str(o['Consultant']), id: str(o['EngineerID'])}); }); }
+    return {visits: visits, items: items, engineers: engineers};
   }
 
   /* ---------- دائرة التخطيط: الموظفون + التأهيل + الفواتير + تكلفة الموظفين ---------- */
@@ -2650,7 +2654,7 @@ var PDCEngine = (function(){
     }
     if(kind === 'wo') out.work = parseWO(XLSX, wb, expectRegion);
     if(kind === 'om') out.work = parseOM(XLSX, wb, expectRegion);
-    if(kind === 'qs'){ var q = parseQS(XLSX, wb, expectRegion); out.visits = q.visits; out.items = q.items; }
+    if(kind === 'qs'){ var q = parseQS(XLSX, wb, expectRegion); out.visits = q.visits; out.items = q.items; out.engineers = q.engineers; }
     /* تحديد المنطقة من المحتوى عند عدم تمريرها */
     var list = out.work || out.visits || [];
     var cnt = {'جدة':0,'مكة':0};
@@ -2834,7 +2838,7 @@ async function loadSlotData(key, file, parsedResult, timing){
     readMs:timing.readMs, parseMs:timing.parseMs, totalMs:timing.totalMs, loadedAt:Date.now(), checkedAt:Date.now(), source:'live'
   };
   S.status = 'ok'; S.msg = '';
-  IDB.set('cache', key, {data:parsedResult, meta:S.meta, v:4});
+  IDB.set('cache', key, {data:parsedResult, meta:S.meta, v:5});
 }
 
 /* قراءة ملف من رابطه المباشر على ون درايف (يتطلب أن يسمح المتصفح بالطلب — انظر الدليل) */
@@ -3138,13 +3142,15 @@ function updateFreshness(){
 const ALL = {work:[], visits:[], items:[], cancelled:[], plan:null, built:false};
 function rebuild(){
   TODAY = todayDay();
-  const work = [], visits = [], items = [];
+  const work = [], visits = [], items = [], engs = [];
   SLOTS.forEach(s => {
     const d = SLOT[s.key].data; if(!d) return;
     if(d.work) d.work.forEach(x => work.push(x));
     if(d.visits) d.visits.forEach(x => visits.push(x));
     if(d.items) d.items.forEach(x => items.push(x));
+    if(d.engineers) d.engineers.forEach(x => engs.push(x));
   });
+  ALL.engineers = engs;
   const pd = SLOT['pl_الكل'] && SLOT['pl_الكل'].data;
   ALL.plan = pd && pd.plan ? pd.plan : null;
   /* توحيد أسماء المقاولين والاستشاريين عبر الملفات السبعة */
@@ -6505,7 +6511,7 @@ function qlShow(i){
   const r = (k, val) => val === '' || val === null || val === undefined ? '' : `<tr><th>${k}</th><td>${val}</td></tr>`;
   const link = (u, t) => /^https?:\/\//.test(u || '') ? `<a href="${esc(u)}" target="_blank" rel="noopener">${t}</a>` : '';
   openModal(`${esc(x.ty)} — زيارة ${esc(x.vid)}`, `<table class="ql-d"><tbody>
-    ${r('التاريخ', esc(dayStr(x.d)))}${r('النوع والتصنيف', esc(x.ty + (x.cg ? ' • ' + x.cg : '')))}${typeof qtTeamI === 'function' ? r('فريق الزيارة', esc((qtTeamI(x) === 'PDC' ? 'فريق PDC' : 'فريق CMS') + (v.cs ? ' — ' + v.cs : ''))) : ''}${r('المخالفة / النشاط', '<b>' + esc(x.vn || x.ac) + '</b>')}${r('الوصف التفصيلي', esc(x.desc))}
+    ${r('التاريخ', esc(dayStr(x.d)))}${r('النوع والتصنيف', esc(x.ty + (x.cg ? ' • ' + x.cg : '')))}${typeof qtTeamI === 'function' ? r('فريق الزيارة', esc(qtTeamName(qtTeamI(x)) + (v.en ? ' — ' + v.en + ' (' + qtCoName(qtCo(v)) + ')' : ''))) : ''}${r('المخالفة / النشاط', '<b>' + esc(x.vn || x.ac) + '</b>')}${r('الوصف التفصيلي', esc(x.desc))}
     ${r('المقاول', esc(x.ct))}${r('الاستشاري', esc(x.cs))}${r('المنطقة / الدائرة', esc([x.r, x.u].filter(Boolean).join(' — ')))}${r('رقم أمر العمل', esc(x.no))}${r('الموقع', esc(v.loc))}${r('المهندس / الراصد', esc(v.en))}
     ${r('الفئة', esc(x.sc))}${r('درجة الخطورة', esc(x.sv))}${r('الجزاء', esc(x.pn))}${r('المبلغ', x.am ? '<span class="num">' + fmt(x.am) + '</span> ر.س' : '')}${r('موقف الخصم', esc(x.ded))}
     ${r('الحالة', esc(x.stt))}${r('مدة التصحيح', x.cdays === null || x.cdays === undefined ? '' : fmt(x.cdays) + ' يوم')}${r('تاريخ التصحيح / الإغلاق', esc(dayStr(x.cld)))}
@@ -6549,73 +6555,94 @@ renderQS = function(){
 document.addEventListener('click', e => { const r = e.target.closest && e.target.closest('tr[data-ql]'); if(r) qlShow(+r.dataset.ql); });
 
 /* ==================== v14: فريق الزيارة (PDC / CMS) والجهة المسؤولة عن المخالفة ==================== */
-/* فريق الزيارة من عمود «الاستشاري» في ورقة الزيارات: «فريق PDC» = PDC، وبقية الاستشاريين = CMS */
+/* فريق الزيارة من ورقة «Engineers» (مخفية في ملف السلامة): جهة عمل المهندس / الراصد الذي نفّذ الزيارة.
+   جهة العمل «PDC» = فريق PDC، وبقية الجهات (الاستشاريون) = فريق CMS، ومن لا يوجد اسمه في الورقة = غير مسجَّل */
 const QT = {tm:safeLS('pdc_qs_tm') || 'all', rp:safeLS('pdc_qs_rp') || 'all'};
-const qtIsPDC = cs => /PDC/i.test(String(cs || ''));
+const qtKey = s => String(s || '').trim().replace(/\s+/g, ' ').replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي');
+const qtIsPDC = co => /^\s*(PDC|فريق PDC)\s*$/i.test(String(co || ''));
+let QT_E = {src:null, m:null};
+function qtEngMap(){ if(QT_E.src !== ALL.engineers){ const m = new Map(); (ALL.engineers || []).forEach(e => { if(e.n) m.set(qtKey(e.n), e.co || ''); }); QT_E = {src:ALL.engineers, m}; } return QT_E.m; }
+/* جهة عمل المهندس: اسم الجهة كما في الورقة، أو null إن لم يُسجَّل */
+function qtCo(v){ const m = qtEngMap(), k = qtKey(v && v.en); return k && m.has(k) ? m.get(k) : null; }
 let QT_VMAP = {src:null, m:null};
 function qtVisit(vid){
   if(QT_VMAP.src !== ALL.visits){ const m = new Map(); ALL.visits.forEach(v => m.set(v.id, v)); QT_VMAP = {src:ALL.visits, m}; }
   return QT_VMAP.m.get(vid);
 }
-function qtTeamV(v){ return qtIsPDC(v.cs) ? 'PDC' : 'CMS'; }
-function qtTeamI(x){ const v = qtVisit(x.vid); return qtIsPDC(v ? v.cs : x.cs) ? 'PDC' : 'CMS'; }
-/* الجهة المسؤولة مسجَّلة في الملف للمخالفات فقط (عمود «الجهة المسؤولة»)، والملاحظات بلا جهة */
+function qtTeamV(v){ const co = qtCo(v); return co === null ? 'NA' : qtIsPDC(co) ? 'PDC' : 'CMS'; }
+function qtTeamI(x){ const v = qtVisit(x.vid); return v ? qtTeamV(v) : 'NA'; }
+const qtCoName = co => co === null ? 'غير مسجَّل في قائمة المهندسين' : qtIsPDC(co) ? 'PDC' : co;
 function qtParty(x){ return x.rp === 'مقاول' ? 'ct' : x.rp === 'استشاري' ? 'cs' : ''; }
 function qtKeepV(v){ return QT.tm === 'all' || qtTeamV(v) === QT.tm; }
 function qtKeepI(x){ return (QT.tm === 'all' || qtTeamI(x) === QT.tm) && (QT.rp === 'all' || qtParty(x) === QT.rp); }
 function qtSet(k, v){ QT[k] = v; safeLS(k === 'tm' ? 'pdc_qs_tm' : 'pdc_qs_rp', v); renderQS(); }
-const qtTeamName = t => t === 'PDC' ? 'فريق PDC' : 'فريق CMS (الاستشاريون)';
+const qtTeamName = t => t === 'PDC' ? 'فريق PDC' : t === 'CMS' ? 'فريق CMS (الاستشاريون)' : 'مهندسون غير مسجَّلين';
 
 function qtBar(){
   const seg = (k, opts) => `<div class="ql-chips">${opts.map(o => `<button class="ql-c ${QT[k] === o[0] ? 'on' : ''}" onclick="qtSet('${k}','${o[0]}')">${o[1]}</button>`).join('')}</div>`;
   const on = QT.tm !== 'all' || QT.rp !== 'all';
   return `<div class="qt-bar ${on ? 'on' : ''}">
-    <div class="qt-g"><span>فريق الزيارة</span>${seg('tm', [['all', 'الكل'], ['PDC', 'فريق PDC'], ['CMS', 'فريق CMS']])}</div>
+    <div class="qt-g"><span>فريق الزيارة</span>${seg('tm', [['all', 'الكل'], ['PDC', 'فريق PDC'], ['CMS', 'فريق CMS']].concat(ALL.visits.some(v => qtTeamV(v) === 'NA') ? [['NA', 'غير مسجَّل']] : []))}</div>
     <div class="qt-g"><span>المخالفات المرصودة على</span>${seg('rp', [['all', 'الكل'], ['ct', 'المقاول'], ['cs', 'الاستشاري الفرعي']])}</div>
     ${on ? `<button class="btn" onclick="QT.tm='all';QT.rp='all';safeLS('pdc_qs_tm','all');safeLS('pdc_qs_rp','all');renderQS()">إلغاء</button>` : ''}
-    <div class="qt-n">${QT.rp !== 'all' ? 'عند اختيار جهة تُعرض <b>المخالفات</b> فقط، لأن الملاحظات غير مصنَّفة بجهة مسؤولة في الملف. أعداد الزيارات والإيقافات لا تتغير بهذا الاختيار.' : 'يطبَّق الاختيار على كل ما في هذه الصفحة وعلى سجل المخالفات والتصدير.'}</div>
+    <div class="qt-n">${QT.rp !== 'all' ? 'عند اختيار جهة تُعرض <b>المخالفات</b> فقط، لأن الملاحظات غير مصنَّفة بجهة مسؤولة في الملف. أعداد الزيارات والإيقافات لا تتغير بهذا الاختيار.' : 'فريق الزيارة حسب جهة عمل المهندس / الراصد في ورقة «Engineers». يطبَّق الاختيار على كل ما في هذه الصفحة وعلى سجل المخالفات والتصدير.'}</div>
   </div>`;
 }
 
-/* بطاقة المقارنة: زيارات فريق PDC مقابل فريق CMS */
+/* بطاقة المقارنة: زيارات فريق PDC مقابل فريق CMS — حسب جهة عمل المهندس */
 function qtTeams(Vs, Is){
-  const team = t => { const v = Vs.filter(x => qtTeamV(x) === t), it = Is.filter(x => !x.empty && qtTeamI(x) === t);
+  const live = Is.filter(x => !x.empty);
+  const team = t => { const v = Vs.filter(x => qtTeamV(x) === t), it = live.filter(x => qtTeamI(x) === t);
     return {v, n:v.length, wv:v.filter(x => x.hv).length, sw:v.filter(x => x.sw).length, vio:it.filter(x => x.ty === 'مخالفة').length, ob:it.filter(x => x.ty === 'ملاحظة').length, f:v.reduce((s, x) => s + (x.f || 0), 0),
-      en:new Set(v.map(x => x.en).filter(Boolean)).size, mk:v.filter(x => x.r === 'مكة').length, jd:v.filter(x => x.r === 'جدة').length}; };
-  const P = team('PDC'), C = team('CMS'), tot = P.n + C.n;
+      en:new Set(v.map(x => qtKey(x.en)).filter(Boolean)).size, mk:v.filter(x => x.r === 'مكة').length, jd:v.filter(x => x.r === 'جدة').length}; };
+  const P = team('PDC'), C = team('CMS'), NA = team('NA'), tot = Vs.length;
   const panel = (t, o, color) => `<div class="qt-p" style="--kc:${color}"><div class="h"><b>${qtTeamName(t)}</b><span class="num">${fpct(o.n, tot)} من الزيارات</span></div>
     <div class="g">${[['الزيارات', fmt(o.n)], ['مكة / جدة', `${fmt(o.mk)} / ${fmt(o.jd)}`], ['بها مخالفات', `${fmt(o.wv)} <small>${o.n ? fpct(o.wv, o.n) : ''}</small>`], ['المخالفات المرصودة', fmt(o.vio)], ['الملاحظات', fmt(o.ob)], ['إيقاف العمل', fmt(o.sw)], ['الغرامات (ر.س)', fmt(o.f)], ['المهندسون / الراصدون', fmt(o.en)]].map(z => `<div><span>${z[0]}</span><b class="num">${z[1]}</b></div>`).join('')}</div></div>`;
-  /* حسب الجهة الزائرة */
-  const by = new Map();
-  Vs.forEach(v => { const k = qtIsPDC(v.cs) ? 'فريق PDC' : (v.cs || 'غير محدد'); if(!by.has(k)) by.set(k, []); by.get(k).push(v); });
-  const gk = cs => qtIsPDC(cs) ? 'فريق PDC' : (cs || 'غير محدد'), itBy = new Map(); Is.filter(x => !x.empty).forEach(x => { const v = qtVisit(x.vid), k = gk(v ? v.cs : x.cs); if(!itBy.has(k)) itBy.set(k, []); itBy.get(k).push(x); });
+  /* حسب جهة عمل المهندس */
+  const coOf = v => qtCoName(qtCo(v)), by = new Map(), itBy = new Map();
+  Vs.forEach(v => { const k = coOf(v); if(!by.has(k)) by.set(k, []); by.get(k).push(v); });
+  live.forEach(x => { const v = qtVisit(x.vid); if(!v) return; const k = coOf(v); if(!itBy.has(k)) itBy.set(k, []); itBy.get(k).push(x); });
+  const ord = {PDC:0, CMS:1, NA:2};
   const rows = Array.from(by.entries()).map(([k, v]) => { const it = itBy.get(k) || [], last = Math.max.apply(null, v.map(x => x.d).filter(nn).concat([-1]));
-    return {k, t:qtIsPDC(k) ? 'PDC' : 'CMS', n:v.length, mk:v.filter(x => x.r === 'مكة').length, jd:v.filter(x => x.r === 'جدة').length, wv:v.filter(x => x.hv).length, vio:it.filter(x => x.ty === 'مخالفة').length, ob:it.filter(x => x.ty === 'ملاحظة').length, sw:v.filter(x => x.sw).length, f:v.reduce((s, x) => s + (x.f || 0), 0), last}; })
-    .sort((a, b) => (a.t === b.t ? b.n - a.n : a.t === 'PDC' ? -1 : 1));
+    return {k, t:qtTeamV(v[0]), n:v.length, en:new Set(v.map(x => qtKey(x.en)).filter(Boolean)).size, mk:v.filter(x => x.r === 'مكة').length, jd:v.filter(x => x.r === 'جدة').length, wv:v.filter(x => x.hv).length, vio:it.filter(x => x.ty === 'مخالفة').length, ob:it.filter(x => x.ty === 'ملاحظة').length, sw:v.filter(x => x.sw).length, f:v.reduce((s, x) => s + (x.f || 0), 0), last}; })
+    .sort((a, b) => (a.t === b.t ? b.n - a.n : ord[a.t] - ord[b.t]));
+  const tb = t => `<span class="badge ${t === 'PDC' ? 'b-run' : t === 'CMS' ? 'b-ok' : 'b-warn'}">${t === 'NA' ? 'غير مسجَّل' : t}</span>`;
   /* اتجاه أسبوعي */
   const dd = Vs.map(x => x.d).filter(d => nn(d) && d <= TODAY), lastD = dd.length ? Math.max.apply(null, dd) : TODAY, wk = d => Math.floor(d / 7), w1 = wk(Math.min(TODAY, lastD)), ws = []; for(let w = w1 - 11; w <= w1; w++) ws.push(w);
   const cnt = t => ws.map(w => Vs.filter(x => nn(x.d) && wk(x.d) === w && qtTeamV(x) === t).length);
-  return `<div class="grid"><div class="card c12 qt-card"><div class="card-h"><div class="t"><h3>الزيارات: فريق PDC مقابل فريق CMS</h3><div class="sub">التصنيف من عمود «الاستشاري» في ورقة الزيارات — «فريق PDC» لفريق الشركة، وبقية الاستشاريين فريق CMS</div></div></div><div class="card-b">
-    <div class="qt-ps">${panel('PDC', P, 'var(--s1)')}${panel('CMS', C, 'var(--s3)')}</div>
-    <div class="qt-tb">${table('qt-by', [{t:'الجهة الزائرة'}, {t:'الفريق'}, {t:'الزيارات', n:1}, {t:'مكة', n:1}, {t:'جدة', n:1}, {t:'بها مخالفات', n:1}, {t:'المخالفات', n:1}, {t:'الملاحظات', n:1}, {t:'إيقاف العمل', n:1}, {t:'الغرامات', n:1}, {t:'آخر زيارة'}],
-      rows.map(r => ({h:[`<b>${esc(r.k)}</b>`, `<span class="badge ${r.t === 'PDC' ? 'b-run' : 'b-ok'}">${r.t}</span>`, fmt(r.n), fmt(r.mk), fmt(r.jd), `${fmt(r.wv)} <small style="color:var(--muted)">${fpct(r.wv, r.n)}</small>`, fmt(r.vio), fmt(r.ob), fmt(r.sw), fmt(r.f), r.last >= 0 ? dayStr(r.last) : '—'], v:[r.k, r.t, r.n, r.mk, r.jd, r.wv, r.vio, r.ob, r.sw, r.f, r.last]})), {maxh:330})}</div>
-    <div class="qt-row"><div class="qt-ch"><div class="tk-sub">الزيارات أسبوعياً — آخر 12 أسبوعاً حتى آخر زيارة مسجَّلة (${dayStr(lastD)})</div>${lines([{name:'فريق PDC', color:'var(--s1)', values:cnt('PDC')}, {name:'فريق CMS', color:'var(--s3)', values:cnt('CMS')}], ws.map(w => weekLabel(w + 1)), {h:260, tipPrefix:'أسبوع ينتهي '})}</div>${qtMonthly(Vs)}</div>
-  </div></div></div>`;
+  const ser = [{name:'فريق PDC', color:'var(--s1)', values:cnt('PDC')}, {name:'فريق CMS', color:'var(--s3)', values:cnt('CMS')}].concat(NA.n ? [{name:'غير مسجَّل', color:'var(--muted)', values:cnt('NA')}] : []);
+  return `<div class="grid"><div class="card c12 qt-card"><div class="card-h"><div class="t"><h3>الزيارات: فريق PDC مقابل فريق CMS</h3><div class="sub">التصنيف حسب جهة عمل المهندس / الراصد الذي نفّذ الزيارة، من ورقة «Engineers» في ملف السلامة — جهة «PDC» لفريق الشركة، وبقية الجهات فريق CMS</div></div></div><div class="card-b">
+    <div class="qt-ps ${NA.n ? 'three' : ''}">${panel('PDC', P, 'var(--s1)')}${panel('CMS', C, 'var(--s3)')}${NA.n ? panel('NA', NA, 'var(--warning)') : ''}</div>
+    <div class="tk-sub">حسب جهة عمل المهندس</div>
+    <div class="qt-tb">${table('qt-by', [{t:'جهة عمل المهندس'}, {t:'الفريق'}, {t:'المهندسون', n:1}, {t:'الزيارات', n:1}, {t:'مكة', n:1}, {t:'جدة', n:1}, {t:'بها مخالفات', n:1}, {t:'المخالفات', n:1}, {t:'الملاحظات', n:1}, {t:'إيقاف العمل', n:1}, {t:'الغرامات', n:1}, {t:'آخر زيارة'}],
+      rows.map(r => ({h:[`<b>${esc(r.k)}</b>`, tb(r.t), fmt(r.en), fmt(r.n), fmt(r.mk), fmt(r.jd), `${fmt(r.wv)} <small style="color:var(--muted)">${fpct(r.wv, r.n)}</small>`, fmt(r.vio), fmt(r.ob), fmt(r.sw), fmt(r.f), r.last >= 0 ? dayStr(r.last) : '—'], v:[r.k, r.t, r.en, r.n, r.mk, r.jd, r.wv, r.vio, r.ob, r.sw, r.f, r.last]})), {maxh:330})}</div>
+    <div class="qt-row"><div class="qt-ch"><div class="tk-sub">الزيارات أسبوعياً — آخر 12 أسبوعاً حتى آخر زيارة مسجَّلة (${dayStr(lastD)})</div>${lines(ser, ws.map(w => weekLabel(w + 1)), {h:260, tipPrefix:'أسبوع ينتهي '})}</div>${qtMonthly(Vs)}</div>
+  </div></div></div>${qtEngineers(Vs, live)}`;
 }
-
+/* المهندسون / الراصدون: الزيارات والرصد لكل مهندس مع جهة عمله */
+function qtEngineers(Vs, live){
+  const m = new Map();
+  Vs.forEach(v => { const k = qtKey(v.en) || '—'; if(!m.has(k)){ m.set(k, {n:v.en || '—', co:qtCo(v), t:qtTeamV(v), v:0, mk:0, jd:0, wv:0, vio:0, ob:0, last:-1, ids:new Set()}); } const o = m.get(k); o.v++; o[v.r === 'مكة' ? 'mk' : 'jd']++; if(v.hv) o.wv++; if(nn(v.d) && v.d > o.last) o.last = v.d; o.ids.add(v.id); });
+  live.forEach(x => { const v = qtVisit(x.vid); if(!v) return; const o = m.get(qtKey(v.en) || '—'); if(!o) return; if(x.ty === 'مخالفة') o.vio++; else if(x.ty === 'ملاحظة') o.ob++; });
+  const rows = Array.from(m.values()).sort((a, b) => b.v - a.v), na = rows.filter(r => r.t === 'NA');
+  return `<div class="grid">${card({cls:'c12', title:'المهندسون والراصدون', sub:`<span class="num">${fmt(rows.length)}</span> مهندساً نفّذوا زيارات${na.length ? ` — منهم <b class="num" style="color:var(--warning)">${fmt(na.length)}</b> غير مسجَّلين في ورقة «Engineers» (<span class="num">${fmt(na.reduce((s, r) => s + r.v, 0))}</span> زيارة): أضفهم في الورقة مع جهة عملهم ليُصنَّفوا` : ''}`,
+    body:table('qt-eng', [{t:'المهندس / الراصد'}, {t:'جهة العمل'}, {t:'الفريق'}, {t:'الزيارات', n:1}, {t:'مكة', n:1}, {t:'جدة', n:1}, {t:'بها مخالفات', n:1}, {t:'المخالفات', n:1}, {t:'الملاحظات', n:1}, {t:'آخر زيارة'}],
+      rows.map(r => ({h:[`<b>${esc(r.n)}</b>`, r.co === null ? '<span style="color:var(--warning)">غير مسجَّل</span>' : esc(qtCoName(r.co)), `<span class="badge ${r.t === 'PDC' ? 'b-run' : r.t === 'CMS' ? 'b-ok' : 'b-warn'}">${r.t === 'NA' ? 'غير مسجَّل' : r.t}</span>`, fmt(r.v), fmt(r.mk), fmt(r.jd), fmt(r.wv), fmt(r.vio), fmt(r.ob), r.last >= 0 ? dayStr(r.last) : '—'], v:[r.n, qtCoName(r.co), r.t, r.v, r.mk, r.jd, r.wv, r.vio, r.ob, r.last]})), {maxh:360}),
+    data:{cols:['المهندس / الراصد', 'جهة العمل', 'الفريق', 'الزيارات', 'مكة', 'جدة', 'بها مخالفات', 'المخالفات', 'الملاحظات', 'آخر زيارة'], rows:rows.map(r => [r.n, qtCoName(r.co), r.t === 'NA' ? 'غير مسجَّل' : r.t, r.v, r.mk, r.jd, r.wv, r.vio, r.ob, r.last >= 0 ? dayStr(r.last) : ''])}})}</div>`;
+}
 function qtMonthly(Vs){
-  const m = new Map(); Vs.forEach(v => { if(!nn(v.d)) return; const k = dayStr(v.d).slice(0, 7); if(!m.has(k)) m.set(k, {p:0, c:0}); m.get(k)[qtTeamV(v) === 'PDC' ? 'p' : 'c']++; });
+  const m = new Map(); Vs.forEach(v => { if(!nn(v.d)) return; const k = dayStr(v.d).slice(0, 7); if(!m.has(k)) m.set(k, {p:0, c:0, u:0}); const t = qtTeamV(v); m.get(k)[t === 'PDC' ? 'p' : t === 'CMS' ? 'c' : 'u']++; });
   const rows = Array.from(m.entries()).sort((a, b) => b[0] < a[0] ? -1 : 1).slice(0, 8);
   const MN = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
-  return `<div><div class="tk-sub">حسب الشهر</div>${table('qt-mon', [{t:'الشهر'}, {t:'فريق PDC', n:1}, {t:'فريق CMS', n:1}, {t:'الإجمالي', n:1}, {t:'حصة PDC', n:1}],
-    rows.map(([k, o]) => ({h:[MN[+k.slice(5) - 1] + ' ' + k.slice(0, 4), fmt(o.p), fmt(o.c), `<b>${fmt(o.p + o.c)}</b>`, fpct(o.p, o.p + o.c)], v:[k, o.p, o.c, o.p + o.c, pct(o.p, o.p + o.c)]})), {maxh:300})}</div>`;
+  return `<div><div class="tk-sub">حسب الشهر</div>${table('qt-mon', [{t:'الشهر'}, {t:'فريق PDC', n:1}, {t:'فريق CMS', n:1}, {t:'غير مسجَّل', n:1}, {t:'الإجمالي', n:1}, {t:'حصة PDC', n:1}],
+    rows.map(([k, o]) => { const T = o.p + o.c + o.u; return {h:[MN[+k.slice(5) - 1] + ' ' + k.slice(0, 4), fmt(o.p), fmt(o.c), fmt(o.u), `<b>${fmt(T)}</b>`, fpct(o.p, T)], v:[k, o.p, o.c, o.u, T, pct(o.p, T)]}; }), {maxh:300})}</div>`;
 }
 /* الجهة المسؤولة: ملخص صغير */
 function qtParties(Is){
   const v = Is.filter(x => x.ty === 'مخالفة'), ct = v.filter(x => qtParty(x) === 'ct'), cs = v.filter(x => qtParty(x) === 'cs'), un = v.length - ct.length - cs.length;
   const sum = a => a.reduce((s, x) => s + (x.am || 0), 0);
   const top = a => tkCount(a, x => x.ct === 'غير محدد' ? '' : x.ct).slice(0, 5);
-  const topCs = a => tkCount(a, x => qtIsPDC(x.cs) ? '' : x.cs).slice(0, 5);
+  const topCs = a => tkCount(a, x => /PDC/i.test(x.cs || '') ? '' : x.cs).slice(0, 5);
   return `<div class="grid">
     ${card({cls:'c6', title:'المخالفات المرصودة على المقاول', sub:`<span class="num">${fmt(ct.length)}</span> مخالفة • غرامات <span class="num">${fmt(sum(ct))}</span> ر.س — حسب المقاول`, body:tkBars(top(ct), {color:'var(--critical)'}), data:{cols:['المقاول', 'المخالفات'], rows:tkCount(ct, x => x.ct)}})}
     ${card({cls:'c6', title:'المخالفات المرصودة على الاستشاري الفرعي', sub:`<span class="num">${fmt(cs.length)}</span> مخالفة • غرامات <span class="num">${fmt(sum(cs))}</span> ر.س — حسب الاستشاري${un ? ` • <span class="num">${fmt(un)}</span> بلا جهة` : ''}`, body:tkBars(topCs(cs), {color:'var(--s3)'}), data:{cols:['الاستشاري', 'المخالفات'], rows:tkCount(cs, x => x.cs)}})}
@@ -6649,8 +6676,8 @@ qlBase = function(){ return qlBase0().filter(qtKeepI); };
 const qlExport0 = qlExport;
 qlExport = function(){
   const rows = qlData(); if(!rows.length){ toast('لا توجد سجلات للتصدير'); return; }
-  exportSheets('سجل المخالفات والملاحظات', [{name:'السجل', cols:['التاريخ', 'رقم الزيارة', 'فريق الزيارة', 'الجهة الزائرة', 'النوع', 'التصنيف', 'الجهة المسؤولة', 'المخالفة / النشاط', 'الوصف التفصيلي', 'المنطقة', 'القطاع', 'الدائرة', 'المقاول', 'الاستشاري', 'رقم أمر العمل', 'الفئة', 'درجة الخطورة', 'الجزاء', 'المبلغ (ريال)', 'موقف الخصم', 'الحالة', 'مدة التصحيح (يوم)', 'تاريخ الإغلاق', 'الإجراء التصحيحي المطلوب', 'الإجراء الفعلي', 'قائد الفريق', 'رابط الصور'],
-    rows:rows.map(x => { const v = qtVisit(x.vid) || {}; return [dayStr(x.d), x.vid, qtTeamI(x), v.cs || '', x.ty, x.cg, x.rp || '', x.vn || x.ac, x.desc, x.r, x.s, x.u, x.ct, x.cs, x.no, x.sc, x.sv, x.pn, x.am || 0, x.ded, x.stt, x.cdays === null ? '' : x.cdays, dayStr(x.cld), x.cra, x.act, x.tl, x.img]; })}]);
+  exportSheets('سجل المخالفات والملاحظات', [{name:'السجل', cols:['التاريخ', 'رقم الزيارة', 'فريق الزيارة', 'المهندس — جهة العمل', 'النوع', 'التصنيف', 'الجهة المسؤولة', 'المخالفة / النشاط', 'الوصف التفصيلي', 'المنطقة', 'القطاع', 'الدائرة', 'المقاول', 'الاستشاري', 'رقم أمر العمل', 'الفئة', 'درجة الخطورة', 'الجزاء', 'المبلغ (ريال)', 'موقف الخصم', 'الحالة', 'مدة التصحيح (يوم)', 'تاريخ الإغلاق', 'الإجراء التصحيحي المطلوب', 'الإجراء الفعلي', 'قائد الفريق', 'رابط الصور'],
+    rows:rows.map(x => { const v = qtVisit(x.vid) || {}; return [dayStr(x.d), x.vid, qtTeamI(x) === 'NA' ? 'غير مسجَّل' : qtTeamI(x), (v.en || '') + (v.en ? ' — ' + qtCoName(qtCo(v)) : ''), x.ty, x.cg, x.rp || '', x.vn || x.ac, x.desc, x.r, x.s, x.u, x.ct, x.cs, x.no, x.sc, x.sv, x.pn, x.am || 0, x.ded, x.stt, x.cdays === null ? '' : x.cdays, dayStr(x.cld), x.cra, x.act, x.tl, x.img]; })}]);
 };
 
 /* ==================== تقارير الإدارة: الأداء الشهري + المالي (قوالب العرض) ==================== */
@@ -7413,7 +7440,7 @@ function rkPptx(pres, D){
   /* آخر نسخة مقروءة محفوظة في المتصفح — تظهر فوراً عند الفتح (مهم للجوال) ثم تُستبدل بالقراءة الحية */
   for(const s of SLOTS){
     const c = await IDB.get('cache', s.key);
-    if(c && c.data && c.v === 4){ const S = SLOT[s.key]; S.data = c.data; S.meta = Object.assign({}, c.meta, {source:'cache'}); S.status = 'cached'; S.msg = 'آخر نسخة مقروءة ' + ago(c.meta.loadedAt) + ' — حدّث لقراءة الأحدث'; }
+    if(c && c.data && c.v === 5){ const S = SLOT[s.key]; S.data = c.data; S.meta = Object.assign({}, c.meta, {source:'cache'}); S.status = 'cached'; S.msg = 'آخر نسخة مقروءة ' + ago(c.meta.loadedAt) + ' — حدّث لقراءة الأحدث'; }
   }
   rebuild();
   updateFreshness();
