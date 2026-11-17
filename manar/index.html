@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Manar Alshreef | منار الشريف</title>
+<meta name="description" content="Import Operations · DHL Saudi Arabia · Jeddah — performance portfolio 2025–2026">
+<meta property="og:title" content="Manar Alshreef | منار الشريف">
+<meta property="og:description" content="Import Operations · DHL Saudi Arabia · Jeddah">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F5F3EC;--sheet:#FFFFFF;--ink:#121212;--ink2:#1c1c1c;--muted:#66625a;--rule:#DCD8CC;
+  --red:#D40511;--red-soft:#FBE3E5;--y:#FFCC00;--y-soft:#FFF3C2;
+  --body:"IBM Plex Sans Arabic",system-ui,sans-serif;--mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6;overflow-x:hidden}
+button{font-family:inherit;color:inherit}
+bdi{unicode-bidi:isolate}
+.wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+.mono{font-family:var(--mono)}
+
+/* ---------- HERO ---------- */
+.hero{background:var(--ink);color:#fff;position:relative;overflow:hidden;padding-bottom:64px}
+.hero .bg{position:absolute;inset:0;width:100%;height:100%;opacity:.9}
+.hero .grid{position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.09) 1px,transparent 1px);background-size:22px 22px;mask-image:linear-gradient(180deg,#000 40%,transparent)}
+.top{position:relative;display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:20px}
+.tag{font-family:var(--mono);font-size:12px;letter-spacing:.1em;color:#bdb9ae;display:flex;align-items:center;gap:9px}
+[dir=rtl] .tag{font-family:var(--body);letter-spacing:0;font-size:13px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--y);box-shadow:0 0 0 4px rgba(255,204,0,.2);animation:pulse 2.4s ease-in-out infinite;flex:none}
+.tr{display:flex;align-items:center;gap:16px}
+.wm{font-family:Arial,Helvetica,sans-serif;font-weight:700;font-style:italic;color:var(--red);background:var(--y);padding:4px 10px 3px;border-radius:4px;font-size:18px;letter-spacing:-.04em;line-height:1}
+.lang{display:flex;border:1px solid #3a3a3a;border-radius:999px;padding:3px}
+.lang button{border:0;background:none;padding:4px 12px;border-radius:999px;cursor:pointer;font-size:13px;color:#aaa}
+.lang button[aria-pressed=true]{background:var(--y);color:var(--ink)}
+.hgrid{position:relative;display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:48px;align-items:center;padding-top:38px}
+.eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--y)}
+[dir=rtl] .eyebrow{font-family:var(--body);letter-spacing:0;font-size:14px}
+h1{font-size:clamp(52px,9vw,104px);font-weight:700;line-height:.98;letter-spacing:-.03em;margin:14px 0 20px}
+[dir=rtl] h1{letter-spacing:0;line-height:1.15}
+h1 .ln{display:block;overflow:hidden}
+h1 .ln span{display:inline-block;transform:translateY(105%);animation:rise .9s cubic-bezier(.2,.8,.2,1) forwards}
+h1 .ln:nth-child(2) span{animation-delay:.12s}
+h1 .y{color:var(--y)}
+.lede{font-size:clamp(17px,2vw,20px);color:#d9d6ce;max-width:34em;opacity:0;animation:fade .8s .45s forwards}
+.lede b{color:#fff;background:var(--red);padding:0 6px;border-radius:4px;font-weight:700}
+.facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin-top:30px;border-top:1px solid #333;opacity:0;animation:fade .8s .6s forwards}
+.facts div{padding:12px 12px 0 0;min-width:0}
+[dir=rtl] .facts div{padding:12px 0 0 12px}
+.facts dt{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:#8d897f}
+[dir=rtl] .facts dt{font-family:var(--body);letter-spacing:0;font-size:12px}
+.facts dd{font-weight:500;font-size:14.5px;margin-top:2px}
+
+/* shipping label */
+.label{background:#fff;color:var(--ink);border-radius:10px;box-shadow:0 30px 70px rgba(0,0,0,.55);transform:rotate(-2.5deg);position:relative;overflow:hidden;opacity:0;animation:drop 1s .35s cubic-bezier(.2,.9,.25,1.15) forwards}
+[dir=rtl] .label{transform:rotate(2.5deg)}
+.label .lh{background:var(--y);display:flex;justify-content:space-between;align-items:center;padding:12px 16px}
+.label .lh .wm{background:none;padding:0;font-size:26px}
+.label .lh .svc{font-family:var(--mono);font-weight:600;font-size:12px;letter-spacing:.08em;text-align:end}
+[dir=rtl] .label .lh .svc{font-family:var(--body);letter-spacing:0;font-size:13px}
+.lrow{display:grid;grid-template-columns:1fr 1fr;border-bottom:1.5px solid var(--ink)}
+.lrow>div{padding:10px 16px;min-width:0}
+.lrow>div+div{border-inline-start:1.5px solid var(--ink)}
+.lk{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;color:var(--muted);display:block}
+[dir=rtl] .lk{font-family:var(--body);letter-spacing:0;font-size:11px}
+.lv{font-weight:700;font-size:14.5px;line-height:1.35;display:block;margin-top:1px}
+.lfull{padding:10px 16px;border-bottom:1.5px solid var(--ink)}
+.lfull .lv{font-weight:500;font-size:13.5px}
+.bc{padding:12px 16px 10px;display:grid;gap:4px}
+.bc svg{width:100%;height:54px;display:block}
+.bc .num{font-family:var(--mono);font-size:11.5px;letter-spacing:.3em;text-align:center;direction:ltr}
+.stamp{position:absolute;inset-inline-end:18px;bottom:30px;border:3px solid var(--red);color:var(--red);font-family:var(--mono);font-weight:600;font-size:13px;letter-spacing:.12em;padding:4px 10px;border-radius:6px;transform:rotate(-14deg) scale(2.2);opacity:0;animation:stamp .45s 1.5s cubic-bezier(.3,1.6,.5,1) forwards;background:rgba(255,255,255,.85);text-align:center;line-height:1.25}
+[dir=rtl] .stamp{font-family:var(--body);letter-spacing:0;font-size:14px}
+
+/* marquee */
+.marquee{background:var(--y);color:var(--ink);overflow:hidden;border-block:2px solid var(--ink);direction:ltr}
+.mtrack{display:flex;width:max-content;animation:scroll 32s linear infinite}
+.mtrack span{font-family:var(--mono);font-weight:600;font-size:15px;letter-spacing:.06em;padding:13px 0;white-space:nowrap;display:flex;align-items:center}
+.mtrack span::after{content:"";width:9px;height:9px;background:var(--red);transform:rotate(45deg);margin-inline:28px}
+
+/* sections */
+section{padding-block:72px 20px}
+.sh{display:grid;gap:8px;margin-bottom:30px;max-width:46em}
+.sh .k{font-family:var(--mono);font-size:12px;color:var(--red);letter-spacing:.1em;display:flex;align-items:center;gap:10px}
+.sh .k::before{content:"";width:26px;height:2px;background:var(--red)}
+.sh h2{font-size:clamp(28px,4.2vw,44px);font-weight:700;line-height:1.15;letter-spacing:-.01em}
+[dir=rtl] .sh h2{letter-spacing:0;line-height:1.35}
+.sh p{color:var(--muted);font-size:16.5px}
+.rv{opacity:0;transform:translateY(26px);transition:opacity .8s ease,transform .8s cubic-bezier(.2,.8,.2,1)}
+.rv.in{opacity:1;transform:none}
+
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+.stat{background:var(--sheet);border:1px solid var(--rule);border-radius:16px;padding:20px 18px 18px;display:grid;gap:8px;position:relative;overflow:hidden;transition:transform .25s,box-shadow .25s}
+.stat:hover{transform:translateY(-4px);box-shadow:0 14px 30px rgba(0,0,0,.08)}
+.stat.hl{background:var(--ink);color:#fff;border-color:var(--ink)}
+.stat .n{font-family:var(--mono);font-weight:600;font-size:clamp(34px,4.4vw,50px);line-height:1;direction:ltr;unicode-bidi:isolate;letter-spacing:-.02em}
+[dir=rtl] .stat .n{text-align:right}
+.stat .n i{font-style:normal;color:var(--red)}
+.stat.hl .n{color:var(--y)}
+.stat.hl .n i{color:var(--y)}
+.stat .l{font-size:13.5px;color:var(--muted);line-height:1.45}
+.stat.hl .l{color:#c9c5bb}
+.stat .bar{height:4px;border-radius:2px;background:#ece9e0;overflow:hidden;margin-top:auto}
+.stat.hl .bar{background:#333}
+.stat .bar i{display:block;height:100%;width:0;background:var(--red);transition:width 1.6s cubic-bezier(.2,.8,.2,1)}
+.stat.hl .bar i{background:var(--y)}
+
+/* route */
+.route{position:relative;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;list-style:none;--p:1}
+.route::before,.route::after{content:"";position:absolute;top:27px;height:4px;border-radius:2px;inset-inline-start:12.5%}
+.route::before{width:75%;background:repeating-linear-gradient(90deg,#c8c3b5 0 8px,transparent 8px 14px)}
+.route::after{width:calc(75% * var(--p));background:var(--red);transition:width .9s cubic-bezier(.2,.8,.2,1)}
+.plane{position:absolute;top:13px;inset-inline-start:calc(12.5% + 75% * var(--p) - 16px);width:32px;height:32px;z-index:3;transition:inset-inline-start .9s cubic-bezier(.2,.8,.2,1);pointer-events:none;display:none}
+.node{display:grid;justify-items:center;text-align:center;gap:6px;position:relative;z-index:2}
+.node button{width:58px;height:58px;border-radius:50%;border:3px solid #c8c3b5;background:var(--paper);cursor:pointer;display:grid;place-items:center;transition:all .35s}
+.node button svg{width:24px;height:24px;color:#a19b8b;transition:color .35s}
+.node.past button{border-color:var(--red);background:var(--sheet)}
+.node.past button svg{color:var(--red)}
+.node.cur button{background:var(--red);border-color:var(--red);transform:scale(1.12);box-shadow:0 0 0 8px var(--red-soft)}
+.node.cur button svg{color:#fff}
+.node.live.cur button{background:var(--y);border-color:var(--ink);box-shadow:0 0 0 8px var(--y-soft)}
+.node.live.cur button svg{color:var(--ink)}
+.node .d{font-family:var(--mono);font-size:12px;color:var(--red);direction:ltr;margin-top:6px}
+.node .t{font-weight:700;font-size:15.5px;line-height:1.35}
+.rdetail{margin-top:30px;background:var(--ink);color:#fff;border-radius:18px;padding:26px 28px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:24px;align-items:center;min-height:150px}
+.rdetail .big{font-family:var(--mono);font-weight:600;font-size:clamp(40px,6vw,64px);color:var(--y);line-height:1;direction:ltr}
+.rdetail .k{font-family:var(--mono);font-size:11.5px;color:#9a968c;letter-spacing:.1em;direction:ltr;text-align:start;display:block}
+.rdetail h3{font-size:20px;font-weight:700;margin:4px 0 6px}
+.rdetail p{color:#cfcbc2;max-width:46em}
+.rdetail.swap{animation:swap .5s}
+
+/* incoterms */
+.panel{background:var(--sheet);border:1px solid var(--rule);border-radius:20px;overflow:hidden}
+.pb{padding:24px}
+.terms{display:grid;grid-template-columns:repeat(11,minmax(0,1fr));gap:7px;direction:ltr}
+.terms button{border:1.5px dashed #b9b4a6;background:transparent;border-radius:10px;padding:11px 0;font-family:var(--mono);font-weight:600;font-size:14px;cursor:pointer;color:var(--muted);transition:transform .2s,box-shadow .2s}
+.terms button:hover{transform:translateY(-2px)}
+.terms button.on{border:1.5px solid var(--red);background:var(--red);color:#fff}
+.terms button[aria-pressed=true]{box-shadow:0 0 0 3px var(--paper),0 0 0 5px var(--ink);transform:translateY(-2px)}
+.legend{display:flex;flex-wrap:wrap;gap:18px;margin-top:14px;font-size:13px;color:var(--muted)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin-inline-end:6px}
+.thead{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:26px}
+.thead .code{font-family:var(--mono);font-size:44px;font-weight:600;line-height:1;letter-spacing:-.02em}
+.pill{font-size:12.5px;font-weight:500;padding:3px 12px;border-radius:999px;background:var(--red-soft);color:var(--red)}
+.pill.no{background:#eeebe2;color:var(--muted)}
+.mode{font-family:var(--mono);font-size:11.5px;color:var(--muted)}
+[dir=rtl] .mode{font-family:var(--body);font-size:12.5px}
+.desc{color:var(--muted);max-width:52em;font-size:15.5px;margin-top:8px}
+.journey{margin-top:22px;position:relative}
+.jicons{display:grid;grid-template-columns:repeat(5,minmax(0,1fr))}
+.jicons div{display:grid;justify-items:center;gap:6px;text-align:center;padding:0 4px}
+.jicons svg{width:34px;height:34px;color:var(--ink)}
+.jicons span{font-size:12.5px;color:var(--muted);line-height:1.3}
+.track{position:relative;margin-top:14px;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}
+.track div{height:46px;border-radius:8px;display:grid;place-items:center;font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.08em;transition:background .5s,color .5s}
+[dir=rtl] .track div{font-family:var(--body);letter-spacing:0;font-size:13px}
+.track .s{background:var(--ink);color:var(--y)}
+.track .b{background:var(--y-soft);color:var(--ink);box-shadow:inset 0 0 0 1px #efd98a}
+.box{position:absolute;top:-30px;left:0;width:26px;height:22px;background:#b88a4a;border-radius:3px;box-shadow:inset 0 -4px 0 rgba(0,0,0,.15);animation:ship 6s linear infinite}
+.box::after{content:"";position:absolute;inset:0 10px;background:#d8b07a}
+.risk{position:absolute;top:-8px;bottom:-8px;width:0;border-inline-start:3px solid var(--red);transition:inset-inline-start .7s cubic-bezier(.2,.8,.2,1)}
+.risk span{position:absolute;bottom:-26px;inset-inline-start:0;transform:translateX(-50%);white-space:nowrap;font-size:11.5px;font-weight:700;color:var(--red);background:var(--sheet);padding:0 6px}
+.risk::before{content:"";position:absolute;top:-6px;inset-inline-start:-7px;width:11px;height:11px;border-radius:50%;background:var(--red)}
+.jleg{display:flex;gap:18px;margin-top:40px;font-size:13px;color:var(--muted);flex-wrap:wrap}
+.jleg i{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin-inline-end:6px}
+
+/* accounts */
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.acc{background:var(--sheet);border:1px solid var(--rule);border-radius:20px;padding:26px;display:grid;gap:12px;align-content:start;position:relative;overflow:hidden}
+.acc.dark{background:var(--red);color:#fff;border-color:var(--red)}
+.acc .ic{width:46px;height:46px;border-radius:12px;background:var(--y);display:grid;place-items:center}
+.acc .ic svg{width:24px;height:24px}
+.acc h3{font-size:22px;font-weight:700;line-height:1.3}
+.acc p{color:var(--muted);font-size:15.5px}
+.acc.dark p{color:#ffd9dc}
+.acc ul{list-style:none;display:grid;gap:8px;font-size:15px}
+.acc li{display:flex;gap:10px}
+.acc li::before{content:"";flex:none;width:7px;height:7px;border-radius:50%;background:var(--red);margin-top:10px}
+.acc.dark li::before{background:var(--y)}
+.acc .ghost{position:absolute;inset-inline-end:-10px;bottom:-26px;font-family:Arial,Helvetica,sans-serif;font-weight:700;font-style:italic;font-size:120px;letter-spacing:-.05em;color:rgba(0,0,0,.04);line-height:1;pointer-events:none;direction:ltr}
+.acc.dark .ghost{color:rgba(255,255,255,.08)}
+
+/* 2027 */
+.next{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.nx{background:var(--sheet);border:1px solid var(--rule);border-radius:18px;padding:22px 20px;display:grid;gap:8px;align-content:start;position:relative;overflow:hidden;transition:transform .3s,background .3s,color .3s}
+.nx:hover{transform:translateY(-6px);background:var(--ink);color:#fff}
+.nx:hover p{color:#c9c5bb}
+.nx .no{font-family:var(--mono);font-size:42px;font-weight:600;color:var(--y);line-height:1;-webkit-text-stroke:1.5px var(--ink)}
+.nx:hover .no{-webkit-text-stroke:0}
+.nx .ic{width:30px;height:30px;color:var(--red)}
+.nx h3{font-size:18px;font-weight:700;line-height:1.3}
+.nx p{font-size:14.5px;color:var(--muted);transition:color .3s}
+.support{margin-top:18px;background:var(--y);border-radius:18px;padding:20px 24px;display:grid;grid-template-columns:auto repeat(3,minmax(0,1fr));gap:20px;align-items:center}
+.support .k{font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.1em;color:var(--red);max-width:9em;line-height:1.4}
+[dir=rtl] .support .k{font-family:var(--body);letter-spacing:0;font-size:13.5px}
+.support div{font-weight:500;font-size:15px;display:flex;gap:10px;align-items:flex-start;line-height:1.45}
+.support div::before{content:"✓";flex:none;width:22px;height:22px;border-radius:50%;background:var(--ink);color:var(--y);display:grid;place-items:center;font-size:12px;margin-top:1px}
+
+/* footer */
+footer{margin-top:80px;background:var(--ink);color:#fff;position:relative;overflow:hidden}
+.fin{position:relative;padding-block:70px 34px;display:grid;gap:16px}
+footer .k{font-family:var(--mono);font-size:12.5px;letter-spacing:.12em;color:var(--y)}
+[dir=rtl] footer .k{font-family:var(--body);letter-spacing:0;font-size:14px}
+footer h2{font-size:clamp(32px,5.5vw,62px);font-weight:700;line-height:1.1;max-width:15em;letter-spacing:-.02em}
+[dir=rtl] footer h2{letter-spacing:0;line-height:1.35}
+footer h2 em{font-style:normal;color:var(--y)}
+footer p{color:#bdb9ae;max-width:40em;font-size:17px}
+.road{position:relative;height:90px;margin-top:20px;border-bottom:3px dashed #3a3a3a}
+.truck{position:absolute;bottom:4px;left:-170px;width:160px;animation:drive 9s linear infinite}
+.note{font-size:12.5px;color:#8d897f;border-top:1px solid #2c2c2c;padding-top:16px;margin-top:18px}
+
+@keyframes pulse{50%{box-shadow:0 0 0 9px transparent;opacity:.7}}
+@keyframes rise{to{transform:none}}
+@keyframes fade{to{opacity:1}}
+@keyframes drop{from{opacity:0;transform:translateY(-60px) rotate(-8deg)}to{opacity:1}}
+@keyframes stamp{to{opacity:1;transform:rotate(-14deg) scale(1)}}
+@keyframes scroll{to{transform:translateX(-50%)}}
+@keyframes swap{from{opacity:.2;transform:translateY(8px)}}
+@keyframes ship{0%{left:0%;opacity:0}6%{opacity:1}94%{opacity:1}100%{left:calc(100% - 26px);opacity:0}}
+@keyframes drive{to{left:100%}}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}.rv,.lede,.facts,.label,.stamp{opacity:1!important;transform:none!important}h1 .ln span{transform:none}}
+
+@media (max-width:900px){
+  .hgrid{grid-template-columns:minmax(0,1fr);gap:40px}
+  .label{max-width:420px}
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .stats .stat:first-child{grid-column:span 2}
+  .next{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .terms{grid-template-columns:repeat(6,minmax(0,1fr))}
+  .support{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:700px){
+  .wrap{padding-inline:18px}
+  .facts{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:6px}
+  .two{grid-template-columns:minmax(0,1fr)}
+  .route{grid-template-columns:minmax(0,1fr);gap:22px}
+  .route::before,.route::after{top:12px;inset-inline-start:27px;width:4px}
+  .route::before{height:calc(100% - 24px);background:repeating-linear-gradient(180deg,#c8c3b5 0 8px,transparent 8px 14px)}
+  .route::after{height:calc((100% - 24px) * var(--p))}
+  .node{grid-template-columns:58px minmax(0,1fr);justify-items:start;text-align:start;column-gap:16px;row-gap:0;align-items:center}
+  .node button{grid-row:span 2}
+  .node .d{margin-top:0}
+  .rdetail{grid-template-columns:minmax(0,1fr);gap:10px;padding:22px}
+  .jicons span{font-size:11px}
+  .jicons svg{width:26px;height:26px}
+  .track div{height:38px;font-size:10px;letter-spacing:.02em}
+  [dir=rtl] .track div{font-size:11px}
+  .risk span{font-size:10.5px}
+  .pb{padding:18px}
+}
+@media (max-width:480px){
+  .next{grid-template-columns:minmax(0,1fr)}
+  .terms{grid-template-columns:repeat(4,minmax(0,1fr))}
+  h1{font-size:54px}
+  .label{transform:rotate(-1.5deg)}
+}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <svg class="bg" viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <defs>
+      <path id="a1" d="M-50 560 C 250 260, 700 160, 1250 260"/>
+      <path id="a2" d="M-50 420 C 300 520, 800 120, 1250 120"/>
+      <path id="a3" d="M100 720 C 400 380, 900 400, 1250 560"/>
+    </defs>
+    <use href="#a1" fill="none" stroke="#FFCC00" stroke-opacity=".28" stroke-width="1.5" stroke-dasharray="4 9"/>
+    <use href="#a2" fill="none" stroke="#D40511" stroke-opacity=".45" stroke-width="1.5" stroke-dasharray="4 9"/>
+    <use href="#a3" fill="none" stroke="#ffffff" stroke-opacity=".14" stroke-width="1.5" stroke-dasharray="4 9"/>
+    <g fill="#FFCC00"><path d="M14 0c0-.6-.6-1-1.4-1H9L5-7H3l2 6H1L-.5-3H-2l1 3-1 3h1.5L1 1h4L3 7h2l4-6h4C13.4 1 14 .6 14 0z" transform="scale(1.6)"/><animateMotion dur="14s" repeatCount="indefinite" rotate="auto"><mpath href="#a1"/></animateMotion></g>
+    <g fill="#D40511"><path d="M14 0c0-.6-.6-1-1.4-1H9L5-7H3l2 6H1L-.5-3H-2l1 3-1 3h1.5L1 1h4L3 7h2l4-6h4C13.4 1 14 .6 14 0z" transform="scale(1.3)"/><animateMotion dur="18s" begin="-6s" repeatCount="indefinite" rotate="auto"><mpath href="#a2"/></animateMotion></g>
+    <g fill="#ffffff" fill-opacity=".6"><path d="M14 0c0-.6-.6-1-1.4-1H9L5-7H3l2 6H1L-.5-3H-2l1 3-1 3h1.5L1 1h4L3 7h2l4-6h4C13.4 1 14 .6 14 0z" transform="scale(1.1)"/><animateMotion dur="22s" begin="-3s" repeatCount="indefinite" rotate="auto"><mpath href="#a3"/></animateMotion></g>
+  </svg>
+  <div class="grid"></div>
+  <div class="wrap">
+    <div class="top">
+      <div class="tag"><span class="dot" aria-hidden="true"></span><span data-i="status"></span></div>
+      <div class="tr">
+        <span class="wm">DHL</span>
+        <div class="lang" role="group" aria-label="Language">
+          <button data-l="en" aria-pressed="true">EN</button>
+          <button data-l="ar" aria-pressed="false">عربي</button>
+        </div>
+      </div>
+    </div>
+    <div class="hgrid">
+      <div>
+        <p class="eyebrow" data-i="eyebrow"></p>
+        <h1 id="name"></h1>
+        <p class="lede" data-i="lede"></p>
+        <dl class="facts">
+          <div><dt data-i="f1k"></dt><dd data-i="f1v"></dd></div>
+          <div><dt data-i="f2k"></dt><dd data-i="f2v"></dd></div>
+          <div><dt data-i="f3k"></dt><dd data-i="f3v"></dd></div>
+          <div><dt data-i="f4k"></dt><dd data-i="f4v"></dd></div>
+        </dl>
+      </div>
+      <div class="label" aria-label="Shipping label">
+        <div class="lh"><span class="wm">DHL</span><span class="svc" data-i="lSvc"></span></div>
+        <div class="lrow"><div><span class="lk" data-i="lFromK"></span><span class="lv" data-i="lFrom"></span></div><div><span class="lk" data-i="lToK"></span><span class="lv" data-i="lTo"></span></div></div>
+        <div class="lfull"><span class="lk" data-i="lContK"></span><span class="lv" data-i="lCont"></span></div>
+        <div class="lrow"><div><span class="lk" data-i="lWtK"></span><span class="lv" data-i="lWt"></span></div><div><span class="lk" data-i="lHandK"></span><span class="lv" data-i="lHand"></span></div></div>
+        <div class="bc"><svg id="barcode" viewBox="0 0 300 54" preserveAspectRatio="none"></svg><span class="num">MA 2025 1008 · JED · 2027</span></div>
+        <div class="stamp" data-i="stamp"></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="marquee" aria-hidden="true"><div class="mtrack" id="mq"></div></div>
+
+<main class="wrap">
+  <section id="impact">
+    <div class="sh rv"><span class="k"><bdi dir="ltr">01 / IMPACT</bdi></span><h2 data-i="impH"></h2><p data-i="impP"></p></div>
+    <div class="stats" id="stats"></div>
+  </section>
+
+  <section id="route">
+    <div class="sh rv"><span class="k"><bdi dir="ltr">02 / ROUTE</bdi></span><h2 data-i="routeH"></h2><p data-i="routeP"></p></div>
+    <ol class="route rv" id="routeList"></ol>
+    <div class="rdetail rv" id="rdetail" aria-live="polite"></div>
+  </section>
+
+  <section id="incoterms">
+    <div class="sh rv"><span class="k"><bdi dir="ltr">03 / INCOTERMS</bdi></span><h2 data-i="incH"></h2><p data-i="incP"></p></div>
+    <article class="panel rv"><div class="pb">
+      <div class="terms" id="terms"></div>
+      <div class="legend"><span><i style="background:var(--red)"></i><span data-i="legOn"></span></span><span><i style="border:1.5px dashed #b9b4a6"></i><span data-i="legOff"></span></span></div>
+      <div id="tdet" aria-live="polite"></div>
+      <div class="journey">
+        <div class="jicons" id="jicons"></div>
+        <div class="track" id="track"></div>
+        <div class="jleg"><span><i style="background:var(--ink)"></i><span data-i="seller"></span></span><span><i style="background:var(--y-soft);box-shadow:inset 0 0 0 1px #efd98a"></i><span data-i="buyer"></span></span></div>
+      </div>
+    </div></article>
+  </section>
+
+  <section id="accounts">
+    <div class="sh rv"><span class="k"><bdi dir="ltr">04 / ACCOUNTS</bdi></span><h2 data-i="accH"></h2><p data-i="accP"></p></div>
+    <div class="two">
+      <article class="acc dark rv">
+        <div class="ic"><svg viewBox="0 0 24 24"><path d="M3 7h11v9H3z M14 10h4l3 3v3h-7z" fill="none" stroke="#121212" stroke-width="1.8" stroke-linejoin="round"/><circle cx="7" cy="17.5" r="1.8" fill="#121212"/><circle cx="17" cy="17.5" r="1.8" fill="#121212"/></svg></div>
+        <h3 data-i="a1H"></h3><p data-i="a1P"></p><ul data-i="a1L"></ul><span class="ghost">D2D</span>
+      </article>
+      <article class="acc rv">
+        <div class="ic"><svg viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1 M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1" fill="none" stroke="#121212" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+        <h3 data-i="a2H"></h3><p data-i="a2P"></p><ul data-i="a2L"></ul><span class="ghost">SAL</span>
+      </article>
+    </div>
+  </section>
+
+  <section id="next">
+    <div class="sh rv"><span class="k"><bdi dir="ltr">05 / 2027</bdi></span><h2 data-i="nxH"></h2><p data-i="nxP"></p></div>
+    <div class="next" id="nextList"></div>
+    <div class="support rv" id="support"></div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap fin">
+    <span class="k rv" data-i="askK"></span>
+    <h2 class="rv" data-i="askH"></h2>
+    <p class="rv" data-i="askP"></p>
+    <div class="road" aria-hidden="true">
+      <svg class="truck" viewBox="0 0 150 56">
+        <rect x="2" y="6" width="92" height="36" rx="2" fill="#FFCC00"/>
+        <text x="48" y="31" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="700" font-size="17" fill="#D40511" font-style="italic" letter-spacing="-1">DHL</text>
+        <path d="M98 16h24l14 14v12H98z" fill="#FFCC00"/><path d="M104 20h16l9 9h-25z" fill="#D40511" opacity=".55"/>
+        <circle cx="24" cy="46" r="7" fill="#121212" stroke="#FFCC00" stroke-width="2.5"/><circle cx="72" cy="46" r="7" fill="#121212" stroke="#FFCC00" stroke-width="2.5"/><circle cx="120" cy="46" r="7" fill="#121212" stroke="#FFCC00" stroke-width="2.5"/>
+      </svg>
+    </div>
+    <p class="note" data-i="note"></p>
+  </div>
+</footer>
+
+<script>
+const L=t=>'<bdi dir="ltr">'+t+'</bdi>';
+const T={
+en:{status:"IN TRANSIT · JEDDAH",eyebrow:"Import Operations · DHL Saudi Arabia",
+name:["Manar","Alshreef"],
+lede:"I run import shipments end to end in Jeddah: seven months on the D2A consol, 400+ delivery orders issued, and a door-to-door account taken over mid-stream with <b>zero loss</b>.",
+f1k:"Now",f1v:"EXW · Kerry D2D",f2k:"Based in",f2v:"Jeddah",f3k:"With DHL since",f3v:"Oct 2025",f4k:"Review period",f4v:"2025 – 2026",
+lSvc:"PRIORITY<br>DOOR-TO-DOOR",lFromK:"FROM",lFrom:"Import Ops<br>Jeddah, KSA",lToK:"TO",lTo:"2027<br>The next leg",
+lContK:"CONTENTS",lCont:"400+ DOs · 63+ DAP/DDP · D2A consol · Kerry D2D account · SAL network",
+lWtK:"WEIGHT",lWt:"Heavy-weight ready",lHandK:"HANDLING",lHand:"Sensitive cargo",stamp:"READY FOR<br>2027",
+mq:["400+ DELIVERY ORDERS","63+ DAP & DDP SHIPMENTS","7 MONTHS D2A CONSOL","0 LOSS ON HANDOVER","KERRY DOOR-TO-DOOR","SAL RELATIONSHIPS","6 OF 11 INCOTERMS","READY FOR 2027"],
+impH:"One year, in numbers",impP:"What twelve months of import operations in Jeddah added up to.",
+stats:[["400","+","Delivery orders (DO) issued",1],["63","+","DAP & DDP shipments handled",.63],["7","","Months running the Jeddah D2A consol",.7],["0","","Loss on the door-to-door account handover",1],["6","/11","Incoterms handled hands-on",.545]],
+routeH:"My route so far",routeP:"Drawn like a shipment’s tracking line. Each checkpoint added responsibility, and the live end is where I work now. Tap a checkpoint.",
+route:[
+ {d:"Oct 2025",t:"Jeddah D2A consol",k:"8 OCT 2025 → 1 MAY 2026",big:"D2A",h:"Running the D2A consol shipments for Jeddah",p:"I owned the Jeddah consol sheet, kept every shipment’s details clear and current, and made sure downstream teams worked from accurate data."},
+ {d:"Feb 2026",t:"Door-to-door account",k:"FEB 2026 → NOW",big:"0",h:"Took over a door-to-door account mid-stream",p:"I picked up a live door-to-door account from February and continued it without losing any business during the handover."},
+ {d:"May 2026",t:"Consol completed",k:"7 MONTHS",big:"400+",h:"Consol assignment completed",p:"Seven months on the D2A consol, alongside 400+ delivery orders and 63+ DAP and DDP shipments."},
+ {d:"Now",t:"EXW · Kerry account",k:"CURRENT",big:"EXW",h:"EXW shipments and the Kerry door-to-door account",p:"My current scope is EXW work, led by the Kerry door-to-door account, the most important account I handle today."}],
+incH:"Incoterms I work with",incP:"Hands-on import experience in six of the eleven Incoterms 2020 rules. Pick any term to see who carries each leg, and where the risk changes hands.",
+legOn:"Handled hands-on",legOff:"Next to learn",
+stages:["Export clearance","Main carriage","Transit risk","Import clearance & duties","Unloading at destination"],
+seller:"SELLER",buyer:"BUYER",risk:"Risk passes here",done:"Handled hands-on",todo:"Next to learn",anyMode:"Any mode of transport",seaMode:"Sea and inland waterway only",
+desc:{EXW:"Ex Works. Goods are made available at the seller’s premises; the buyer arranges everything else, including export clearance.",
+FCA:"Free Carrier. The seller clears export and hands the goods to the buyer’s carrier at the named place.",
+CPT:"Carriage Paid To. The seller pays carriage to the destination, but risk passes when goods reach the first carrier.",
+CIP:"Carriage and Insurance Paid To. As CPT, plus the seller buys all-risks cargo insurance for the buyer.",
+DAP:"Delivered at Place. The seller delivers to the named place, ready for unloading; the buyer clears import and pays duties.",
+DPU:"Delivered at Place Unloaded. As DAP, but the seller also unloads at destination.",
+DDP:"Delivered Duty Paid. The seller carries everything to the door, including import clearance and duties.",
+FAS:"Free Alongside Ship. The seller places export-cleared goods alongside the vessel at the port of loading.",
+FOB:"Free On Board. The seller clears export and loads the goods on board the vessel named by the buyer.",
+CFR:"Cost and Freight. The seller pays sea freight to the destination port; risk passes once goods are on board.",
+CIF:"Cost, Insurance and Freight. As CFR, plus the seller buys minimum cargo insurance."},
+accH:"Accounts and relationships",accP:"Where I add value beyond the shipment count.",
+a1H:"Kerry door-to-door account",a1P:"My most important account today, run end to end on EXW terms.",
+a1L:["Full ownership from pickup to delivery","Built on the door-to-door account I took over in February 2026","Zero loss since the handover"],
+a2H:"Strong relationships at SAL",a2P:"I know the people and processes behind most release issues at SAL.",
+a2L:["Resolve release problems directly instead of escalating","Keep shipments moving before issues reach the customer","A working network that comes with me into 2027"],
+nxH:"2027 — what I want to take on",nxP:"Expectations and responsibilities I am ready for in the coming year.",
+next:[["Sensitive shipments","Own sensitive cargo end to end, backed by the right DHL training."],["Heavy-weight shipments","Plan and run high-weight cargo from booking to delivery."],["A larger account","Build on the Kerry door-to-door account to run a bigger portfolio."],["All 11 Incoterms","Live files on FCA, FOB, FAS, CIF and DPU to close the gap."]],
+supK:"SUPPORT I AM ASKING FOR",
+support:["Sensitive-cargo and dangerous-goods training","Mentoring from a key-account owner","Assignment to shipments on new Incoterms"],
+askK:"MY ASK FOR 2027",askH:"Contract conversion, and <em>a larger account.</em>",
+askP:"One year in, I have shown I can carry volume, protect accounts and solve problems at release. I am ready for the next leg.",
+note:"Figures are from my own shipment and delivery-order records for October 2025 to November 2026."},
+ar:{status:"قيد الشحن · جدة",eyebrow:"عمليات الاستيراد · "+L("DHL")+" السعودية",
+name:["منار","الشريف"],
+lede:"أتولى شحنات الاستيراد في جدة من البداية للنهاية: سبعة أشهر على كونسول "+L("D2A")+"، وأكثر من 400 إذن تسليم، وحساب دور تو دور استلمته أثناء التشغيل <b>دون أي خسارة</b>.",
+f1k:"حالياً",f1v:L("EXW")+" · "+L("Kerry"),f2k:"المدينة",f2v:"جدة",f3k:"في "+L("DHL")+" منذ",f3v:"أكتوبر 2025",f4k:"فترة التقييم",f4v:L("2025 – 2026"),
+lSvc:"أولوية<br>دور تو دور",lFromK:"من",lFrom:"عمليات الاستيراد<br>جدة",lToK:"إلى",lTo:"2027<br>المرحلة القادمة",
+lContK:"المحتويات",lCont:"أكثر من 400 إذن تسليم · 63 شحنة "+L("DAP/DDP")+" · كونسول "+L("D2A")+" · حساب "+L("Kerry")+" · علاقات سال",
+lWtK:"الوزن",lWt:"جاهزة للشحنات الثقيلة",lHandK:"المناولة",lHand:"شحنات حساسة",stamp:"جاهزة<br>لعام 2027",
+mq:["400+ DELIVERY ORDERS","63+ DAP & DDP SHIPMENTS","7 MONTHS D2A CONSOL","0 LOSS ON HANDOVER","KERRY DOOR-TO-DOOR","SAL RELATIONSHIPS","6 OF 11 INCOTERMS","READY FOR 2027"],
+impH:"عام واحد بالأرقام",impP:"حصيلة اثني عشر شهراً من عمليات الاستيراد في جدة.",
+stats:[["400","+","إذن تسليم "+L("DO")+" أصدرتها",1],["63","+","شحنة "+L("DAP & DDP"),.63],["7","","أشهر على كونسول "+L("D2A")+" جدة",.7],["0","","خسارة عند استلام حساب دور تو دور",1],["6","/11","من قواعد الإنكوترمز بخبرة عملية",.545]],
+routeH:"مساري حتى الآن",routeP:"مرسوم كخط تتبّع شحنة: كل نقطة أضافت مسؤولية جديدة، والطرف النشط هو موقعي الحالي. اضغط على أي نقطة.",
+route:[
+ {d:"Oct 2025",t:"كونسول "+L("D2A")+" جدة",k:"8 OCT 2025 → 1 MAY 2026",big:"D2A",h:"إدارة شحنات كونسول "+L("D2A")+" لجدة",p:"كنت مسؤولة عن كونسول شيت جدة، أوضّح تفاصيل كل شحنة وأحدّثها، لتعمل بقية الفرق على بيانات دقيقة."},
+ {d:"Feb 2026",t:"حساب دور تو دور",k:"FEB 2026 → NOW",big:"0",h:"استلام حساب دور تو دور أثناء التشغيل",p:"استلمت حساب دور تو دور قائماً من فبراير، واستمر دون خسارة أي عمل أثناء التسليم."},
+ {d:"May 2026",t:"إتمام الكونسول",k:"7 MONTHS",big:"400+",h:"إتمام مهمة الكونسول",p:"سبعة أشهر على كونسول "+L("D2A")+"، إلى جانب أكثر من 400 إذن تسليم و63 شحنة "+L("DAP & DDP")+"."},
+ {d:"Now",t:L("EXW")+" · حساب "+L("Kerry"),k:"CURRENT",big:"EXW",h:"شحنات "+L("EXW")+" وحساب "+L("Kerry")+" دور تو دور",p:"نطاق عملي الحالي شحنات "+L("EXW")+"، وأهمها حساب "+L("Kerry")+" دور تو دور، وهو أهم حساب أتولاه اليوم."}],
+incH:"الإنكوترمز التي أعمل بها",incP:"خبرة استيراد عملية في ست من أصل إحدى عشرة قاعدة. اختر أي قاعدة لترى من يتحمّل كل مرحلة، وأين تنتقل المخاطر.",
+legOn:"خبرة عملية",legOff:"الخطوة القادمة",
+stages:["التخليص عند التصدير","النقل الرئيسي","مخاطر النقل","التخليص الجمركي والرسوم","التفريغ في الوجهة"],
+seller:"البائع",buyer:"المشتري",risk:"هنا تنتقل المخاطر",done:"خبرة عملية",todo:"الخطوة القادمة",anyMode:"لأي وسيلة نقل",seaMode:"للنقل البحري والنهري فقط",
+desc:{EXW:"تسليم في موقع البائع، ويتولى المشتري كل ما بعد ذلك بما فيه التخليص عند التصدير.",
+FCA:"يخلّص البائع التصدير ويسلّم البضاعة لناقل المشتري في المكان المحدد.",
+CPT:"يدفع البائع أجرة النقل حتى الوجهة، لكن المخاطر تنتقل عند التسليم لأول ناقل.",
+CIP:"مثل "+L("CPT")+" مع تأمين شامل يشتريه البائع لصالح المشتري.",
+DAP:"يسلّم البائع في المكان المحدد جاهزة للتفريغ، ويتولى المشتري التخليص ودفع الرسوم.",
+DPU:"مثل "+L("DAP")+" لكن البائع يتولى التفريغ في الوجهة أيضاً.",
+DDP:"يتولى البائع كل شيء حتى الباب، بما فيه التخليص الجمركي والرسوم.",
+FAS:"يضع البائع البضاعة مخلّصة للتصدير بجانب السفينة في ميناء الشحن.",
+FOB:"يخلّص البائع التصدير ويحمّل البضاعة على السفينة التي يحددها المشتري.",
+CFR:"يدفع البائع الشحن البحري حتى ميناء الوصول، والمخاطر تنتقل بعد التحميل على السفينة.",
+CIF:"مثل "+L("CFR")+" مع تأمين بالحد الأدنى يشتريه البائع."},
+accH:"الحسابات والعلاقات",accP:"القيمة التي أضيفها بعيداً عن عدد الشحنات.",
+a1H:"حساب "+L("Kerry")+" دور تو دور",a1P:"أهم حساب أتولاه اليوم، بشروط "+L("EXW")+" ومن البداية للنهاية.",
+a1L:["مسؤولية كاملة من الاستلام حتى التسليم","امتداد لحساب دور تو دور الذي استلمته في فبراير 2026","صفر خسارة منذ الاستلام"],
+a2H:"علاقات قوية مع سال",a2P:"أعرف الأشخاص والإجراءات خلف أغلب مشاكل الإفراج في سال.",
+a2L:["أحل مشاكل الإفراج مباشرة دون تصعيد","أُبقي الشحنات تتحرك قبل أن تصل المشكلة للعميل","شبكة علاقات قائمة أنقلها معي إلى 2027"],
+nxH:"2027 — ما أطمح لتولّيه",nxP:"التوقعات والمسؤوليات التي أنا جاهزة لها في العام القادم.",
+next:[["الشحنات الحساسة","تولّي الشحنات الحساسة من البداية للنهاية مع التدريب المناسب."],["الشحنات ذات الوزن العالي","تخطيط ومتابعة الشحنات الثقيلة من الحجز حتى التسليم."],["حساب أكبر","البناء على خبرة حساب "+L("Kerry")+" لإدارة محفظة أكبر."],["كامل الإنكوترمز","العمل على ملفات "+L("FCA, FOB, FAS, CIF, DPU")+"."]],
+supK:"الدعم الذي أطلبه",
+support:["تدريب على الشحنات الحساسة والبضائع الخطرة","إرشاد من مسؤول حسابات رئيسية","إسناد شحنات بقواعد إنكوترمز جديدة"],
+askK:"طلبي لعام 2027",askH:"تحويل العقد، <em>وتولّي حساب أكبر.</em>",
+askP:"خلال عام واحد أثبتّ قدرتي على تحمّل حجم العمل، وحماية الحسابات، وحل مشاكل الإفراج. وأنا جاهزة للمرحلة القادمة.",
+note:"الأرقام من سجلات شحناتي وأذونات التسليم للفترة من أكتوبر 2025 إلى نوفمبر 2026."}
+};
+const TERMS=["EXW","FCA","FAS","FOB","CPT","CFR","CIP","CIF","DAP","DPU","DDP"];
+const DONE=new Set(["EXW","CPT","CIP","DAP","DDP","CFR"]);
+const SEA=new Set(["FAS","FOB","CFR","CIF"]);
+const SPLIT={EXW:"BBBBB",FCA:"SBBBB",FAS:"SBBBB",FOB:"SBBBB",CPT:"SSBBB",CFR:"SSBBB",CIP:"SSBBB",CIF:"SSBBB",DAP:"SSSBB",DPU:"SSSBS",DDP:"SSSSB"};
+const RISK={EXW:0,FCA:1,FAS:1,FOB:1,CPT:1,CFR:1,CIP:1,CIF:1,DAP:3,DPU:3,DDP:3};
+const RICON=['<path d="M4 8h16v11H4z M8 8V5h8v3" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>',
+'<path d="M3 7h11v9H3z M14 10h4l3 3v3h-7z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>',
+'<path d="M5 12l5 5L19 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>',
+'<path d="M21 13c0-1-1-1.6-2.2-1.6H13L7.5 4H5l3 7.4H5L3 9H1.5l1 4-1 4H3l2-2.4h3L5 22h2.5l5.5-7.4h5.8C20 14.6 21 14 21 13z" fill="currentColor"/>'];
+const JICON=['<path d="M3 21V9l6 3V9l6 3V5h6v16z M7 17h2 M12 17h2 M17 17h2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>',
+'<path d="M3 15h18l-2 5H5z M6 15V9h6v6 M12 11h5v4 M9 9V6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>',
+'<path d="M12 3l8 4v6c0 4-3.5 7-8 8-4.5-1-8-4-8-8V7z M9 12l2 2 4-4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>',
+'<path d="M4 4h16v16H4z M8 9h8 M8 13h8 M8 17h5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>',
+'<path d="M3 11l9-7 9 7v10H3z M9 21v-6h6v6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>'];
+const NICON=['<path d="M12 3l10 18H2z M12 10v5 M12 17.5v.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>',
+'<path d="M7 8h10l3 13H4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="5.5" r="2.3" fill="none" stroke="currentColor" stroke-width="2"/>',
+'<rect x="3" y="7" width="18" height="13" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 7V5h6v2 M3 12h18" fill="none" stroke="currentColor" stroke-width="2"/>',
+'<circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3 12h18 M12 3c3 3 3 15 0 18 M12 3c-3 3-3 15 0 18" fill="none" stroke="currentColor" stroke-width="1.7"/>'];
+let lang="en",sel=3,term="DDP",counted=false;
+const $=id=>document.getElementById(id);
+
+// barcode
+(function(){let x=0,s=7,h="";while(x<296){s=(s*9301+49297)%233280;const w=1+Math.floor(s/233280*4);if(Math.floor(s/7)%2)h+='<rect x="'+x+'" y="0" width="'+w+'" height="54" fill="#121212"/>';x+=w+1}$("barcode").innerHTML=h})();
+
+function render(){
+  const t=T[lang];
+  document.documentElement.lang=lang;document.documentElement.dir=lang==="ar"?"rtl":"ltr";
+  document.querySelectorAll("[data-i]").forEach(el=>{const v=t[el.dataset.i];if(v===undefined)return;
+    el.innerHTML=Array.isArray(v)?v.map(x=>"<li>"+x+"</li>").join(""):v;});
+  document.querySelectorAll(".lang button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.l===lang));
+  $("name").innerHTML='<span class="ln"><span>'+t.name[0]+'</span></span><span class="ln"><span>'+t.name[1]+'<span class="y">.</span></span></span>';
+  const m=T.en.mq.map(x=>"<span>"+x+"</span>").join("");$("mq").innerHTML=m+m;
+  $("stats").innerHTML=t.stats.map((s,i)=>'<div class="stat rv'+(i===0?' hl':'')+(document.querySelector("#stats .in")?' in':'')+'"><span class="n"><span class="cnt" data-v="'+s[0]+'">'+(counted?s[0]:0)+'</span><i>'+s[1]+'</i></span><span class="l">'+s[2]+'</span><span class="bar"><i style="width:'+(counted?s[3]*100:0)+'%" data-w="'+s[3]*100+'"></i></span></div>').join("");
+  drawRoute();drawTerm();
+  $("nextList").innerHTML=t.next.map((n,i)=>'<div class="nx rv'+(counted?' in':'')+'"><span class="no">0'+(i+1)+'</span><svg class="ic" viewBox="0 0 24 24">'+NICON[i]+'</svg><h3>'+n[0]+'</h3><p>'+n[1]+'</p></div>').join("");
+  $("support").innerHTML='<span class="k">'+t.supK+'</span>'+t.support.map(s=>'<div>'+s+'</div>').join("");
+  observe();
+}
+function drawRoute(anim){
+  const t=T[lang];
+  $("routeList").style.setProperty("--p",sel/3);
+  $("routeList").innerHTML=t.route.map((r,i)=>'<li class="node'+(i===3?' live':'')+(i<sel?' past':'')+(i===sel?' cur past':'')+'"><button aria-pressed="'+(i===sel)+'" data-r="'+i+'" aria-label="'+r.d+'"><svg viewBox="0 0 24 24">'+RICON[i]+'</svg></button><span class="d">'+r.d+'</span><span class="t">'+r.t+'</span></li>').join("");
+  const r=t.route[sel],d=$("rdetail");
+  d.innerHTML='<span class="big">'+r.big+'</span><div><span class="k">'+r.k+'</span><h3>'+r.h+'</h3><p>'+r.p+'</p></div>';
+  if(anim){d.classList.remove("swap");void d.offsetWidth;d.classList.add("swap")}
+  $("routeList").querySelectorAll("button").forEach(b=>b.onclick=()=>{sel=+b.dataset.r;drawRoute(true)});
+}
+function drawTerm(){
+  const t=T[lang];
+  $("terms").innerHTML=TERMS.map(c=>'<button class="'+(DONE.has(c)?"on":"")+'" aria-pressed="'+(c===term)+'" data-t="'+c+'">'+c+'</button>').join("");
+  $("terms").querySelectorAll("button").forEach(b=>b.onclick=()=>{term=b.dataset.t;drawTerm()});
+  $("tdet").innerHTML='<div class="thead"><span class="code">'+term+'</span><span class="pill'+(DONE.has(term)?'':' no')+'">'+(DONE.has(term)?t.done:t.todo)+'</span><span class="mode">'+(SEA.has(term)?t.seaMode:t.anyMode)+'</span></div><p class="desc">'+t.desc[term]+'</p>';
+  $("jicons").innerHTML=t.stages.map((s,i)=>'<div><svg viewBox="0 0 24 24">'+JICON[i]+'</svg><span>'+s+'</span></div>').join("");
+  const sp=SPLIT[term],tr=$("track");
+  let cells=tr.querySelectorAll(".cell");
+  if(!cells.length){tr.insertAdjacentHTML("beforeend",[0,1,2,3,4].map(()=>'<div class="cell"></div>').join("")+'<div class="risk"><span></span></div>');cells=tr.querySelectorAll(".cell")}
+  cells.forEach((c,i)=>{c.className="cell "+(sp[i]==="S"?"s":"b");c.textContent=sp[i]==="S"?t.seller:t.buyer});
+  const rk=tr.querySelector(".risk");rk.style.insetInlineStart=(RISK[term]/5*100)+"%";rk.querySelector("span").textContent=t.risk;
+  const sx=RISK[term]===0?"translateX(0)":(lang==="ar"?"translateX(50%)":"translateX(-50%)");rk.querySelector("span").style.transform=sx;
+}
+function count(){
+  if(counted)return;counted=true;
+  document.querySelectorAll(".cnt").forEach(el=>{const v=+el.dataset.v,st=performance.now(),D=1600;
+    (function f(n){const p=Math.min(1,(n-st)/D),e=1-Math.pow(1-p,3);el.textContent=Math.round(v*e);if(p<1)requestAnimationFrame(f)})(st)});
+  document.querySelectorAll(".stat .bar i").forEach(b=>b.style.width=b.dataset.w+"%");
+}
+let io;
+function observe(){
+  if(!("IntersectionObserver" in window)){document.querySelectorAll(".rv").forEach(e=>e.classList.add("in"));count();return}
+  io&&io.disconnect();
+  io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("in");if(e.target.closest("#stats"))count();io.unobserve(e.target)}}),{threshold:.15});
+  document.querySelectorAll(".rv:not(.in)").forEach((e,i)=>{if(e.parentElement.id==="stats"||e.parentElement.id==="nextList")e.style.transitionDelay=(Array.from(e.parentElement.children).indexOf(e)*90)+"ms";io.observe(e)});
+}
+document.querySelectorAll(".lang button").forEach(b=>b.onclick=()=>{lang=b.dataset.l;try{localStorage.setItem("ml-lang",lang)}catch(e){}render()});
+try{const s=localStorage.getItem("ml-lang");if(s&&T[s])lang=s}catch(e){}
+render();
+</script>
+</body>
+</html>
