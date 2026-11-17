@@ -9,7 +9,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="icon-192.png">
 <script>
-var APP_VER = "202611171000";
+var APP_VER = "202611171300";
 if("serviceWorker" in navigator){ navigator.serviceWorker.register("sw.js", {updateViaCache:"none"}).then(function(r){ r.update(); }).catch(function(){}); }
 fetch("version.txt?t=" + Date.now(), {cache:"no-store"}).then(function(r){ return r.ok ? r.text() : ""; }).then(function(v){
   v = (v || "").trim();
@@ -2089,6 +2089,38 @@ body.side-min #btnFx span{display:none} body.side-min #btnFx{justify-content:cen
 .rk-lo .btn{margin-inline-start:auto}
 @media(max-width:900px){ .rk-launch{grid-template-columns:1fr} body.rk-open .rp-bar .hint{display:none} body.rk-open .rp-bar{padding:8px 10px; gap:6px} body.rk-open .rp-bar b{font-size:12px} }
 
+
+.tk-h{margin:18px 2px 8px; font-size:15px; font-weight:650; display:flex; align-items:center; gap:10px}
+.tk-h::after{content:""; flex:1; height:1px; background:var(--border)}
+.tk-bars{display:flex; flex-direction:column; gap:7px}
+.tk-b{display:grid; grid-template-columns:minmax(0,40%) 1fr auto 46px; gap:8px; align-items:center; font-size:12px; padding:2px 4px; border-radius:6px}
+.tk-b.clk{cursor:pointer}.tk-b.clk:hover{background:color-mix(in srgb,var(--s1) 7%,transparent)}
+.tk-b .n{white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.tk-b .t{height:9px; border-radius:5px; background:var(--surface-3); overflow:hidden}
+.tk-b .t i{display:block; height:100%; border-radius:5px}
+.tk-b b{font-weight:650; min-width:38px; text-align:end}
+.tk-b em{font-style:normal; color:var(--muted); font-size:11px; text-align:end; white-space:nowrap}
+.tk-ms{display:flex; flex-direction:column; gap:12px}
+.tk-m .h{display:flex; justify-content:space-between; font-size:12px}.tk-m .h b{font-weight:650}
+.tk-m .t{height:9px; border-radius:5px; background:var(--surface-3); overflow:hidden; margin:4px 0 2px}.tk-m .t i{display:block; height:100%; border-radius:5px}
+.tk-m .f{font-size:11px; color:var(--muted)}
+.tk-sub{margin:14px 0 6px; font-size:11.5px; color:var(--muted); font-weight:600}
+.ql-tools{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:10px}
+.ql-tools label{display:flex; align-items:center; gap:5px; font-size:11.5px; color:var(--muted)}
+.ql-chips{display:flex; gap:4px; background:var(--surface-3); padding:3px; border-radius:10px}
+.ql-c{border:0; background:transparent; color:var(--text-2,inherit); font:inherit; font-size:12px; padding:5px 11px; border-radius:8px; cursor:pointer}
+.ql-c.on{background:var(--surface); color:var(--text); font-weight:650; box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.ql-q{flex:1; min-width:180px}
+.ql-sum{display:flex; flex-wrap:wrap; gap:6px 18px; font-size:12px; color:var(--muted); margin-bottom:8px}
+.ql-sum b{color:var(--text); font-weight:650}
+.ql-w{max-width:360px; min-width:220px; white-space:normal !important; line-height:1.5}
+.ql-w small{display:block; color:var(--muted); font-size:11px}
+.tk-bars.wide .tk-b{grid-template-columns:minmax(0,34%) 1fr auto 104px}
+.ql-d{width:100%; border-collapse:collapse; font-size:12.5px}
+.ql-d th{width:190px; text-align:start; color:var(--muted); font-weight:500; padding:7px 8px; vertical-align:top; border-bottom:1px solid var(--border)}
+.ql-d td{padding:7px 8px; border-bottom:1px solid var(--border); line-height:1.7}
+@media(max-width:900px){ .tk-b{grid-template-columns:minmax(0,46%) 1fr auto} .tk-b em{display:none} .ql-d th{width:110px} }
+
 </style>
 </head>
 <body>
@@ -2121,6 +2153,7 @@ body.side-min #btnFx span{display:none} body.side-min #btnFx{justify-content:cen
 <main>
   <section class="page" id="pg-hud"></section>
   <section class="page" id="pg-todo"></section>
+  <section class="page" id="pg-track"></section>
   <section class="page" id="pg-trust"></section>
   <section class="page" id="pg-dq"></section>
   <section class="page" id="pg-risk"></section>
@@ -3618,6 +3651,7 @@ function closeModal(){ const m = $('#modalBg'); if(m) m.remove(); }
 const TABS = [
   {k:'hud', t:'مركز القيادة', i:'🛰️'},
   {k:'exec', t:'الملخص التنفيذي', i:'📊'},
+  {k:'track', t:'التنفيذ والتصاريح والأرشفة', i:'📋'},
   {k:'todo', t:'المتابعة اليومية', i:'✅'},
   {k:'risk', t:'الالتزام والمخاطر', i:'⏳'},
   {k:'dq', t:'جودة البيانات', i:'🧪'},
@@ -3646,7 +3680,7 @@ function render(){
   applyFilters();
   renderFilterBar();
   for(const k in CARD_DATA) if(CARD_DATA[k].pg === CUR || !document.getElementById(k)) delete CARD_DATA[k];
-  const fn = {hud:renderHud, risk:renderRisk, todo:renderTodo, dq:renderDQ, trust:renderTrust, exec:renderExec, ops:renderOps, cons:renderCons, maint:renderMaint, qs:renderQS, map:renderMap, perf:renderPerf, eng:renderEng, reports:renderReports, builder:renderBuilder, charts:renderCharts, help:renderHelp, plan:renderPlan, fin:renderFin}[CUR];
+  const fn = {hud:renderHud, risk:renderRisk, todo:renderTodo, track:renderTrack, dq:renderDQ, trust:renderTrust, exec:renderExec, ops:renderOps, cons:renderCons, maint:renderMaint, qs:renderQS, map:renderMap, perf:renderPerf, eng:renderEng, reports:renderReports, builder:renderBuilder, charts:renderCharts, help:renderHelp, plan:renderPlan, fin:renderFin}[CUR];
   document.body.classList.toggle('on-plan', CUR === 'plan');
   document.body.classList.toggle('on-hud', CUR === 'hud');
   if(CUR === 'plan'){ fn(); return; }
@@ -5277,15 +5311,15 @@ function exportReport(){
 
 
 /* ==================== واجهة الإصدار ٢: الأيقونات، التنقل، لوح الأوامر، وضع العرض، السحب والإفلات ==================== */
-const IC = {"exec": "<rect x=\"3\" y=\"3\" width=\"7\" height=\"9\" rx=\"1.5\"/><rect x=\"14\" y=\"3\" width=\"7\" height=\"5\" rx=\"1.5\"/><rect x=\"14\" y=\"12\" width=\"7\" height=\"9\" rx=\"1.5\"/><rect x=\"3\" y=\"16\" width=\"7\" height=\"5\" rx=\"1.5\"/>", "charts": "<path d=\"M3 21h18\"/><rect x=\"5\" y=\"11\" width=\"3.5\" height=\"7\" rx=\"1\"/><rect x=\"10.25\" y=\"5\" width=\"3.5\" height=\"13\" rx=\"1\"/><rect x=\"15.5\" y=\"8.5\" width=\"3.5\" height=\"9.5\" rx=\"1\"/>", "fin": "<rect x=\"2.5\" y=\"6\" width=\"19\" height=\"12\" rx=\"2.5\"/><circle cx=\"12\" cy=\"12\" r=\"2.6\"/><path d=\"M6.2 12h.01M17.8 12h.01\"/>", "ops": "<rect x=\"3\" y=\"4\" width=\"18\" height=\"16\" rx=\"2.5\"/><path d=\"M3 9.5h18M3 14.75h18M9.5 9.5V20\"/>", "cons": "<path d=\"M3 21h18M6 21V8l6-4.5L18 8v13M10 21v-5h4v5M10 11h.01M14 11h.01\"/>", "maint": "<path d=\"M14.7 6.3a4.2 4.2 0 0 0-5.3 5.3L3.2 17.8a2.1 2.1 0 0 0 3 3l6.2-6.2a4.2 4.2 0 0 0 5.3-5.3l-2.6 2.6-2.5-.5-.5-2.5z\"/>", "qs": "<path d=\"M12 3l8 3v6c0 4.6-3.2 8-8 9-4.8-1-8-4.4-8-9V6z\"/><path d=\"M8.8 12.2l2.2 2.2 4.2-4.4\"/>", "map": "<path d=\"M12 21.5s7-6.2 7-11.7A7 7 0 0 0 5 9.8c0 5.5 7 11.7 7 11.7z\"/><circle cx=\"12\" cy=\"9.8\" r=\"2.6\"/>", "plan": "<circle cx=\"9\" cy=\"8\" r=\"3.3\"/><path d=\"M2.8 20c0-3.4 2.8-6 6.2-6s6.2 2.6 6.2 6M16.2 5a3.3 3.3 0 0 1 0 6M18.2 14.6c1.8.9 3 2.9 3 5.4\"/>", "perf": "<circle cx=\"12\" cy=\"9\" r=\"5.5\"/><path d=\"M8.6 13.4L7 21l5-2.6 5 2.6-1.6-7.6\"/>", "eng": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><circle cx=\"12\" cy=\"12\" r=\"5\"/><circle cx=\"12\" cy=\"12\" r=\"1.2\"/>", "reports": "<path d=\"M14 3H7.5A2.5 2.5 0 0 0 5 5.5v13A2.5 2.5 0 0 0 7.5 21h9a2.5 2.5 0 0 0 2.500-2.500V8z\"/><path d=\"M14 3v5h5M9 13h6M9 17h4\"/>", "builder": "<path d=\"M4 6h9M19 6h1M4 12h3M13 12h7M4 18h11\"/><circle cx=\"16\" cy=\"6\" r=\"2.2\"/><circle cx=\"10\" cy=\"12\" r=\"2.2\"/><circle cx=\"18\" cy=\"18\" r=\"2.2\"/>", "menu": "<path d=\"M4 6.5h16M4 12h16M4 17.5h16\"/>", "search": "<circle cx=\"11\" cy=\"11\" r=\"6.5\"/><path d=\"M20 20l-4.2-4.2\"/>", "folder": "<path d=\"M3 7.5A2.5 2.5 0 0 1 5.5 5h3.6l2.2 2.5h7.2A2.5 2.5 0 0 1 21 10v7.5a2.5 2.5 0 0 1-2.500 2.500h-13A2.5 2.5 0 0 1 3 17.5z\"/>", "refresh": "<path d=\"M20 12a8 8 0 1 1-2.340-5.660M20 4v5h-5\"/>", "clock": "<circle cx=\"12\" cy=\"13\" r=\"8\"/><path d=\"M12 9v4l2.500 2.500M9 2h6\"/>", "play": "<path d=\"M7 4.500v15l12-7.500z\"/>", "pause": "<path d=\"M8 5v14M16 5v14\"/>", "stop": "<path d=\"M6 6l12 12M18 6L6 18\"/>", "x": "<path d=\"M6 6l12 12M18 6L6 18\"/>", "prev": "<path d=\"M9 5l7 7-7 7\"/>", "next": "<path d=\"M15 5l-7 7 7 7\"/>", "moon": "<path d=\"M20 14.500A8.500 8.500 0 0 1 9.500 4a7 7 0 1 0 10.500 10.500z\"/>", "help": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M9.500 9.300a2.600 2.600 0 0 1 5 .900c0 1.800-2.500 2.200-2.500 4M12 17.300h.01\"/>", "filter": "<path d=\"M4 5h16l-6 7.500V19l-4-2v-4.500z\"/>", "max": "<path d=\"M9 4H4v5M15 4h5v5M9 20H4v-5M15 20h5v-5\"/>", "chev": "<path d=\"M13 6l6 6-6 6M6 6l6 6-6 6\"/>", "screen": "<rect x=\"3\" y=\"4\" width=\"18\" height=\"12\" rx=\"2\"/><path d=\"M8 20h8M12 16v4M10 8.200v3.600l3.200-1.800z\"/>", "hud": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 12l5.500-5.500M12 3v2.500M12 7.500a4.500 4.500 0 1 0 4.500 4.500\"/>", "risk": "<path d=\"M12 3.500l9.500 16.500h-19z\"/><path d=\"M12 10v4.500M12 17.500h.01\"/>", "share": "<path d=\"M12 15V4M8 7.500L12 3.500l4 4M5 12v6.500A1.500 1.500 0 0 0 6.500 20h11a1.500 1.500 0 0 0 1.500-1.500V12\"/>", "todo": "<path d=\"M4 6.500l1.800 1.800L9 5M4 12.500l1.800 1.800L9 11M4 18.500l1.800 1.800L9 17M12.500 7H20M12.500 13H20M12.500 19H20\"/>", "dq": "<ellipse cx=\"11\" cy=\"6\" rx=\"7\" ry=\"3\"/><path d=\"M4 6v6c0 1.700 3.100 3 7 3M4 12v6c0 1.700 3.100 3 7 3M18 6v4M14.500 17.500l2.200 2.200 4.300-4.400\"/>", "star": "<path d=\"M12 3.500l2.600 5.400 5.900.800-4.300 4.100 1 5.900L12 16.900 6.800 19.700l1-5.900L3.500 9.700l5.900-.800z\"/>", "trust": "<path d=\"M12 3l8 3v6c0 4.6-3.2 8-8 9-4.8-1-8-4.4-8-9V6z\"/><path d=\"M8.8 12.2l2.2 2.2 4.2-4.4\"/>", "fx": "<path d=\"M12 3l1.800 4.700L18.500 9.500l-4.700 1.800L12 16l-1.800-4.700L5.500 9.500l4.700-1.800zM18.500 15l.900 2.100 2.100.900-2.100.900-.900 2.100-.900-2.100-2.100-.900 2.100-.900z\"/>"};
+const IC = {"exec": "<rect x=\"3\" y=\"3\" width=\"7\" height=\"9\" rx=\"1.5\"/><rect x=\"14\" y=\"3\" width=\"7\" height=\"5\" rx=\"1.5\"/><rect x=\"14\" y=\"12\" width=\"7\" height=\"9\" rx=\"1.5\"/><rect x=\"3\" y=\"16\" width=\"7\" height=\"5\" rx=\"1.5\"/>", "charts": "<path d=\"M3 21h18\"/><rect x=\"5\" y=\"11\" width=\"3.5\" height=\"7\" rx=\"1\"/><rect x=\"10.25\" y=\"5\" width=\"3.5\" height=\"13\" rx=\"1\"/><rect x=\"15.5\" y=\"8.5\" width=\"3.5\" height=\"9.5\" rx=\"1\"/>", "fin": "<rect x=\"2.5\" y=\"6\" width=\"19\" height=\"12\" rx=\"2.5\"/><circle cx=\"12\" cy=\"12\" r=\"2.6\"/><path d=\"M6.2 12h.01M17.8 12h.01\"/>", "ops": "<rect x=\"3\" y=\"4\" width=\"18\" height=\"16\" rx=\"2.5\"/><path d=\"M3 9.5h18M3 14.75h18M9.5 9.5V20\"/>", "cons": "<path d=\"M3 21h18M6 21V8l6-4.5L18 8v13M10 21v-5h4v5M10 11h.01M14 11h.01\"/>", "maint": "<path d=\"M14.7 6.3a4.2 4.2 0 0 0-5.3 5.3L3.2 17.8a2.1 2.1 0 0 0 3 3l6.2-6.2a4.2 4.2 0 0 0 5.3-5.3l-2.6 2.6-2.5-.5-.5-2.5z\"/>", "qs": "<path d=\"M12 3l8 3v6c0 4.6-3.2 8-8 9-4.8-1-8-4.4-8-9V6z\"/><path d=\"M8.8 12.2l2.2 2.2 4.2-4.4\"/>", "map": "<path d=\"M12 21.5s7-6.2 7-11.7A7 7 0 0 0 5 9.8c0 5.5 7 11.7 7 11.7z\"/><circle cx=\"12\" cy=\"9.8\" r=\"2.6\"/>", "plan": "<circle cx=\"9\" cy=\"8\" r=\"3.3\"/><path d=\"M2.8 20c0-3.4 2.8-6 6.2-6s6.2 2.6 6.2 6M16.2 5a3.3 3.3 0 0 1 0 6M18.2 14.6c1.8.9 3 2.9 3 5.4\"/>", "perf": "<circle cx=\"12\" cy=\"9\" r=\"5.5\"/><path d=\"M8.6 13.4L7 21l5-2.6 5 2.6-1.6-7.6\"/>", "eng": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><circle cx=\"12\" cy=\"12\" r=\"5\"/><circle cx=\"12\" cy=\"12\" r=\"1.2\"/>", "reports": "<path d=\"M14 3H7.5A2.5 2.5 0 0 0 5 5.5v13A2.5 2.5 0 0 0 7.5 21h9a2.5 2.5 0 0 0 2.500-2.500V8z\"/><path d=\"M14 3v5h5M9 13h6M9 17h4\"/>", "builder": "<path d=\"M4 6h9M19 6h1M4 12h3M13 12h7M4 18h11\"/><circle cx=\"16\" cy=\"6\" r=\"2.2\"/><circle cx=\"10\" cy=\"12\" r=\"2.2\"/><circle cx=\"18\" cy=\"18\" r=\"2.2\"/>", "menu": "<path d=\"M4 6.5h16M4 12h16M4 17.5h16\"/>", "search": "<circle cx=\"11\" cy=\"11\" r=\"6.5\"/><path d=\"M20 20l-4.2-4.2\"/>", "folder": "<path d=\"M3 7.5A2.5 2.5 0 0 1 5.5 5h3.6l2.2 2.5h7.2A2.5 2.5 0 0 1 21 10v7.5a2.5 2.5 0 0 1-2.500 2.500h-13A2.5 2.5 0 0 1 3 17.5z\"/>", "refresh": "<path d=\"M20 12a8 8 0 1 1-2.340-5.660M20 4v5h-5\"/>", "clock": "<circle cx=\"12\" cy=\"13\" r=\"8\"/><path d=\"M12 9v4l2.500 2.500M9 2h6\"/>", "play": "<path d=\"M7 4.500v15l12-7.500z\"/>", "pause": "<path d=\"M8 5v14M16 5v14\"/>", "stop": "<path d=\"M6 6l12 12M18 6L6 18\"/>", "x": "<path d=\"M6 6l12 12M18 6L6 18\"/>", "prev": "<path d=\"M9 5l7 7-7 7\"/>", "next": "<path d=\"M15 5l-7 7 7 7\"/>", "moon": "<path d=\"M20 14.500A8.500 8.500 0 0 1 9.500 4a7 7 0 1 0 10.500 10.500z\"/>", "help": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M9.500 9.300a2.600 2.600 0 0 1 5 .900c0 1.800-2.500 2.200-2.500 4M12 17.300h.01\"/>", "filter": "<path d=\"M4 5h16l-6 7.500V19l-4-2v-4.500z\"/>", "max": "<path d=\"M9 4H4v5M15 4h5v5M9 20H4v-5M15 20h5v-5\"/>", "chev": "<path d=\"M13 6l6 6-6 6M6 6l6 6-6 6\"/>", "screen": "<rect x=\"3\" y=\"4\" width=\"18\" height=\"12\" rx=\"2\"/><path d=\"M8 20h8M12 16v4M10 8.200v3.600l3.200-1.800z\"/>", "hud": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 12l5.500-5.500M12 3v2.500M12 7.500a4.500 4.500 0 1 0 4.500 4.500\"/>", "risk": "<path d=\"M12 3.500l9.500 16.500h-19z\"/><path d=\"M12 10v4.500M12 17.500h.01\"/>", "share": "<path d=\"M12 15V4M8 7.500L12 3.500l4 4M5 12v6.500A1.500 1.500 0 0 0 6.500 20h11a1.500 1.500 0 0 0 1.500-1.500V12\"/>", "todo": "<path d=\"M4 6.500l1.800 1.800L9 5M4 12.500l1.800 1.800L9 11M4 18.500l1.800 1.800L9 17M12.500 7H20M12.500 13H20M12.500 19H20\"/>", "dq": "<ellipse cx=\"11\" cy=\"6\" rx=\"7\" ry=\"3\"/><path d=\"M4 6v6c0 1.700 3.100 3 7 3M4 12v6c0 1.700 3.100 3 7 3M18 6v4M14.500 17.500l2.200 2.200 4.300-4.400\"/>", "star": "<path d=\"M12 3.500l2.600 5.400 5.900.800-4.300 4.100 1 5.900L12 16.900 6.800 19.700l1-5.900L3.500 9.700l5.900-.800z\"/>", "trust": "<path d=\"M12 3l8 3v6c0 4.6-3.2 8-8 9-4.8-1-8-4.4-8-9V6z\"/><path d=\"M8.8 12.2l2.2 2.2 4.2-4.4\"/>", "fx": "<path d=\"M12 3l1.800 4.700L18.500 9.500l-4.700 1.800L12 16l-1.800-4.700L5.500 9.500l4.700-1.800zM18.500 15l.900 2.100 2.100.900-2.100.900-.900 2.100-.900-2.100-2.100-.900 2.100-.900z\"/>", "track": "<path d=\"M4 6h10M4 12h7M4 18h10\"/><path d=\"M16 11l2 2 4-4\"/><circle cx=\"19\" cy=\"18\" r=\"2\"/>"};
 function icon(k){ return `<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">${IC[k] || ''}</svg>`; }
 const NAV_GROUPS = [
-  ['نظرة عامة', ['hud','exec','todo','risk','charts','fin','ops']],
+  ['نظرة عامة', ['hud','exec','track','todo','risk','charts','fin','ops']],
   ['القطاعات', ['cons','maint','qs','map']],
   ['الأطراف والكوادر', ['perf','eng','plan']],
   ['الأدوات', ['reports','builder','dq','trust']]
 ];
-const MNAV = [['hud','القيادة'],['exec','الملخص'],['risk','المخاطر'],['qs','السلامة']];
+const MNAV = [['hud','القيادة'],['exec','الملخص'],['track','التنفيذ'],['qs','السلامة']];
 function tabTitle(k){ const t = TABS.find(t => t.k === k); return t ? t.t : (k === 'help' ? 'دليل الاستخدام' : ''); }
 function renderNav(){
   $('#nav').innerHTML = NAV_GROUPS.map(([g, ks]) => `<div class="grp">${g}</div>` + ks.map(k => `<button data-tab="${k}" class="${k === CUR ? 'active' : ''}" title="${esc(tabTitle(k))}">${icon(k)}<span>${esc(tabTitle(k))}</span></button>`).join('')).join('') + navViews();
@@ -6307,6 +6341,201 @@ function fxSample(){
   document.addEventListener('click', e => { if(e.target.closest('#btnFx')) fxCycle(); });
 })();
 
+/* ==================== v13: متابعة التنفيذ والتصاريح والأرشفة والإجراءات + سجل السلامة ==================== */
+const tkCount = (a, f) => { const m = new Map(); a.forEach(x => { const k = f(x); if(k === '' || k === null || k === undefined) return; m.set(k, (m.get(k) || 0) + 1); }); return Array.from(m.entries()).sort((p, q) => q[1] - p[1]); };
+/* قائمة أشرطة: [الاسم، القيمة، نص فرعي] مع نقر للتصفية إن وُجد بُعد */
+function tkBars(rows, o){
+  o = o || {}; if(!rows.length) return emptyBox('لا توجد بيانات ضمن الفلاتر الحالية');
+  const mx = o.max || Math.max.apply(null, rows.map(r => r[1]).concat([1])), tot = o.total || rows.reduce((s, r) => s + r[1], 0);
+  return `<div class="tk-bars ${o.wide ? 'wide' : ''}">${rows.map(r => `<div class="tk-b ${o.dim ? 'clk' : ''}"${o.dim ? fAttr(o.dim, r[3] !== undefined ? r[3] : r[0]) : ''}><span class="n" title="${esc(r[0])}">${esc(r[0])}</span><span class="t"><i style="width:${Math.max(1.5, r[1] / mx * 100)}%;background:${r[4] || o.color || 'var(--s1)'}"></i></span><b class="num">${o.fmt ? o.fmt(r[1]) : fmt(r[1])}</b><em class="num">${r[2] !== undefined && r[2] !== null ? r[2] : fpct(r[1], tot)}</em></div>`).join('')}</div>`;
+}
+function tkMeter(label, done, total, color, unit){
+  const p = total ? Math.min(100, done / total * 100) : 0;
+  return `<div class="tk-m"><div class="h"><span>${label}</span><b class="num">${total ? fpct(done, total) : '—'}</b></div><div class="t"><i style="width:${p}%;background:${color}"></i></div><div class="f num">${fmt(done)} من ${fmt(total)}${unit ? ' ' + unit : ''}</div></div>`;
+}
+const tkDelivered = x => x.dc && !/لم تُسل|لم تسل/.test(x.dc);
+const tkNeedPermit = x => x.np === 'نعم';
+const tkIssued = x => x.pm === 'تم الإصدار';
+const tkArchived = x => x.ar === 'تم الرفع للصيانة';
+
+function renderTrack(){
+  const pg = $('#pg-track');
+  if(!W.length){ pg.innerHTML = head('التنفيذ والتصاريح والأرشفة') + emptyBox('لا توجد أعمال ضمن الفلاتر الحالية'); return; }
+  const C = W.filter(isCons), M = W.filter(x => x.s === 'صيانة');
+  const cEx = C.filter(x => x.st !== 'U'), cUn = C.filter(x => x.st === 'U');
+  const mDone = M.filter(x => x.ds === 'منجز'), mRun = M.filter(x => x.ds === 'جاري التنفيذ'), mNs = M.filter(x => x.ds === 'لم يتم البدء');
+  const need = C.filter(tkNeedPermit), iss = need.filter(tkIssued), pend = need.filter(x => !tkIssued(x)), pendOpen = pend.filter(x => x.st === 'U');
+  const docsOk = cEx.filter(tkDelivered), uds = cEx.filter(x => /تم الرفع/.test(x.dc || '')), arch = mDone.filter(tkArchived);
+  const sum = (a, f) => a.reduce((s, x) => s + (f(x) || 0), 0);
+
+  const kp = `<div class="kpis">
+    ${kpi({label:'تنفيذ الإنشاءات', value:fpct(cEx.length, C.length), sub:`<span class="num">${fmt(cEx.length)}</span> منفَّذ من <span class="num">${fmt(C.length)}</span>`, p:pct(cEx.length, C.length), color:'var(--st-a)'})}
+    ${kpi({label:'إنجاز الصيانة', value:fpct(mDone.length, M.length), sub:`<span class="num">${fmt(mDone.length)}</span> منجز • <span class="num">${fmt(mNs.length)}</span> لم يبدأ`, p:pct(mDone.length, M.length), color:'var(--good)'})}
+    ${kpi({label:'التصاريح الصادرة', value:fpct(iss.length, need.length), sub:`<span class="num">${fmt(iss.length)}</span> من <span class="num">${fmt(need.length)}</span> أمراً يتطلب تصريحاً`, p:pct(iss.length, need.length), color:'var(--s3)'})}
+    ${kpi({label:'تصاريح لم تصدر', value:fmt(pend.length), sub:`منها <span class="num">${fmt(pendOpen.length)}</span> لأوامر تحت التنفيذ`, color:'var(--warning)'})}
+    ${kpi({label:'مستندات الإنشاءات المسلَّمة', value:fpct(docsOk.length, cEx.length), sub:`<span class="num">${fmt(uds.length)}</span> مرفوعة (UDS) من <span class="num">${fmt(cEx.length)}</span> منفَّذ`, p:pct(docsOk.length, cEx.length), color:'var(--s2)'})}
+    ${kpi({label:'أرشفة الصيانة', value:fpct(arch.length, mDone.length), sub:`<span class="num">${fmt(arch.length)}</span> مرفوعة للصيانة من <span class="num">${fmt(mDone.length)}</span> منجز`, p:pct(arch.length, mDone.length), color:'var(--s8)'})}
+  </div>`;
+
+  /* ---- التنفيذ ---- */
+  const byUnit = tkCount(W, x => x.u).slice(0, 12).map(([u, n]) => { const a = W.filter(x => x.u === u), ex = a.filter(x => x.st !== 'U').length; return [u, pct(ex, n), `${fmt(ex)} / ${fmt(n)}`, u]; }).sort((a, b) => a[1] - b[1]);
+  const fe = tkCount(cUn, x => x.fe || x.fs).slice(0, 10);
+  const prog = [tkMeter('الحفر المنفَّذ', sum(C, x => x.gD), sum(C, x => x.gT), 'var(--s1)', 'م'), tkMeter('التمديد المنفَّذ', sum(C, x => x.xD), sum(C, x => x.xT), 'var(--s3)', 'م'), tkMeter('المعدات المركَّبة', sum(C, x => x.eqD), sum(C, x => x.eqT), 'var(--s2)', '')].join('');
+  const ms = tkCount(C, x => x.ms).slice(0, 6);
+  const secExec = `<h3 class="tk-h">التنفيذ</h3><div class="grid">
+    ${card({cls:'c4', title:'نسبة التنفيذ حسب المكتب / الدائرة', sub:'الأقل تنفيذاً أولاً — انقر للتصفية', body:tkBars(byUnit, {dim:'u', max:100, wide:1, fmt:v => fpct(v, 100), color:'var(--st-a)'}), data:{cols:['المكتب / الدائرة', 'نسبة التنفيذ %', 'المنفَّذ / الإجمالي'], rows:byUnit.map(r => [r[0], Math.round(r[1] * 10) / 10, r[2]])}})}
+    ${card({cls:'c4', title:'أين تقف الأوامر تحت التنفيذ', sub:`مرحلة التنفيذ الميدانية لـ <span class="num">${fmt(cUn.length)}</span> أمراً`, body:tkBars(fe, {color:'var(--st-u)'}), data:{cols:['المرحلة الميدانية', 'العدد'], rows:fe}})}
+    ${card({cls:'c4', title:'تقدّم الكميات وتركيب العدادات', sub:'من سجل أوامر عمل الإنشاءات', body:`<div class="tk-ms">${prog}</div>` + (ms.length ? `<div class="tk-sub">حالة تركيب العدادات</div>` + tkBars(ms, {color:'var(--s8)'}) : '')})}
+  </div>`;
+
+  /* ---- التصاريح ---- */
+  const pmDist = tkCount(need, x => x.pm || 'غير محدد');
+  const ctPerm = tkCount(need, x => x.ct).slice(0, 40).map(([ct, n]) => { const a = need.filter(x => x.ct === ct), i = a.filter(tkIssued).length; return {ct, n, i, p:n - i, po:a.filter(x => !tkIssued(x) && x.st === 'U').length}; }).sort((a, b) => b.p - a.p);
+  const pendRows = pendOpen.slice().sort((a, b) => (nn(a.ad) ? a.ad : 1e9) - (nn(b.ad) ? b.ad : 1e9));
+  const secPerm = `<h3 class="tk-h">التصاريح</h3><div class="grid">
+    ${card({cls:'c4', title:'حالة التصريح', sub:`للأوامر التي تتطلب تصريحاً (<span class="num">${fmt(need.length)}</span>)`, body:tkBars(pmDist.map(r => [r[0], r[1], undefined, undefined, r[0] === 'تم الإصدار' ? 'var(--good)' : /رفض|عوائق/.test(r[0]) ? 'var(--critical)' : 'var(--warning)'])), data:{cols:['حالة التصريح', 'العدد'], rows:pmDist}})}
+    ${card({cls:'c8', title:'التصاريح حسب المقاول', sub:'مرتّبة بالأكثر تصاريح غير صادرة — انقر اسم المقاول للتصفية', body:table('tk-perm', [{t:'المقاول'}, {t:'تتطلب تصريحاً', n:1}, {t:'صادرة', n:1}, {t:'لم تصدر', n:1}, {t:'منها تحت التنفيذ', n:1}, {t:'نسبة الإصدار', n:1}],
+        ctPerm.map(r => ({h:[`<a href="#" onclick="event.preventDefault();toggleFilter('ct',${esc(JSON.stringify(r.ct))})"><b>${esc(r.ct)}</b></a>`, fmt(r.n), fmt(r.i), r.p ? `<b style="color:var(--warning)">${fmt(r.p)}</b>` : '0', fmt(r.po), fpct(r.i, r.n)], v:[r.ct, r.n, r.i, r.p, r.po, pct(r.i, r.n)]})), {maxh:300, sort:3}),
+      data:{cols:['المقاول', 'تتطلب تصريحاً', 'صادرة', 'لم تصدر', 'منها تحت التنفيذ', 'نسبة الإصدار %'], rows:ctPerm.map(r => [r.ct, r.n, r.i, r.p, r.po, Math.round(pct(r.i, r.n) * 10) / 10])}})}
+  </div><div class="grid">
+    ${card({cls:'c12', title:'أوامر تحت التنفيذ تنتظر التصريح', sub:`<span class="badge ${pendRows.length ? 'b-warn' : 'b-ok'}"><span class="num">${fmt(pendRows.length)}</span></span> الأقدم إسناداً أولاً — انقر الصف لتفاصيل الأمر${pendRows.length > 15 ? ' — يظهر أول 15 والتصدير يشمل الكل' : ''}`,
+      body:pendRows.length ? table('tk-pend', [{t:'رقم الأمر'}, {t:'المنطقة'}, {t:'المكتب'}, {t:'المقاول'}, {t:'حالة التصريح'}, {t:'منذ الإسناد (يوم)', n:1}, {t:'المرحلة الميدانية'}],
+        pendRows.slice(0, 15).map(x => ({click:x.id, h:[`<b>${esc(x.no)}</b>`, esc(x.r), esc(x.u), esc(x.ct), esc(x.pm || '—'), nn(x.ad) ? fmt(TODAY - x.ad) : '—', esc(x.fe || x.fs || '—')], v:[x.no, x.r, x.u, x.ct, x.pm, nn(x.ad) ? TODAY - x.ad : 0, x.fe || x.fs]})), {maxh:330}) : emptyBox('لا توجد أوامر تنتظر التصريح ضمن الفلاتر الحالية'),
+      data:pendRows.length ? {cols:['رقم الأمر', 'المنطقة', 'المكتب', 'المقاول', 'الاستشاري', 'حالة التصريح', 'تاريخ الإسناد', 'منذ الإسناد (يوم)', 'المرحلة الميدانية'], rows:pendRows.map(x => [x.no, x.r, x.u, x.ct, x.cs, x.pm, dayStr(x.ad), nn(x.ad) ? TODAY - x.ad : '', x.fe || x.fs])} : null})}
+  </div>`;
+
+  /* ---- المستندات والأرشفة ---- */
+  const dcDist = tkCount(cEx, x => x.dc || 'غير محدد'), arDist = tkCount(mDone, x => x.ar || 'غير مسجَّلة');
+  const ctDoc = tkCount(W, x => x.ct).slice(0, 40).map(([ct]) => { const ce = cEx.filter(x => x.ct === ct), md = mDone.filter(x => x.ct === ct); return {ct, ce:ce.length, cd:ce.filter(tkDelivered).length, md:md.length, ma:md.filter(tkArchived).length}; }).filter(r => r.ce || r.md).sort((a, b) => (b.ce - b.cd + b.md - b.ma) - (a.ce - a.cd + a.md - a.ma));
+  const dcol = v => /تم الرفع|جاهزة/.test(v) ? 'var(--good)' : /لم تُسل|لم تسل|غير/.test(v) ? 'var(--critical)' : 'var(--warning)';
+  const secDocs = `<h3 class="tk-h">المستندات والأرشفة</h3><div class="grid">
+    ${card({cls:'c6', title:'مستندات أوامر الإنشاءات المنفَّذة', sub:'حالة المستندات — انقر للتصفية', body:tkBars(dcDist.map(r => [r[0], r[1], undefined, r[0] === 'غير محدد' ? '' : r[0], dcol(r[0])]), {dim:'dc'}), data:{cols:['حالة المستندات', 'العدد'], rows:dcDist}})}
+    ${card({cls:'c6', title:'أرشفة مهام الصيانة المنجزة', sub:'حالة أرشفة المستندات', body:tkBars(arDist.map(r => [r[0], r[1], undefined, undefined, dcol(r[0])])), data:{cols:['حالة الأرشفة', 'العدد'], rows:arDist}})}
+  </div><div class="grid">
+    ${card({cls:'c12', title:'المتبقي حسب المقاول', sub:'أعمال منفَّذة لم تكتمل مستنداتها أو أرشفتها', body:table('tk-doc', [{t:'المقاول'}, {t:'إنشاءات بلا تسليم', n:1}, {t:'نسبة التسليم', n:1}, {t:'صيانة بلا أرشفة', n:1}, {t:'نسبة الأرشفة', n:1}],
+        ctDoc.map(r => ({h:[`<a href="#" onclick="event.preventDefault();toggleFilter('ct',${esc(JSON.stringify(r.ct))})"><b>${esc(r.ct)}</b></a>`, fmt(r.ce - r.cd), r.ce ? fpct(r.cd, r.ce) : '—', fmt(r.md - r.ma), r.md ? fpct(r.ma, r.md) : '—'], v:[r.ct, r.ce - r.cd, pct(r.cd, r.ce), r.md - r.ma, pct(r.ma, r.md)]})), {maxh:300}),
+      data:{cols:['المقاول', 'إنشاءات منفَّذة', 'مستندات مسلَّمة', 'صيانة منجزة', 'مؤرشفة'], rows:ctDoc.map(r => [r.ct, r.ce, r.cd, r.md, r.ma])}})}
+  </div>`;
+
+  /* ---- الإجراءات ---- */
+  const caD = tkCount(C, x => x.ca).slice(0, 12).map(r => [codeLabel(r[0]), r[1], undefined, r[0]]), ccD = tkCount(C, x => x.cc).slice(0, 12).map(r => [codeLabel(r[0]), r[1], undefined, r[0]]);
+  const lsD = tkCount(C, x => x.ls).slice(0, 12);
+  const secProc = `<h3 class="tk-h">الإجراءات</h3><div class="grid">
+    ${card({cls:'c4', title:'رمز إجراء الاستشاري', sub:'أين تقف أوامر الإنشاءات عند الاستشاري — انقر للتصفية', body:tkBars(caD, {dim:'ca', color:'var(--s3)'}), data:{cols:['رمز إجراء الاستشاري', 'العدد'], rows:caD.map(r => [r[0], r[1]])}})}
+    ${card({cls:'c4', title:'رمز إجراء المقاول', sub:'أين تقف أوامر الإنشاءات عند المقاول — انقر للتصفية', body:tkBars(ccD, {dim:'cc', color:'var(--s1)'}), data:{cols:['رمز إجراء المقاول', 'العدد'], rows:ccD.map(r => [r[0], r[1]])}})}
+    ${card({cls:'c4', title:'مرحلة السلّم', sub:'توزيع أوامر الإنشاءات على مراحل السلّم التفصيلية', body:tkBars(lsD, {color:'var(--s2)'}), data:{cols:['مرحلة السلّم', 'العدد'], rows:lsD}})}
+  </div>`;
+
+  pg.innerHTML = head('التنفيذ والتصاريح والأرشفة', '<span class="badge b-run">التنفيذ • التصاريح • المستندات والأرشفة • الإجراءات</span>') + kp + secExec + secPerm + secDocs + secProc;
+}
+
+/* ---------- المتابعة اليومية: تقديم التصاريح والأرشفة والاستلام، وتأخير قوائم تجاوز المدة ---------- */
+const renderTodo0 = renderTodo;
+renderTodo = function(){
+  renderTodo0();
+  const pg = $('#pg-todo'), kp = pg.querySelector('.kpis'), grids = pg.querySelectorAll(':scope > .grid');
+  if(!kp || !grids.length) return;
+  const C = W.filter(isCons), M = W.filter(x => x.s === 'صيانة');
+  const perm = C.filter(x => x.st === 'U' && tkNeedPermit(x) && !tkIssued(x)).sort((a, b) => (nn(a.ad) ? a.ad : 1e9) - (nn(b.ad) ? b.ad : 1e9));
+  const arch = M.filter(x => x.ds === 'منجز' && !tkArchived(x)).sort((a, b) => (nn(a.ed) ? a.ed : 1e9) - (nn(b.ed) ? b.ed : 1e9));
+  const cols = ['رقم الأمر', 'المنطقة', 'المكتب / الدائرة', 'المقاول'];
+  const row = (x, e) => ({click:x.id, h:[`<b>${esc(x.no)}</b>`, esc(x.r), esc(x.u), esc(x.ct)].concat(e.map(z => z[0])), v:[x.no, x.r, x.u, x.ct].concat(e.map(z => z[1]))});
+  const html = `<div class="grid">
+    ${todoCard({id:'td-perm', title:'أوامر تحت التنفيذ تنتظر التصريح', sub:'تتطلب تصريحاً ولم يصدر بعد — الأقدم إسناداً أولاً', tone:'b-warn', all:perm, cols:cols.concat(['حالة التصريح', 'منذ الإسناد (يوم)']), num:[5], row:x => row(x, [[esc(x.pm || '—'), x.pm], [nn(x.ad) ? fmt(TODAY - x.ad) : '—', nn(x.ad) ? TODAY - x.ad : 0]])})}
+    ${todoCard({id:'td-arch', title:'مهام صيانة منجزة لم تُؤرشف', sub:'لم تُرفع مستنداتها للصيانة بعد — الأقدم إنجازاً أولاً', tone:'b-warn', all:arch, cols:cols.concat(['حالة الأرشفة', 'منذ الإنجاز (يوم)']), num:[5], row:x => row(x, [[esc(x.ar || 'غير مسجَّلة'), x.ar], [nn(x.ed) ? fmt(TODAY - x.ed) : '—', nn(x.ed) ? TODAY - x.ed : 0]])})}
+  </div>`;
+  grids[0].insertAdjacentHTML('beforebegin', html);
+  const k = (label, n, sub, color, anchor) => `<a class="kpi click" href="#${anchor}" style="--kc:${color};text-decoration:none;color:inherit" onclick="event.preventDefault();var t=document.getElementById('tw-${anchor}');if(t)t.closest('.card').scrollIntoView({behavior:'smooth',block:'center'})"><div class="kl">${label}</div><div class="kv num">${fmt(n)}</div><div class="ks">${sub}</div></a>`;
+  kp.insertAdjacentHTML('afterbegin', k('تنتظر التصريح', perm.length, 'أوامر تحت التنفيذ لم يصدر تصريحها', 'var(--s3)', 'td-perm') + k('صيانة منجزة لم تُؤرشف', arch.length, 'لم تُرفع مستنداتها للصيانة', 'var(--s8)', 'td-arch'));
+  /* قوائم تجاوز المدة والغرامة إلى آخر الصفحة */
+  ['td-wait', 'td-docs', 'td-cert', 'td-ns'].forEach(id => { const a = kp.querySelector(`a[href="#${id}"]`); if(a) kp.insertBefore(a, kp.querySelector('a[href="#td-soon"]')); });
+  ['td-soon', 'td-fresh', 'td-pen'].forEach(id => { const a = kp.querySelector(`a[href="#${id}"]`); if(a) kp.appendChild(a); });
+  pg.appendChild(grids[0]);
+};
+
+/* ==================== السلامة: سجل المخالفات والملاحظات ليوم أو فترة ==================== */
+const QL = {mode:'today', from:null, to:null, ty:'all', cg:'all', stt:'all', q:'', rows:[]};
+function qlRange(){
+  if(QL.mode === 'today') return [TODAY, TODAY];
+  if(QL.mode === 'yest') return [TODAY - 1, TODAY - 1];
+  if(QL.mode === '7') return [TODAY - 6, TODAY];
+  if(QL.mode === '30') return [TODAY - 29, TODAY];
+  if(QL.mode === 'custom') return [QL.from, QL.to];
+  return [null, null];
+}
+function qlBase(){ return ALL.items.filter(x => { if(x.empty) return false; for(const d of ['r', 's', 'ct', 'cs']){ const sel = F[d]; if(sel.length && sel.indexOf(x[d]) < 0) return false; } return true; }); }
+function qlData(){
+  const [a, b] = qlRange(), q = QL.q.trim();
+  return qlBase().filter(x => {
+    if(a !== null && (x.d === null || x.d === undefined || x.d < a)) return false;
+    if(b !== null && (x.d === null || x.d === undefined || x.d > b)) return false;
+    if(QL.ty !== 'all' && x.ty !== QL.ty) return false;
+    if(QL.cg !== 'all' && x.cg !== QL.cg) return false;
+    if(QL.stt !== 'all' && x.stt !== QL.stt) return false;
+    if(q && [x.vid, x.no, x.ct, x.cs, x.vn, x.ac, x.desc, x.u, x.tl].join(' ').indexOf(q) < 0) return false;
+    return true;
+  }).sort((p, r) => (r.d || 0) - (p.d || 0) || String(p.vid).localeCompare(String(r.vid)));
+}
+function qlSet(k, v){
+  if(k === 'from' || k === 'to'){ QL[k] = v ? Math.floor(Date.parse(v) / 86400000) : null; QL.mode = 'custom'; } else QL[k] = v;
+  if(k === 'q'){ qlBody(); return; }
+  qlRender();
+}
+function qlLatest(){ const ds = qlBase().map(x => x.d).filter(nn); if(!ds.length) return; const d = Math.max.apply(null, ds); QL.mode = 'custom'; QL.from = d; QL.to = d; qlRender(); }
+function qlExport(){
+  const rows = qlData(); if(!rows.length){ toast('لا توجد سجلات للتصدير'); return; }
+  exportSheets('سجل المخالفات والملاحظات', [{name:'السجل', cols:['التاريخ', 'رقم الزيارة', 'النوع', 'التصنيف', 'المخالفة / النشاط', 'الوصف التفصيلي', 'المنطقة', 'القطاع', 'الدائرة', 'المقاول', 'الاستشاري', 'رقم أمر العمل', 'الفئة', 'درجة الخطورة', 'الجزاء', 'المبلغ (ريال)', 'موقف الخصم', 'الحالة', 'مدة التصحيح (يوم)', 'تاريخ الإغلاق', 'الإجراء التصحيحي المطلوب', 'الإجراء الفعلي', 'قائد الفريق', 'الجهة المسؤولة', 'رابط الصور'],
+    rows:rows.map(x => [dayStr(x.d), x.vid, x.ty, x.cg, x.vn || x.ac, x.desc, x.r, x.s, x.u, x.ct, x.cs, x.no, x.sc, x.sv, x.pn, x.am || 0, x.ded, x.stt, x.cdays === null ? '' : x.cdays, dayStr(x.cld), x.cra, x.act, x.tl, x.rp, x.img])}]);
+}
+function qlShow(i){
+  const x = QL.rows[i]; if(!x) return;
+  const v = ALL.visits.find(z => z.id === x.vid) || {};
+  const r = (k, val) => val === '' || val === null || val === undefined ? '' : `<tr><th>${k}</th><td>${val}</td></tr>`;
+  const link = (u, t) => /^https?:\/\//.test(u || '') ? `<a href="${esc(u)}" target="_blank" rel="noopener">${t}</a>` : '';
+  openModal(`${esc(x.ty)} — زيارة ${esc(x.vid)}`, `<table class="ql-d"><tbody>
+    ${r('التاريخ', esc(dayStr(x.d)))}${r('النوع والتصنيف', esc(x.ty + (x.cg ? ' • ' + x.cg : '')))}${r('المخالفة / النشاط', '<b>' + esc(x.vn || x.ac) + '</b>')}${r('الوصف التفصيلي', esc(x.desc))}
+    ${r('المقاول', esc(x.ct))}${r('الاستشاري', esc(x.cs))}${r('المنطقة / الدائرة', esc([x.r, x.u].filter(Boolean).join(' — ')))}${r('رقم أمر العمل', esc(x.no))}${r('الموقع', esc(v.loc))}${r('المهندس / الراصد', esc(v.en))}
+    ${r('الفئة', esc(x.sc))}${r('درجة الخطورة', esc(x.sv))}${r('الجزاء', esc(x.pn))}${r('المبلغ', x.am ? '<span class="num">' + fmt(x.am) + '</span> ر.س' : '')}${r('موقف الخصم', esc(x.ded))}
+    ${r('الحالة', esc(x.stt))}${r('مدة التصحيح', x.cdays === null || x.cdays === undefined ? '' : fmt(x.cdays) + ' يوم')}${r('تاريخ التصحيح / الإغلاق', esc(dayStr(x.cld)))}
+    ${r('الإجراء التصحيحي المطلوب', esc(x.cra))}${r('الإجراء الفعلي / ملاحظات الإغلاق', esc(x.act))}${r('قائد الفريق المخالف', esc(x.tl))}${r('الجهة المسؤولة', esc(x.rp))}${r('عدد مرات التكرار', x.rpt ? fmt(x.rpt) : '')}
+    ${r('روابط', [link(x.img, 'صور الملاحظة'), link(v.lk, 'تقرير الزيارة')].filter(Boolean).join(' • '))}</tbody></table>`);
+}
+function qlBody(){
+  const box = document.getElementById('qlBody'); if(!box) return;
+  const rows = QL.rows = qlData(), lim = 400, [a, b] = qlRange();
+  const viol = rows.filter(x => x.ty === 'مخالفة'), per = a === null ? 'كل الفترة' : a === b ? dayStr(a) : `${dayStr(a)} ← ${dayStr(b)}`;
+  const sm = `<div class="ql-sum"><span>الفترة: <b class="num">${per}</b></span><span>السجلات: <b class="num">${fmt(rows.length)}</b></span><span>مخالفات: <b class="num" style="color:var(--critical)">${fmt(viol.length)}</b></span><span>ملاحظات: <b class="num">${fmt(rows.length - viol.length)}</b></span><span>مفتوحة: <b class="num" style="color:var(--warning)">${fmt(rows.filter(x => x.stt === 'مفتوحة').length)}</b></span><span>الغرامات: <b class="num">${fmt(viol.reduce((s, x) => s + (x.am || 0), 0))}</b> ر.س</span></div>`;
+  if(!rows.length){ box.innerHTML = sm + `<div class="empty" style="padding:22px">لا توجد مخالفات أو ملاحظات مسجَّلة في هذه الفترة ضمن الفلاتر الحالية. <button class="btn" onclick="qlLatest()">عرض آخر يوم فيه سجلات</button></div>`; return; }
+  box.innerHTML = sm + `<div class="tbl-wrap" style="max-height:520px"><table class="t"><thead><tr>${['التاريخ', 'رقم الزيارة', 'النوع', 'التصنيف', 'المخالفة / النشاط', 'المقاول', 'الاستشاري', 'الدائرة', 'رقم أمر العمل', 'الخطورة', 'المبلغ', 'الحالة'].map(c => `<th>${c}</th>`).join('')}</tr></thead><tbody>
+    ${rows.slice(0, lim).map((x, i) => `<tr class="clk" data-ql="${i}"><td class="num">${dayStr(x.d)}</td><td class="num">${esc(x.vid)}</td><td><span class="badge ${x.ty === 'مخالفة' ? 'b-err' : 'b-run'}">${esc(x.ty)}</span></td><td>${esc(x.cg)}</td><td class="ql-w">${esc(x.vn || x.ac)}${x.desc && x.desc !== (x.vn || x.ac) ? `<small>${esc(String(x.desc).length > 110 ? String(x.desc).slice(0, 109) + '…' : x.desc)}</small>` : ''}</td><td>${esc(x.ct)}</td><td>${esc(x.cs)}</td><td>${esc(x.u)}</td><td class="num">${esc(x.no)}</td><td>${esc(x.sv)}</td><td class="n num">${x.am ? fmt(x.am) : ''}</td><td><span class="badge ${x.stt === 'مفتوحة' ? 'b-warn' : 'b-ok'}">${esc(x.stt || '—')}</span></td></tr>`).join('')}
+    </tbody></table></div>${rows.length > lim ? `<div class="note">يظهر أول ${lim} سجل من ${fmt(rows.length)} — التصدير إلى إكسل يشمل الكل، أو ضيّق الفترة.</div>` : ''}`;
+}
+function qlRender(){
+  const el = document.getElementById('qlCard'); if(!el) return;
+  const base = qlBase(), cgs = Array.from(new Set(base.map(x => x.cg).filter(Boolean))), [a, b] = qlRange();
+  const chip = (k, t) => `<button class="ql-c ${QL.mode === k ? 'on' : ''}" onclick="qlSet('mode','${k}')">${t}</button>`;
+  const sel = (k, opts) => `<select class="inp" onchange="qlSet('${k}',this.value)">${opts.map(o => `<option value="${esc(o[0])}" ${QL[k] === o[0] ? 'selected' : ''}>${esc(o[1])}</option>`).join('')}</select>`;
+  el.innerHTML = `<div class="ql-tools">
+      <div class="ql-chips">${chip('today', 'اليوم')}${chip('yest', 'أمس')}${chip('7', 'آخر 7 أيام')}${chip('30', 'آخر 30 يوماً')}${chip('all', 'كل الفترة')}</div>
+      <label>من <input type="date" class="inp" value="${QL.mode === 'custom' && a !== null ? dayStr(a) : ''}" onchange="qlSet('from',this.value)"></label>
+      <label>إلى <input type="date" class="inp" value="${QL.mode === 'custom' && b !== null ? dayStr(b) : ''}" onchange="qlSet('to',this.value)"></label>
+      ${sel('ty', [['all', 'كل الأنواع'], ['مخالفة', 'المخالفات'], ['ملاحظة', 'الملاحظات']])}
+      ${sel('cg', [['all', 'كل التصنيفات']].concat(cgs.map(c => [c, c])))}
+      ${sel('stt', [['all', 'كل الحالات'], ['مفتوحة', 'مفتوحة'], ['مغلقة', 'مغلقة']])}
+      <input class="inp ql-q" type="search" placeholder="بحث: مقاول، رقم زيارة أو أمر، نص المخالفة…" value="${esc(QL.q)}" oninput="qlSet('q',this.value)">
+      <button class="btn pri" onclick="qlExport()">⤓ تصدير إلى إكسل</button>
+    </div><div id="qlBody"></div>`;
+  qlBody();
+}
+const renderQS0 = renderQS;
+renderQS = function(){
+  renderQS0();
+  const pg = $('#pg-qs'), kp = pg.querySelector('.kpis'); if(!kp || !ALL.items || !ALL.items.length) return;
+  kp.insertAdjacentHTML('afterend', `<div class="grid"><div class="card c12 ql-card"><div class="card-h"><div class="t"><h3>سجل المخالفات والملاحظات</h3><div class="sub">استعرض كل ما رُصد في يوم محدَّد أو فترة — انقر أي صف للتفاصيل الكاملة. يتبع فلاتر المنطقة والقطاع والمقاول والاستشاري، وله فترته المستقلة عن فلتر الفترة العام.</div></div></div><div class="card-b"><div id="qlCard"></div></div></div></div>`);
+  qlRender();
+};
+document.addEventListener('click', e => { const r = e.target.closest && e.target.closest('tr[data-ql]'); if(r) qlShow(+r.dataset.ql); });
+
 /* ==================== تقارير الإدارة: الأداء الشهري + المالي (قوالب العرض) ==================== */
 const RKC = {ink:'#0B2545', ink2:'#42526B', mut:'#7B8798', line:'#E2E7EE', soft:'#F3F5F9', gold:'#C8A24A',
   U:'#E3A008', A:'#2F6FDE', T:'#D9679A', S:'#7B55D6', C:'#1B9A59', red:'#C5362B', pos:'#15794B', neg:'#B3261E', teal:'#0E8C8C'};
@@ -6814,216 +7043,225 @@ function rkDownloadPptx(fresh){
   }catch(e){ console.error(e); openModal('تعذّر إنشاء ملف PowerPoint', '<p>' + esc(e.message) + '</p>', 'sm'); }
 }
 
-/* ==================== التقرير الشهري للأداء: ملف PowerPoint قابل للتعديل ==================== */
+/* ==================== التقرير الشهري للأداء: ملف PowerPoint قابل للتعديل (بنفس هوية النموذج الأصلي) ==================== */
 function rkPptx(pres, D){
-  const K = {ink:'0B2545', ink2:'42526B', mut:'7B8798', line:'E2E7EE', soft:'F3F5F9', gold:'C8A24A', white:'FFFFFF',
-    U:'E3A008', A:'2F6FDE', T:'D9679A', S:'7B55D6', C:'1B9A59', red:'C5362B', pos:'15794B', neg:'B3261E', teal:'0E8C8C'};
-  const FONT = 'Arial', W = 13.333, MX = 0.5, CW = W - 2 * MX, TOP = 1.5, BOT = 6.9, BH = BOT - TOP, G = 0.25;
+  const K = {navy:'0F2D5C', ink:'14233F', ink2:'42526B', mut:'8490A3', line:'DFE5EC', soft:'F8FAFC', track:'EDF0F5', gold:'C9A24B', white:'FFFFFF', page:'FFFFFF',
+    U:'F0A202', A:'2B78D8', T:'E57FA8', S:'7C4FD3', C:'118A1E', red:'C0392B', pos:'15794B', neg:'B3261E', blue:'2B78D8'};
+  const FONT = 'Segoe UI', W = 13.333, MX = 0.32, CW = W - 2 * MX, TOP = 1.0, BOT = 6.92, BH = BOT - TOP, G = 0.16;
   const ST = [['U', 'تحت التنفيذ'], ['A', 'تم التنفيذ'], ['T', 'مستلمة من إدارة الكهرباء'], ['S', 'أصدرت شهادة الإنجاز'], ['C', 'مقفلة']];
   const MS = [['C', 'منجز'], ['A', 'جاري التنفيذ'], ['red', 'لم يبدأ']];
   const N = n => (n === null || n === undefined || isNaN(n)) ? '—' : Math.round(n).toLocaleString('en-US');
   const R1 = v => String(Math.round(v * 10) / 10);
   const P = (a, b) => b ? R1(a / b * 100) + '%' : '—';
   const Pv = v => (v === null || v === undefined || isNaN(v)) ? '—' : R1(v) + '%';
+  const cut = (t, n) => String(t).length > n ? String(t).slice(0, n - 1) + '…' : String(t);
   pres.layout = 'LAYOUT_WIDE'; pres.rtlMode = true;
   pres.title = `التقرير الشهري للأداء — ${D.region} — ${D.month}`; pres.author = 'إدارة مشاريع التوزيع'; pres.company = 'PDC';
   pres.theme = {headFontFace:FONT, bodyFontFace:FONT};
-  const tag = `${D.region} · ${D.month}` + (D.sample ? '   |   نموذج توضيحي ببيانات تجريبية' : '');
-  pres.defineSlideMaster({title:'COVER', background:{color:K.ink}});
-  pres.defineSlideMaster({title:'CONTENT', background:{color:K.white}, margin:[TOP, MX, 0.6, MX],
-    objects:[
-      {placeholder:{options:{name:'title', type:'title', x:4.2, y:0.32, w:W - 4.2 - MX, h:0.62, align:'right', valign:'middle', fontSize:28, bold:true, color:K.ink, fontFace:FONT, margin:0, rtlMode:true}, text:''}},
-      {placeholder:{options:{name:'body', type:'body', x:4.2, y:0.94, w:W - 4.2 - MX, h:0.34, align:'right', valign:'middle', fontSize:12, color:K.mut, fontFace:FONT, margin:0, rtlMode:true}, text:''}},
-      {text:{text:tag, options:{x:MX, y:0.42, w:3.6, h:0.4, align:'left', valign:'middle', fontSize:11, color:K.ink2, fontFace:FONT, margin:0, rtlMode:true}}},
-      {text:{text:'الشركة السعودية لتطوير المشاريع — قطاع الإشراف', options:{x:W - MX - 5, y:7.05, w:5, h:0.3, align:'right', fontSize:10, color:K.mut, fontFace:FONT, margin:0, rtlMode:true}}},
-      {text:{text:'داخلي', options:{x:W / 2 - 1, y:7.05, w:2, h:0.3, align:'center', fontSize:10, color:K.mut, fontFace:FONT, margin:0, rtlMode:true}}}],
-    slideNumber:{x:MX, y:7.05, w:0.6, h:0.3, fontSize:10, color:K.ink, fontFace:FONT, align:'left'}});
+  const mobj = [
+    {rect:{x:0, y:0, w:W, h:0.8, fill:{color:K.navy}, line:{color:K.navy, width:0}}},
+    {rect:{x:0, y:0.8, w:W, h:0.035, fill:{color:K.gold}, line:{color:K.gold, width:0}}},
+    {placeholder:{options:{name:'title', type:'title', x:4.6, y:0.1, w:W - 4.6 - MX, h:0.42, align:'right', valign:'middle', fontSize:19, bold:true, color:K.white, fontFace:FONT, margin:0, rtlMode:true}, text:''}},
+    {placeholder:{options:{name:'body', type:'body', x:4.6, y:0.5, w:W - 4.6 - MX, h:0.24, align:'right', valign:'middle', fontSize:9.5, color:'D5DEEC', fontFace:FONT, margin:0, rtlMode:true}, text:''}},
+    {text:{text:`${D.region} · ${D.month}`, options:{x:D.sample ? 1.95 : MX, y:0.24, w:2.2, h:0.3, align:'left', valign:'middle', fontSize:10, bold:true, color:K.white, fontFace:FONT, margin:0, rtlMode:true}}},
+    {rect:{x:MX, y:7.02, w:CW, h:0.008, fill:{color:K.line}, line:{color:K.line, width:0}}},
+    {text:{text:'الشركة السعودية لتطوير المشاريع — قطاع الإشراف', options:{x:W - MX - 5, y:7.1, w:5, h:0.26, align:'right', fontSize:8.5, color:K.mut, fontFace:FONT, margin:0, rtlMode:true}}},
+    {text:{text:'داخلي', options:{x:W / 2 - 1, y:7.1, w:2, h:0.26, align:'center', fontSize:8.5, color:K.mut, fontFace:FONT, margin:0, rtlMode:true}}}];
+  if(D.sample) mobj.push({text:{text:'نموذج توضيحي ببيانات تجريبية', options:{shape:pres.ShapeType.roundRect, rectRadius:0.12, x:MX, y:0.27, w:1.5, h:0.24, fill:{color:'EADFC2'}, align:'center', valign:'middle', fontSize:7.5, bold:true, color:'6B5210', fontFace:FONT, margin:0, rtlMode:true}}});
+  pres.defineSlideMaster({title:'COVER', background:{color:'F3F5F9'}});
+  pres.defineSlideMaster({title:'CONTENT', background:{color:K.page}, margin:[TOP, MX, 0.6, MX], objects:mobj, slideNumber:{x:MX, y:7.1, w:0.6, h:0.26, fontSize:8.5, color:K.mut, fontFace:FONT, align:'left'}});
 
-  /* ---------- أدوات ---------- */
+  /* ---------- أدوات الرسم ---------- */
   let sec = '';
   const newSlide = (title, sub) => { const s = pres.addSlide({masterName:'CONTENT', sectionTitle:sec}); s.addText(title, {placeholder:'title', rtlMode:true}); s.addText(sub || ' ', {placeholder:'body', rtlMode:true}); return s; };
-  const T = (s, text, x, y, w, h, o) => s.addText(text, Object.assign({x, y, w, h, isTextBox:true, margin:0, rtlMode:true, align:'right', valign:'middle', fontFace:FONT, fontSize:12, color:K.ink}, o || {}));
-  const box = (s, x, y, w, h, fill, o) => s.addShape(pres.ShapeType.roundRect, Object.assign({x, y, w, h, rectRadius:0.08, fill:{color:fill}, line:{color:fill, width:0}}, o || {}));
-  const card = (s, x, y, w, h, title, small) => {
-    s.addShape(pres.ShapeType.roundRect, {x, y, w, h, rectRadius:0.1, fill:{color:K.white}, line:{color:K.line, width:1}});
-    if(title) T(s, small ? [{text:title, options:{bold:true, fontSize:14, color:K.ink}}, {text:'   ' + small, options:{fontSize:10.5, color:K.mut}}] : title, x + 0.2, y + 0.12, w - 0.4, 0.4, {bold:true, fontSize:14});
-    return {x:x + 0.2, y:y + (title ? 0.6 : 0.2), w:w - 0.4, h:h - (title ? 0.8 : 0.4)};
+  const T = (s, text, x, y, w, h, o) => s.addText(text, Object.assign({x, y, w, h, isTextBox:true, margin:0, rtlMode:true, align:'right', valign:'middle', fontFace:FONT, fontSize:10.5, color:K.ink}, o || {}));
+  const rr = (s, x, y, w, h, fill, lineC, rad) => s.addShape(pres.ShapeType.roundRect, {x, y, w, h, rectRadius:rad === undefined ? 0.06 : rad, fill:{color:fill}, line:lineC ? {color:lineC, width:0.75} : {color:fill, width:0}});
+  const rect = (s, x, y, w, h, fill) => s.addShape(pres.ShapeType.rect, {x, y, w, h, fill:{color:fill}, line:{color:fill, width:0}});
+  const dot = (s, x, y, d, fill) => s.addShape(pres.ShapeType.roundRect, {x, y, w:d, h:d, rectRadius:0.02, fill:{color:fill}, line:{color:fill, width:0}});
+  /* بطاقة بعنوان وخط فاصل */
+  const card = (s, x, y, w, h, title, note) => {
+    rr(s, x, y, w, h, K.white, K.line, 0.07);
+    if(!title) return {x:x + 0.16, y:y + 0.14, w:w - 0.32, h:h - 0.28};
+    T(s, title, x + 0.16, y + 0.1, w - 0.32, 0.34, {bold:true, fontSize:12.5, color:K.navy});
+    if(note) T(s, note, x + 0.16, y + 0.1, 2.4, 0.34, {align:'left', fontSize:8.5, color:K.mut});
+    rect(s, x + 0.16, y + 0.48, w - 0.32, 0.012, K.line);
+    return {x:x + 0.16, y:y + 0.62, w:w - 0.32, h:h - 0.76};
   };
-  /* خانة مؤشر: نقطة لونية + عنوان + رقم + سطر فرعي */
+  /* خانة مؤشر: حد لوني يمين + عنوان + رقم + سطر فرعي */
   const kpi = (s, x, y, w, h, label, value, sub, color, vcol) => {
-    if(h < 1.05 && sub){ label += ' · ' + sub; sub = ''; }
-    box(s, x, y, w, h, K.soft);
-    s.addShape(pres.ShapeType.ellipse, {x:x + w - 0.3, y:y + 0.17, w:0.12, h:0.12, fill:{color:color || K.ink}, line:{color:color || K.ink, width:0}});
-    T(s, label, x + 0.12, y + 0.08, w - 0.5, 0.3, {fontSize:11, color:K.ink2});
-    const len = String(value).length, big = h >= 1.2 ? 26 : 22, fs = Math.max(11, Math.min(big, Math.floor((w - 0.3) * 72 / (len * 0.62))));
-    T(s, String(value), x + 0.12, y + 0.38, w - 0.27, h - (sub ? 0.72 : 0.46), {fontSize:fs, bold:true, color:vcol || K.ink});
-    if(sub) T(s, sub, x + 0.12, y + h - 0.34, w - 0.27, 0.26, {fontSize:10, color:K.mut});
+    rr(s, x, y, w, h, K.soft, K.line, 0.05); rect(s, x + w - 0.055, y + 0.03, 0.055, h - 0.06, color || K.navy);
+    const v = String(value), fs = Math.max(11, Math.min(h >= 1 ? 21 : 18, Math.floor((w - 0.3) * 72 / (v.length * 0.6))));
+    const lh = 0.24, sh = sub ? 0.2 : 0, pad = (h - lh - sh - 0.42) / 2;
+    T(s, label, x + 0.08, y + Math.max(0.05, pad), w - 0.2, lh, {align:'center', fontSize:8.5, color:K.ink2});
+    T(s, v, x + 0.08, y + Math.max(0.05, pad) + lh, w - 0.2, 0.42, {align:'center', fontSize:fs, bold:true, color:vcol || K.ink});
+    if(sub) T(s, sub, x + 0.08, y + Math.max(0.05, pad) + lh + 0.42, w - 0.2, sh, {align:'center', fontSize:8, color:K.mut});
   };
-  const kpiRow = (s, x, y, w, h, items) => { const n = items.length, g = 0.15, cw = (w - g * (n - 1)) / n; items.forEach((it, i) => kpi(s, x + w - cw - i * (cw + g), y, cw, h, it[0], it[1], it[2], it[3], it[4])); };
-  /* مسار المراحل: شريط نسبي + عمود لكل مرحلة (من اليمين) */
-  const pipe = (s, x, y, w, keys, vals, big) => {
-    const tot = vals.reduce((a, b) => a + b, 0) || 1; let cx = x + w;
-    keys.forEach((k, i) => { const sw = vals[i] / tot * w; if(sw > 0.005){ cx -= sw; s.addShape(pres.ShapeType.rect, {x:cx, y, w:Math.max(0.02, sw - 0.02), h:0.2, fill:{color:K[k[0]]}, line:{color:K[k[0]], width:0}}); } });
-    const n = keys.length, g = 0.1, cw = (w - g * (n - 1)) / n;
-    keys.forEach((k, i) => { const x0 = x + w - cw - i * (cw + g), yy = y + 0.34;
-      s.addShape(pres.ShapeType.ellipse, {x:x0 + cw - 0.13, y:yy + 0.09, w:0.12, h:0.12, fill:{color:K[k[0]]}, line:{color:K[k[0]], width:0}});
-      T(s, k[1], x0, yy, cw - 0.2, 0.46, {fontSize:10.5, color:K.ink2, valign:'top'});
-      T(s, N(vals[i]), x0, yy + 0.48, cw, 0.5, {fontSize:big && Math.max.apply(null, vals) < 10000 ? 26 : 20, bold:true});
-      T(s, P(vals[i], tot), x0, yy + 0.98, cw, 0.26, {fontSize:11, color:K.mut}); });
-    return 1.62;
+  const kpiRow = (s, x, y, w, h, items, g) => { g = g === undefined ? 0.12 : g; const n = items.length, cw = (w - g * (n - 1)) / n; items.forEach((it, i) => kpi(s, x + w - cw - i * (cw + g), y, cw, h, it[0], it[1], it[2], it[3], it[4])); };
+  /* أشرطة أفقية رفيعة: الاسم يميناً والشريط في الوسط والقيمة يساراً */
+  const bars = (s, a, rows, color, o) => {
+    o = o || {}; if(!rows.length){ T(s, 'لا يوجد', a.x, a.y, a.w, 0.3, {color:K.mut, fontSize:9.5}); return 0.3; }
+    const rh = Math.max(0.27, Math.min(0.4, a.h / rows.length)), nw = a.w * (o.nw || 0.38), vw = 0.6, bw = a.w - nw - vw - 0.1, mx = Math.max.apply(null, rows.map(r => r[1]).concat([1]));
+    rows.forEach((r, i) => { const y = a.y + i * rh, f = Math.max(0.05, r[1] / mx * bw);
+      T(s, cut(r[0], o.cut || 34), a.x + a.w - nw, y, nw, rh, {fontSize:10});
+      rr(s, a.x + vw, y + rh / 2 - 0.06, bw, 0.12, K.track, null, 0.06); rr(s, a.x + vw + bw - f, y + rh / 2 - 0.06, f, 0.12, r[2] || color, null, 0.06);
+      T(s, o.fmt ? o.fmt(r[1]) : N(r[1]), a.x, y, vw - 0.1, rh, {align:'left', fontSize:10.5, bold:true}); });
+    return rh * rows.length;
   };
-  const seg = (s, x, y, w, h, parts) => { const tot = parts.reduce((a, p) => a + Math.max(0, p[1]), 0) || 1; let cx = x + w;
-    parts.forEach(p => { const sw = Math.max(0, p[1]) / tot * w; if(sw < 0.01) return; cx -= sw; s.addShape(pres.ShapeType.rect, {x:cx, y, w:Math.max(0.02, sw - 0.02), h, fill:{color:p[2]}, line:{color:p[2], width:0}}); if(sw > 0.7) T(s, P(p[1], tot), cx, y, sw, h, {align:'center', fontSize:11, bold:true, color:K.white}); }); };
-  const legend = (s, x, y, w, items) => { const cw = w / items.length; items.forEach((it, i) => { const x0 = x + w - cw * (i + 1); s.addShape(pres.ShapeType.ellipse, {x:x0 + cw - 0.14, y:y + 0.08, w:0.12, h:0.12, fill:{color:it[1]}, line:{color:it[1], width:0}}); T(s, it[0], x0, y, cw - 0.22, 0.28, {fontSize:10.5, color:K.ink2}); }); };
-  /* جدول: الأعمدة تُعطى من اليمين لليسار ثم تُعكس */
+  /* دائرة مجوّفة (رسم أصلي قابل للتعديل) ورقم في الوسط */
+  const donut = (s, x, y, d, parts, center, label, name) => {
+    const tot = parts.reduce((t, p) => t + p[1], 0);
+    if(tot > 0) s.addChart(pres.charts.DOUGHNUT, [{name, labels:parts.map(p => p[0]), values:parts.map(p => p[1])}], {x:x - 0.12, y:y - 0.12, w:d + 0.24, h:d + 0.24, holeSize:66, chartColors:parts.map(p => p[2]), showLegend:false, showValue:false, showPercent:false, showLabel:false, dataBorder:{pt:1.5, color:K.white}, objectName:name});
+    T(s, center, x, y + d / 2 - 0.26, d, 0.36, {align:'center', fontSize:String(center).length > 5 ? 14 : 18, bold:true});
+    T(s, label, x, y + d / 2 + 0.08, d, 0.2, {align:'center', fontSize:8, color:K.mut});
+  };
+  /* مفتاح الحالات: مربع لوني + الاسم + العدد + النسبة */
+  const legend = (s, a, parts, rh) => { const tot = parts.reduce((t, p) => t + p[1], 0); rh = rh || 0.3;
+    parts.forEach((p, i) => { const y = a.y + i * rh; dot(s, a.x + a.w - 0.11, y + rh / 2 - 0.055, 0.11, p[2]);
+      T(s, p[0], a.x + 1.35, y, a.w - 1.35 - 0.2, rh, {fontSize:10}); T(s, N(p[1]), a.x + 0.62, y, 0.7, rh, {align:'center', fontSize:10.5, bold:true}); T(s, P(p[1], tot), a.x, y, 0.6, rh, {align:'left', fontSize:8.5, color:K.mut}); });
+    return rh * parts.length; };
+  /* جدول: الأعمدة تُعطى من اليمين لليسار */
   const table = (s, x, y, w, cols, rows, o) => {
-    o = o || {}; const fs = o.fs || 12, rh = o.rh || 0.42;
-    const tw = cols.reduce((a, c) => a + c.w, 0), colW = cols.map(c => c.w / tw * w).reverse();
-    const hd = cols.map(c => ({text:c.t, options:{bold:true, fontSize:fs - 1.5, color:o.dark ? K.white : K.ink2, fill:{color:o.dark ? K.ink : K.soft}, align:c.r ? 'right' : 'center', valign:'middle', fontFace:FONT}})).reverse();
-    const body = rows.map(r => cols.map((c, i) => { const v = r[i], cell = (v && typeof v === 'object') ? v : {t:v};
-      return {text:String(cell.t === undefined || cell.t === null ? '' : cell.t), options:{fontSize:cell.big ? fs + 2 : fs, bold:!!(cell.b || cell.big || c.r), color:cell.c || K.ink, fill:{color:cell.f || K.white}, align:c.r ? 'right' : 'center', valign:'middle', fontFace:FONT}}; }).reverse());
-    s.addTable([hd].concat(body), {x, y, w, colW, rowH:rh, border:{type:'solid', pt:0.75, color:K.line}, margin:[0.03, 0.1, 0.03, 0.1], objectName:o.name || 'جدول'});
+    o = o || {}; const fs = o.fs || 10.5, rh = o.rh || 0.36, none = {type:'none'}, bot = {type:'solid', pt:0.75, color:K.line};
+    const tw = cols.reduce((t, c) => t + c.w, 0), colW = cols.map(c => c.w / tw * w).reverse();
+    const hd = cols.map(c => ({text:c.t, options:{bold:true, fontSize:fs - 1, color:K.white, fill:{color:K.navy}, align:c.r ? 'right' : 'center', valign:'middle', fontFace:FONT, border:[none, none, none, none]}})).reverse();
+    const body = rows.map((r, ri) => cols.map((c, i) => { const v = r[i], cell = (v && typeof v === 'object') ? v : {t:v};
+      return {text:String(cell.t === undefined || cell.t === null ? '' : cell.t), options:{fontSize:cell.big ? fs + 1.5 : fs, bold:!!(cell.b || cell.big || c.r), color:cell.c || K.ink, fill:{color:ri % 2 ? K.soft : K.white}, align:c.r ? 'right' : 'center', valign:'middle', fontFace:FONT, border:[none, none, bot, none]}}; }).reverse());
+    s.addTable([hd].concat(body), {x, y, w, colW, rowH:rh, margin:[0.02, 0.1, 0.02, 0.1], objectName:o.name || 'جدول'});
     return rh * (rows.length + 1);
   };
-  const CH = {catAxisLabelFontFace:FONT, valAxisLabelFontFace:FONT, dataLabelFontFace:FONT, legendFontFace:FONT, catAxisLabelFontSize:11, valAxisLabelFontSize:10, dataLabelFontSize:11, legendFontSize:11,
+  const CH = {catAxisLabelFontFace:FONT, valAxisLabelFontFace:FONT, dataLabelFontFace:FONT, legendFontFace:FONT, catAxisLabelFontSize:9, valAxisLabelFontSize:8.5, dataLabelFontSize:8.5, legendFontSize:9.5,
     catAxisLabelColor:K.ink2, valAxisLabelColor:K.mut, dataLabelColor:K.ink, legendColor:K.ink2};
   const MONEY = '[>=1000000]#,##0.0,,"M";[>=1000]#,##0.0,"K";0', MONEYN = '[>=1000000]#,##0.0,,"M";[<=-1000]-#,##0.0,"K";#,##0.0,"K"';
-  /* أشرطة أفقية من اليمين */
-  const hbars = (s, a, rows, color, name, fmtCode) => {
-    if(!rows.length){ T(s, 'لا يوجد', a.x, a.y, a.w, 0.4, {color:K.mut}); return; }
-    const h = Math.min(a.h, 0.55 + rows.length * 0.62);
-    s.addChart(pres.charts.BAR, [{name, labels:rows.map(r => String(r[0]).length > 36 ? String(r[0]).slice(0, 35) + '…' : r[0]), values:rows.map(r => r[1])}], Object.assign({x:a.x, y:a.y, w:a.w, h, barDir:'bar', chartColors:[color], catAxisOrientation:'maxMin', valAxisOrientation:'maxMin',
-      valAxisHidden:true, catAxisLineShow:false, valGridLine:{style:'none'}, catGridLine:{style:'none'}, showValue:true, dataLabelPosition:'outEnd', dataLabelFormatCode:fmtCode || '#,##0', showLegend:false, barGapWidthPct:55, objectName:name}, CH));
-  };
-  const donut = (s, x, y, w, h, parts, name) => s.addChart(pres.charts.DOUGHNUT, [{name, labels:parts.map(p => p[0]), values:parts.map(p => p[1])}], Object.assign({x, y, w, h, holeSize:62, chartColors:parts.map(p => p[2]),
-    showLegend:true, legendPos:'b', showPercent:true, showValue:false, dataBorder:{pt:1, color:K.white}, objectName:name}, CH, {dataLabelColor:K.white, dataLabelFontSize:10}));
   const cols = (s, a, cats, series, name, fmtCode) => s.addChart(pres.charts.BAR, series.map(z => ({name:z[0], labels:cats, values:z[1]})), Object.assign({x:a.x, y:a.y, w:a.w, h:a.h, barDir:'col', barGrouping:'clustered', chartColors:series.map(z => z[2]),
-    valGridLine:{color:K.line, size:0.75}, catGridLine:{style:'none'}, showValue:true, dataLabelPosition:'outEnd', dataLabelFormatCode:fmtCode || '#,##0', valAxisLabelFormatCode:fmtCode || '#,##0', showLegend:true, legendPos:'b', barGapWidthPct:60, objectName:name}, CH, {dataLabelFontSize:10}));
+    valGridLine:{color:K.line, size:0.75}, catGridLine:{style:'none'}, showValue:true, dataLabelPosition:'outEnd', dataLabelFormatCode:fmtCode || '#,##0', valAxisLabelFormatCode:fmtCode || '#,##0', showLegend:true, legendPos:'b', barGapWidthPct:70, objectName:name}, CH));
+  const half = (CW - G) / 2;
 
   /* ---------- 1 الغلاف ---------- */
   pres.addSection({title:'نظرة عامة'}); sec = 'نظرة عامة';
   const cv = pres.addSlide({masterName:'COVER', sectionTitle:sec});
-  if(D.logo){ box(cv, 1.0, 2.55, 2.6, 2.4, K.white); cv.addImage({data:String(D.logo).replace(/^data:/, ''), x:1.25, y:2.8, w:2.1, h:1.9, sizing:{type:'contain', w:2.1, h:1.9}}); }
-  else T(cv, 'PDC', 0.6, 2.7, 3.6, 1.6, {align:'center', fontSize:80, bold:true, color:K.white, rtlMode:false});
-  T(cv, 'قطاع الإشراف · إدارة مشاريع التوزيع', 4.6, 2.1, 8.0, 0.45, {fontSize:18, color:'B9C6DA'});
-  T(cv, 'التقرير الشهري للأداء', 4.6, 2.6, 8.0, 1.2, {fontSize:54, bold:true, color:K.white});
-  T(cv, `${D.region} — عقد التوزيع الموحد`, 4.6, 3.85, 8.0, 0.55, {fontSize:24, color:'E8EEF7'});
-  T(cv, `الفترة: ${D.month} · تراكمي حتى ${D.cum}`, 4.6, 4.75, 8.0, 0.45, {fontSize:16, color:K.white});
-  T(cv, 'داخلي — مقيد' + (D.sample ? '   |   نموذج توضيحي ببيانات تجريبية' : ''), 4.6, 6.75, 8.0, 0.35, {fontSize:12, color:K.gold});
+  if(D.logo) cv.addImage({data:String(D.logo).replace(/^data:/, ''), x:1.3, y:2.7, w:2.6, h:2.1, sizing:{type:'contain', w:2.6, h:2.1}});
+  else T(cv, 'PDC', 0.9, 2.75, 3.6, 1.6, {align:'center', fontSize:78, bold:true, color:K.navy, rtlMode:false, charSpacing:6});
+  T(cv, 'قطاع الإشراف · إدارة مشاريع التوزيع', 5.2, 2.45, 7.2, 0.36, {fontSize:14, color:K.ink2});
+  T(cv, 'التقرير الشهري للأداء', 5.2, 2.85, 7.2, 0.95, {fontSize:40, bold:true, color:K.navy});
+  T(cv, `${D.region} — عقد التوزيع الموحد`, 5.2, 3.8, 7.2, 0.42, {fontSize:17, color:K.ink2});
+  rect(cv, 7.6, 4.42, 4.8, 0.03, K.gold);
+  T(cv, `الفترة: ${D.month} · تراكمي حتى ${D.cum}`, 5.2, 4.55, 7.2, 0.34, {fontSize:12.5, color:K.ink});
+  T(cv, 'داخلي — مقيد' + (D.sample ? '   ·   نموذج توضيحي ببيانات تجريبية' : ''), 5.2, 6.85, 7.2, 0.3, {fontSize:10, color:'9A7B2C'});
 
   /* ---------- 2 دورة الحياة ---------- */
   let s = newSlide('نظرة عامة على دورة حياة الأوامر', 'المراحل الخمس: تحت التنفيذ ← تم التنفيذ ← مستلمة ← شهادة الإنجاز ← مقفلة');
-  const half = (CW - G) / 2;
   [[D.life.cum, 'دورة الحياة — تراكمي حتى ' + D.cum, MX + half + G], [D.life.mon, 'دورة الحياة — أوامر ' + D.month + ' (المسندة خلال الشهر)', MX]].forEach(z => {
-    const L = z[0], a = card(s, z[2], TOP, half, BH, z[1]);
-    box(s, a.x + a.w - 1.55, a.y, 1.55, 2.25, K.ink);
-    T(s, N(L.n), a.x + a.w - 1.55, a.y + 0.45, 1.55, 0.9, {align:'center', fontSize:L.n >= 10000 ? 26 : L.n >= 1000 ? 32 : 44, bold:true, color:K.white});
-    T(s, 'إجمالي الأوامر', a.x + a.w - 1.55, a.y + 1.4, 1.55, 0.35, {align:'center', fontSize:11, color:'C7D2E3'});
-    const kw = (a.w - 1.55 - 0.15 * 2) / 2, kx = i => a.x + a.w - 1.55 - 0.15 - kw - i * (kw + 0.15);
-    kpi(s, kx(0), a.y, kw, 1.05, 'المنفَّذة', N(L.exec), P(L.exec, L.n) + ' من الإجمالي', K.A); kpi(s, kx(1), a.y, kw, 1.05, 'تحت التنفيذ', N(L.under), P(L.under, L.n) + ' من الإجمالي', K.U);
-    kpi(s, kx(0), a.y + 1.2, kw, 1.05, 'الإنشاءات', N(L.cons), P(L.cons, L.n) + ' من الإجمالي', K.ink); kpi(s, kx(1), a.y + 1.2, kw, 1.05, 'الصيانة والعمليات', N(L.maint), P(L.maint, L.n) + ' من الإجمالي', K.S);
-    T(s, 'توزيع الأوامر على المراحل الخمس', a.x, a.y + 2.55, a.w, 0.3, {fontSize:12, color:K.ink2});
-    pipe(s, a.x, a.y + 2.95, a.w, ST, L.st, true);
+    const L = z[0], a = card(s, z[2], TOP, half, BH, z[1]), parts = ST.map((k, i) => [k[1], L.st[i], K[k[0]]]), d = 2.0;
+    donut(s, a.x + a.w - d - 0.25, a.y + 0.1, d, parts, N(L.n), 'إجمالي الأوامر', z[1]);
+    const kw = (a.w - d - 0.75 - 0.12) / 2, kh = 0.94, kx = i => a.x + (1 - i) * (kw + 0.12);
+    kpi(s, kx(0), a.y + 0.1, kw, kh, 'المنفَّذة', N(L.exec), P(L.exec, L.n) + ' من الإجمالي', K.A); kpi(s, kx(1), a.y + 0.1, kw, kh, 'تحت التنفيذ', N(L.under), P(L.under, L.n) + ' من الإجمالي', K.U);
+    kpi(s, kx(0), a.y + 0.1 + kh + 0.12, kw, kh, 'الإنشاءات', N(L.cons), P(L.cons, L.n) + ' من الإجمالي', K.navy); kpi(s, kx(1), a.y + 0.1 + kh + 0.12, kw, kh, 'الصيانة والعمليات', N(L.maint), P(L.maint, L.n) + ' من الإجمالي', K.S);
+    rect(s, a.x, a.y + 2.42, a.w, 0.012, K.line);
+    legend(s, {x:a.x, y:a.y + 2.6, w:a.w}, parts, Math.min(0.46, (a.h - 2.7) / 5));
   });
 
   /* ---------- 3 المقارنة ---------- */
   s = newSlide('مقارنة الأداء الشهري', `${D.prev} مقابل ${D.month} · الأعمال المنجزة والمسندة خلال كل شهر`);
   const rows3 = D.cmp.map(r => { const d = r.b - r.a, up = d > 0, okc = d === 0 ? K.mut : ((r.good === 'down') === !up ? K.pos : K.neg);
-    return [r.t, N(r.a), {t:N(r.b), big:1}, {t:(d > 0 ? '+' : '') + N(d), c:okc, b:1}, {t:r.a ? (d > 0 ? '+' : '') + R1(d / r.a * 100) + '%' : '—', c:okc, b:1}, {t:d === 0 ? '●' : up ? '▲' : '▼', c:okc}]; });
-  table(s, MX, TOP, CW, [{t:'المؤشر', w:5, r:1}, {t:D.prev, w:1.6}, {t:D.month, w:1.6}, {t:'التغير', w:1.2}, {t:'التغير %', w:1.3}, {t:'الاتجاه', w:1}], rows3, {rh:0.385, fs:12.5, dark:1, name:'جدول المقارنة'});
-  T(s, 'اللون الأخضر عند التحسن والأحمر عند التراجع حسب طبيعة المؤشر' + (D.cmpNote ? ' · ' + D.cmpNote : ''), MX, 6.58, CW, 0.3, {fontSize:10.5, color:K.mut});
+    return [r.t, N(r.a), {t:N(r.b), b:1}, {t:(d > 0 ? '+' : '') + N(d), c:okc, b:1}, {t:r.a ? (d > 0 ? '+' : '') + R1(d / r.a * 100) + '%' : '—', c:okc, b:1}, {t:d === 0 ? '●' : up ? '▲' : '▼', c:okc}]; });
+  table(s, MX, TOP + 0.05, CW, [{t:'المؤشر', w:5.4, r:1}, {t:D.prev, w:1.7}, {t:D.month, w:1.7}, {t:'التغير', w:1.2}, {t:'التغير %', w:1.3}, {t:'الاتجاه', w:1}], rows3, {rh:0.415, fs:11, name:'جدول المقارنة'});
+  T(s, '▲ ▼ بلون أخضر عند التحسن وأحمر عند التراجع حسب طبيعة المؤشر' + (D.cmpNote ? ' · ' + D.cmpNote : ''), MX, 6.62, CW, 0.26, {fontSize:8.5, color:K.mut});
 
   /* ---------- 4 التنفيذ والزيارات ---------- */
   s = newSlide('إحصاءات التنفيذ والزيارات الميدانية', 'تراكمي حتى نهاية الشهر · الزيارات خلال الشهر');
   let a = card(s, MX + half + G, TOP, half, BH, 'إحصاءات التنفيذ');
-  T(s, `الإنشاءات: ${N(D.cons.n)} أمراً`, a.x, a.y, a.w, 0.32, {fontSize:13, bold:true}); pipe(s, a.x, a.y + 0.42, a.w, ST, D.cons.st, true);
-  T(s, `الصيانة: ${N(D.maint.n)} مهمة`, a.x, a.y + 2.4, a.w, 0.32, {fontSize:13, bold:true}); pipe(s, a.x, a.y + 2.82, a.w, MS, D.maint.ds, true);
+  const dn = 2.0, cP = ST.map((k, i) => [k[1], D.cons.st[i], K[k[0]]]), mP = MS.map((k, i) => [k[1], D.maint.ds[i], K[k[0]]]);
+  donut(s, a.x + a.w - dn - 0.2, a.y + 0.15, dn, cP, N(D.cons.n), 'الإنشاءات', 'حالة أوامر الإنشاءات'); legend(s, {x:a.x + 0.1, y:a.y + 0.15 + (dn - 5 * 0.32) / 2, w:a.w - dn - 0.7}, cP, 0.32);
+  rect(s, a.x, a.y + a.h / 2 - 0.02, a.w, 0.012, K.line);
+  donut(s, a.x + a.w - dn - 0.2, a.y + a.h / 2 + 0.2, dn, mP, N(D.maint.n), 'الصيانة', 'حالة مهام الصيانة'); legend(s, {x:a.x + 0.1, y:a.y + a.h / 2 + 0.2 + (dn - 3 * 0.32) / 2, w:a.w - dn - 0.7}, mP, 0.32);
   a = card(s, MX, TOP, half, BH, 'الزيارات الميدانية — ' + D.month);
-  const q = D.qs, qr = [['الزيارات الميدانية', K.ink, [['العدد', N(q.vis.n)], ['بها مخالفات', N(q.vis.withv)], ['الغرامات (ر.س)', N(q.vis.fines)]]], ['مخالفات السلامة', K.red, [['العدد', N(q.saf.n)], ['المعدل لكل زيارة', Pv(q.saf.rate)], ['نسبة الالتزام', Pv(q.saf.comp)]]],
+  const q = D.qs, qr = [['الزيارات الميدانية', K.navy, [['العدد', N(q.vis.n)], ['بها مخالفات', N(q.vis.withv)], ['الغرامات (ر.س)', N(q.vis.fines)]]], ['مخالفات السلامة', K.red, [['العدد', N(q.saf.n)], ['المعدل لكل زيارة', Pv(q.saf.rate)], ['نسبة الالتزام', Pv(q.saf.comp)]]],
     ['مخالفات الجودة', K.U, [['العدد', N(q.qual.n)], ['المعدل لكل زيارة', Pv(q.qual.rate)], ['نسبة الالتزام', Pv(q.qual.comp)]]], ['إيقاف العمل', K.T, [['العدد', N(q.stop.n)], ['المعدل لكل زيارة', Pv(q.stop.rate)], ['نسبة الالتزام', Pv(q.stop.comp)]]]];
-  const qh = (a.h - 0.15 * 3) / 4;
-  qr.forEach((r, i) => { const y = a.y + i * (qh + 0.15); box(s, a.x, y, a.w, qh, K.soft);
-    s.addShape(pres.ShapeType.ellipse, {x:a.x + a.w - 0.38, y:y + qh / 2 - 0.09, w:0.18, h:0.18, fill:{color:r[1]}, line:{color:r[1], width:0}});
-    T(s, r[0], a.x + a.w - 2.5, y, 2.0, qh, {fontSize:14, bold:true});
-    const cw = (a.w - 2.6) / 3; r[2].forEach((c, j) => { const x0 = a.x + a.w - 2.6 - cw * (j + 1); T(s, c[0], x0, y + 0.1, cw, 0.28, {align:'center', fontSize:10.5, color:K.mut}); T(s, c[1], x0, y + 0.38, cw, qh - 0.5, {align:'center', fontSize:20, bold:true}); }); });
+  const qh = Math.min(1.05, (a.h - 0.14 * 3) / 4);
+  qr.forEach((r, i) => { const y = a.y + 0.05 + i * (qh + 0.14); rr(s, a.x, y, a.w, qh, K.soft, K.line, 0.05); rect(s, a.x + a.w - 0.055, y + 0.03, 0.055, qh - 0.06, r[1]);
+    T(s, r[0], a.x + a.w - 2.35, y, 2.1, qh, {fontSize:11.5, bold:true});
+    const cw = (a.w - 2.5) / 3; r[2].forEach((c, j) => { const x0 = a.x + a.w - 2.5 - cw * (j + 1); T(s, c[0], x0, y + qh / 2 - 0.36, cw, 0.22, {align:'center', fontSize:8, color:K.mut}); T(s, c[1], x0, y + qh / 2 - 0.12, cw, 0.4, {align:'center', fontSize:16, bold:true}); }); });
 
   /* ---------- 5 و 7 تفاصيل القطاع ---------- */
-  const detail = (title, kp, ctTitle, byCt, ctNote, stTitle, parts, tyTitle, byType) => {
-    const sl = newSlide(title, 'تراكمي حتى نهاية الشهر'); kpiRow(sl, MX, TOP, CW, 1.15, kp);
-    const y = TOP + 1.15 + G, h = BOT - y, w3 = (CW - 2 * G) / 3;
-    hbars(sl, card(sl, MX + 2 * (w3 + G), y, w3, h, ctTitle, ctNote), byCt, K.ink, ctTitle);
-    const c2 = card(sl, MX + w3 + G, y, w3, h, stTitle); donut(sl, c2.x, c2.y, c2.w, c2.h, parts, stTitle);
-    hbars(sl, card(sl, MX, y, w3, h, tyTitle), byType, K.teal, tyTitle);
+  const detail = (title, kp, ctTitle, byCt, ctNote, stTitle, parts, total, unit, tyTitle, byType) => {
+    const sl = newSlide(title, 'تراكمي حتى نهاية الشهر'); kpiRow(sl, MX, TOP, CW, 0.98, kp);
+    const y = TOP + 0.98 + G, h = BOT - y, w1 = CW * 0.355, w2 = CW * 0.27, w3 = CW - w1 - w2 - 2 * G;
+    let b = card(sl, MX + w2 + w3 + 2 * G, y, w1, h, ctTitle, ctNote); bars(sl, {x:b.x, y:b.y + 0.05, w:b.w, h:b.h - 0.1}, byCt, K.navy);
+    b = card(sl, MX + w3 + G, y, w2, h, stTitle); const d = Math.min(1.9, b.w - 0.6);
+    donut(sl, b.x + (b.w - d) / 2, b.y + 0.1, d, parts, N(total), unit, stTitle); legend(sl, {x:b.x, y:b.y + d + 0.35, w:b.w}, parts, Math.min(0.34, (b.h - d - 0.4) / parts.length));
+    b = card(sl, MX, y, w3, h, tyTitle); bars(sl, {x:b.x, y:b.y + 0.05, w:b.w, h:b.h - 0.1}, byType, K.blue);
   };
   pres.addSection({title:'الإنشاءات'}); sec = 'الإنشاءات';
   const c = D.cdet;
-  detail('الإنشاءات — تفاصيل الأوامر', [['إجمالي أوامر العمل', N(c.n), 'أمر إنشاءات', K.ink], ['توصيلات', N(c.conn), P(c.conn, c.n), K.A], ['مشاريع', N(c.proj), P(c.proj, c.n), K.S], ['نسبة التنفيذ', P(c.execN, c.n), N(c.execN) + ' أمراً منفَّذاً', K.C]],
-    'الأوامر حسب المقاول', c.byCt, c.ctNote, 'حالة الأوامر', ST.map((k, i) => [k[1], D.cons.st[i], K[k[0]]]), 'الأوامر حسب نوع العمل', c.byType);
+  detail('الإنشاءات — تفاصيل الأوامر', [['إجمالي أوامر العمل', N(c.n), '', K.navy], ['توصيلات', N(c.conn), P(c.conn, c.n), K.A], ['مشاريع', N(c.proj), P(c.proj, c.n), K.S], ['نسبة التنفيذ', P(c.execN, c.n), N(c.execN) + ' أمراً', K.C]],
+    'الأوامر حسب المقاول', c.byCt, c.ctNote, 'حالة الأوامر', ST.map((k, i) => [k[1], D.cons.st[i], K[k[0]]]), c.n, 'أمر', 'الأوامر حسب نوع العمل', c.byType);
 
   /* ---------- 6 بطاقة أداء المقاولين ---------- */
   const p = D.cperf; s = newSlide('الإنشاءات — بطاقة أداء المقاولين', 'التسليم والتأخير والتصاريح والمستندات');
-  kpiRow(s, MX, TOP, CW, 1.15, [['أوامر تتطلب تصريحاً', N(p.need), '', K.ink], ['تصاريح صادرة', N(p.issued), P(p.issued, p.need), K.C], ['تصاريح قيد الإجراء', N(p.proc), P(p.proc, p.need), K.U], ['أوامر منفَّذة', N(p.execOrders), '', K.A], ['مستندات مسلَّمة', N(p.docs), P(p.docs, p.execOrders) + ' من المنفَّذة', K.S]]);
-  const rh6 = Math.min(0.75, (BOT - TOP - 1.15 - G - (p.note ? 0.3 : 0)) / (p.rows.length + 1));
-  table(s, MX, TOP + 1.15 + G, CW, [{t:'المقاول', w:3.2, r:1}, {t:'الأوامر', w:1}, {t:'المنفَّذ', w:1}, {t:'نسبة التنفيذ', w:1.2}, {t:'ضمن المدة', w:1.2}, {t:'مستلمة فأعلى', w:1.2}, {t:'تأخر إغلاق', w:1.1}, {t:'التصاريح الصادرة / المطلوبة', w:1.7}, {t:'تسليم المستندات', w:1.3}],
-    p.rows.map(r => [r.ct, N(r.n), N(r.ex), Pv(r.exP), Pv(r.inTime), Pv(r.recv), {t:N(r.lc), c:r.lc ? K.neg : K.ink, b:1}, `${N(r.pi)} / ${N(r.pr)}`, Pv(r.docs)]), {rh:rh6, fs:12.5, name:'بطاقة أداء مقاولي الإنشاءات'});
-  if(p.note) T(s, p.note, MX, BOT - 0.28, CW, 0.28, {fontSize:10.5, color:K.mut});
+  kpiRow(s, MX, TOP, CW, 0.98, [['أوامر تتطلب تصريحاً', N(p.need), '', K.navy], ['تصاريح صادرة', N(p.issued), P(p.issued, p.need), K.C], ['تصاريح قيد الإجراء', N(p.proc), P(p.proc, p.need), K.U], ['أوامر منفَّذة', N(p.execOrders), '', K.A], ['مستندات مسلَّمة', N(p.docs), P(p.docs, p.execOrders) + ' من المنفَّذة', K.S]]);
+  const rh6 = Math.min(p.rows.length <= 4 ? 0.62 : 0.5, (BOT - TOP - 0.98 - G - (p.note ? 0.3 : 0)) / (p.rows.length + 1));
+  table(s, MX, TOP + 0.98 + G, CW, [{t:'المقاول', w:3.2, r:1}, {t:'الأوامر', w:1}, {t:'المنفَّذ', w:1}, {t:'نسبة التنفيذ', w:1.2}, {t:'ضمن المدة', w:1.2}, {t:'مستلمة فأعلى', w:1.2}, {t:'تأخر إغلاق', w:1.1}, {t:'التصاريح الصادرة / المطلوبة', w:1.8}, {t:'تسليم المستندات', w:1.3}],
+    p.rows.map(r => [r.ct, N(r.n), N(r.ex), Pv(r.exP), Pv(r.inTime), Pv(r.recv), {t:N(r.lc), c:r.lc ? K.neg : K.ink, b:1}, `${N(r.pi)} / ${N(r.pr)}`, Pv(r.docs)]), {rh:rh6, name:'بطاقة أداء مقاولي الإنشاءات'});
+  if(p.note) T(s, p.note, MX, BOT - 0.26, CW, 0.26, {fontSize:8.5, color:K.mut});
 
   /* ---------- 7 الصيانة ---------- */
   pres.addSection({title:'العمليات والصيانة'}); sec = 'العمليات والصيانة';
   const m = D.mdet;
-  detail('العمليات والصيانة — تفاصيل المهام', [['إجمالي المهام', N(m.n), 'مهمة صيانة', K.ink], ['طارئ', N(m.em), P(m.em, m.n), K.red], ['مجدول', N(m.sch), P(m.sch, m.n), K.A], ['نسبة الإنجاز', P(m.done, m.n), N(m.done) + ' مهمة منجزة', K.C]],
-    'المهام حسب المقاول', m.byCt, m.ctNote, 'حالة المهام', MS.map((k, i) => [k[1], D.maint.ds[i], K[k[0]]]), 'المهام حسب النوع', m.byType);
+  detail('العمليات والصيانة — تفاصيل المهام', [['إجمالي المهام', N(m.n), '', K.navy], ['طارئ', N(m.em), P(m.em, m.n), K.red], ['مجدول', N(m.sch), P(m.sch, m.n), K.A], ['نسبة الإنجاز', P(m.done, m.n), N(m.done) + ' مهمة', K.C]],
+    'المهام حسب المقاول', m.byCt, m.ctNote, 'حالة المهام', MS.map((k, i) => [k[1], D.maint.ds[i], K[k[0]]]), m.n, 'مهمة', 'المهام حسب النوع', m.byType);
 
   /* ---------- 8 التسليم والأرشفة ---------- */
   const mp = D.mperf; s = newSlide('العمليات والصيانة — التسليم والأرشفة وملف الأعطال', 'بطاقة أداء مقاولي الصيانة');
   const th8 = table(s, MX, TOP, CW, [{t:'المقاول', w:3.2, r:1}, {t:'المهام', w:1}, {t:'المنجز', w:1}, {t:'نسبة الإنجاز', w:1.2}, {t:'طارئ', w:1}, {t:'مجدول', w:1}, {t:'سُلّم للصيانة', w:1.2}, {t:'نسبة التسليم', w:1.2}, {t:'لم يبدأ > 5 أيام', w:1.4}],
-    mp.rows.map(r => [r.ct, N(r.n), N(r.done), P(r.done, r.n), N(r.em), N(r.sch), N(r.hand), Pv(r.handP), {t:N(r.ns5), c:r.ns5 ? K.neg : K.ink, b:1}]), {rh:mp.rows.length <= 3 ? 0.5 : 0.42, fs:12.5, name:'بطاقة أداء مقاولي الصيانة'});
-  const y8 = TOP + th8 + G, h8 = BOT - y8;
+    mp.rows.map(r => [r.ct, N(r.n), N(r.done), P(r.done, r.n), N(r.em), N(r.sch), N(r.hand), Pv(r.handP), {t:N(r.ns5), c:r.ns5 ? K.neg : K.ink, b:1}]), {rh:0.4, name:'بطاقة أداء مقاولي الصيانة'});
+  const y8 = TOP + th8 + 0.22, h8 = Math.min(BOT - y8, 2.9);
   a = card(s, MX + half + G, y8, half, h8, 'أرشفة المستندات');
-  kpiRow(s, a.x, a.y, a.w, Math.max(0.8, Math.min(1.15, a.h - 0.95)), [['المهام المنجزة', N(mp.doneN), '', K.ink], ['سُلّمت للصيانة', N(mp.hand), P(mp.hand, mp.doneN), K.C], ['غير مسلَّمة', N(mp.doneN - mp.hand), P(mp.doneN - mp.hand, mp.doneN), K.red]]);
-  seg(s, a.x, a.y + a.h - 0.75, a.w, 0.34, [['سُلّمت', mp.hand, K.C], ['غير مسلَّمة', mp.doneN - mp.hand, K.red]]);
-  legend(s, a.x + a.w - 3.6, a.y + a.h - 0.3, 3.6, [['سُلّمت للصيانة', K.C], ['غير مسلَّمة', K.red]]);
-  hbars(s, card(s, MX, y8, half, h8, 'أكثر أوصاف الأعطال تكراراً'), mp.faults, K.red, 'أوصاف الأعطال');
+  kpiRow(s, a.x, a.y, a.w, Math.min(0.98, a.h - 0.75), [['المهام المنجزة', N(mp.doneN), '', K.navy], ['سُلّمت للصيانة', N(mp.hand), P(mp.hand, mp.doneN), K.C], ['غير مسلَّمة', N(mp.doneN - mp.hand), P(mp.doneN - mp.hand, mp.doneN), K.red]]);
+  const sy = a.y + a.h - 0.5, hw = mp.doneN ? mp.hand / mp.doneN * a.w : 0;
+  rr(s, a.x, sy, a.w, 0.16, K.red, null, 0.08); if(hw > 0.05) rr(s, a.x + a.w - hw, sy, hw, 0.16, K.C, null, 0.08);
+  T(s, `سُلّمت للصيانة ${P(mp.hand, mp.doneN)}`, a.x + a.w / 2, sy + 0.2, a.w / 2, 0.24, {fontSize:8.5, color:K.pos}); T(s, `غير مسلَّمة ${P(mp.doneN - mp.hand, mp.doneN)}`, a.x, sy + 0.2, a.w / 2, 0.24, {align:'left', fontSize:8.5, color:K.neg});
+  a = card(s, MX, y8, half, h8, 'أكثر أوصاف الأعطال تكراراً'); bars(s, {x:a.x, y:a.y + 0.05, w:a.w, h:a.h - 0.1}, mp.faults, K.red, {nw:0.42, cut:44});
 
   /* ---------- 9 السلامة والجودة ---------- */
   pres.addSection({title:'السلامة والتقييم'}); sec = 'السلامة والتقييم';
   s = newSlide('السلامة والجودة', 'الزيارات والمخالفات خلال ' + D.month);
   const sf = D.sq.saf, ql = D.sq.qual;
-  [['السلامة', MX + half + G, K.red, [['المخالفات', N(sf.viol), '', K.red], ['إيقاف العمل', N(sf.stop), '', K.T], ['الالتزام', Pv(sf.comp), 'لكل زيارة', K.C], ['الزيارات', N(sf.vis), '', K.ink]], 'أكثر المخالفات رصداً', sf.top, sf.byCt],
-   ['الجودة', MX, K.U, [['المخالفات', N(ql.viol), '', K.U], ['ملاحظات مغلقة', N(ql.closed), Pv(ql.closedP), K.A], ['الالتزام', Pv(ql.comp), 'لكل زيارة', K.C], ['غرامات (ر.س)', N(ql.fines), '', K.ink]], 'أكثر الملاحظات رصداً', ql.top, ql.byCt]].forEach(z => {
-    const b = card(s, z[1], TOP, half, BH, z[0]); kpiRow(s, b.x, b.y, b.w, 1.1, z[3]);
-    const hw = (b.w - 0.2) / 2, yy = b.y + 1.3, hh = b.h - 1.3;
-    T(s, z[4], b.x + hw + 0.2, yy, hw, 0.3, {fontSize:12, color:K.ink2}); hbars(s, {x:b.x + hw + 0.2, y:yy + 0.32, w:hw, h:hh - 0.32}, z[5], z[2], z[0] + ' — ' + z[4]);
-    T(s, 'المخالفات حسب المقاول', b.x, yy, hw, 0.3, {fontSize:12, color:K.ink2}); hbars(s, {x:b.x, y:yy + 0.32, w:hw, h:hh - 0.32}, z[6], K.ink, z[0] + ' — حسب المقاول');
+  [['السلامة', MX + half + G, K.red, [['المخالفات', N(sf.viol), '', K.red], ['إيقاف العمل', N(sf.stop), '', K.T], ['الالتزام', Pv(sf.comp), 'لكل زيارة', K.C], ['الزيارات', N(sf.vis), '', K.navy]], 'أكثر المخالفات رصداً', sf.top, sf.byCt],
+   ['الجودة', MX, K.U, [['المخالفات', N(ql.viol), '', K.U], ['ملاحظات مغلقة', N(ql.closed), Pv(ql.closedP), K.C], ['الالتزام', Pv(ql.comp), 'لكل زيارة', K.C], ['غرامات (ر.س)', N(ql.fines), '', K.S]], 'أكثر الملاحظات رصداً', ql.top, ql.byCt]].forEach(z => {
+    const b = card(s, z[1], TOP, half, BH, z[0]); kpiRow(s, b.x, b.y, b.w, 0.95, z[3]);
+    let yy = b.y + 0.95 + 0.2; const hh = (b.y + b.h - yy - 0.4) / 2;
+    T(s, z[4], b.x, yy, b.w, 0.26, {fontSize:9.5, color:K.ink2, bold:true}); bars(s, {x:b.x, y:yy + 0.3, w:b.w, h:hh - 0.3}, z[5], z[2], {nw:0.5, cut:44});
+    yy += hh + 0.2; rect(s, b.x, yy - 0.1, b.w, 0.012, K.line);
+    T(s, 'المخالفات حسب المقاول', b.x, yy, b.w, 0.26, {fontSize:9.5, color:K.ink2, bold:true}); bars(s, {x:b.x, y:yy + 0.3, w:b.w, h:hh - 0.3}, z[6], K.navy, {nw:0.5});
   });
 
   /* ---------- 10 التقييم ---------- */
   const ev = D.eval; s = newSlide('تقييم المقاولين', ev.weights);
-  const wl = CW * 0.64, scol = v => v >= 70 ? K.pos : v >= 60 ? '9A6B00' : K.neg;
-  a = card(s, MX + CW - wl, TOP, wl, BH, 'بطاقة التقييم');
-  table(s, a.x, a.y, a.w, [{t:'#', w:0.5}, {t:'المقاول', w:3, r:1}, {t:'الأعمال', w:1}, {t:'التنفيذ', w:1}, {t:'الجودة', w:1}, {t:'السلامة', w:1}, {t:'الإجمالي', w:1.1}, {t:'التقييم', w:1.5}],
-    ev.rows.map((r, i) => [i + 1, r.ct, N(r.n), r.ex.toFixed(1), r.q.toFixed(1), r.s.toFixed(1), {t:r.total.toFixed(1), big:1, c:scol(r.total)}, {t:r.grade, b:1, c:scol(r.total)}]), {rh:Math.min(0.62, (a.h - (ev.note ? 0.5 : 0)) / (ev.rows.length + 1)), fs:12.5, name:'بطاقة التقييم'});
-  if(ev.note) T(s, ev.note, a.x, a.y + a.h - 0.4, a.w, 0.4, {fontSize:10, color:K.mut});
-  hbars(s, card(s, MX, TOP, CW - wl - G, BH, 'الترتيب العام'), ev.rows.map(r => [r.ct, Math.round(r.total * 10) / 10]), K.ink, 'الترتيب العام', '0.0');
+  const wl = CW * 0.66, scol = v => v >= 70 ? K.pos : v >= 60 ? '9A6B00' : K.neg, sfill = v => v >= 70 ? K.C : v >= 60 ? K.U : K.red;
+  const r10 = ev.rows.length <= 4 ? 0.6 : 0.46, h10 = Math.min(BH, 0.9 + (ev.rows.length + 1) * r10 + (ev.note ? 0.4 : 0));
+  a = card(s, MX + CW - wl, TOP, wl, h10, 'بطاقة التقييم');
+  const th10 = table(s, a.x, a.y, a.w, [{t:'#', w:0.5}, {t:'المقاول', w:3, r:1}, {t:'الأعمال', w:1}, {t:'التنفيذ', w:1}, {t:'الجودة', w:1}, {t:'السلامة', w:1}, {t:'الإجمالي', w:1.1}, {t:'التقييم', w:1.5}],
+    ev.rows.map((r, i) => [i + 1, r.ct, N(r.n), r.ex.toFixed(1), r.q.toFixed(1), r.s.toFixed(1), {t:r.total.toFixed(1), big:1, c:scol(r.total)}, {t:r.grade, b:1, c:scol(r.total)}]), {rh:r10, name:'بطاقة التقييم'});
+  if(ev.note) T(s, ev.note, a.x, a.y + th10 + 0.06, a.w, 0.3, {fontSize:8, color:K.mut});
+  a = card(s, MX, TOP, CW - wl - G, h10, 'الترتيب العام'); bars(s, {x:a.x, y:a.y + 0.05, w:a.w, h:Math.min(a.h - 0.1, ev.rows.length * 0.46)}, ev.rows.map(r => [r.ct, r.total, sfill(r.total)]), K.navy, {fmt:v => v.toFixed(1), nw:0.44});
 
   /* ---------- 11 المالي ---------- */
   pres.addSection({title:'المالي والمستهدفات'}); sec = 'المالي والمستهدفات';
   const f = D.fin; s = newSlide('الملخص المالي', `قيمة PDC (الدخل) ومصروف الاستشاري و PMSS · ${D.month}`);
-  kpiRow(s, MX, TOP, CW, 1.15, [['إسناد الشهر — PDC', N(f.assignV), N(f.assignN) + ' أمراً', K.A], ['إقفال الشهر — PDC', N(f.closeV), N(f.closeN) + ' أمراً', K.C], ['مصروف الاستشاري', N(f.cons), 'على أوامر الشهر', K.S], ['مصروف PMSS', N(f.pmss), 'تكلفة الموظفين', K.T],
-    ['الربح المتوقع', N(f.profit), 'الشهر السابق ' + N(f.prevProfit), K.pos, f.profit < 0 ? K.neg : K.pos], ['المتبقي المفتوح', N(f.open), 'أمراً (تراكمي)', K.U]]);
-  const y11 = TOP + 1.15 + G, h11 = BOT - y11;
-  cols(s, card(s, MX + half + G, y11, half, h11, `الإسناد والإقفال — آخر ${f.months.length} أشهر`), f.months, [['مسندة', f.assigned, K.ink], ['مقفلة', f.closed, K.C]], 'الإسناد والإقفال');
-  cols(s, card(s, MX, y11, half, h11, 'الدخل والمصروف والربح (ر.س)'), f.months, [['دخل PDC', f.income, K.A], ['استشاري + PMSS', f.expense, K.S], ['الربح', f.profitM, K.C]], 'الدخل والمصروف والربح', f.profitM.some(v => v < 0) ? MONEYN : MONEY);
+  kpiRow(s, MX, TOP, CW, 0.98, [['إسناد الشهر — PDC', N(f.assignV), N(f.assignN) + ' أمراً', K.A], ['إقفال الشهر — PDC', N(f.closeV), N(f.closeN) + ' أمراً', K.C], ['مصروف الاستشاري', N(f.cons), 'على أوامر الشهر', K.S], ['مصروف PMSS', N(f.pmss), 'تكلفة الموظفين', K.T],
+    ['الربح المتوقع', N(f.profit), 'الشهر السابق ' + N(f.prevProfit), K.C, f.profit < 0 ? K.neg : K.pos], ['المتبقي المفتوح', N(f.open), 'أمراً (تراكمي)', K.U]]);
+  const y11 = TOP + 0.98 + G, h11 = BOT - y11;
+  a = card(s, MX + half + G, y11, half, h11, `الإسناد والإقفال — آخر ${f.months.length} أشهر`); cols(s, a, f.months, [['مسندة', f.assigned, K.navy], ['مقفلة', f.closed, K.C]], 'الإسناد والإقفال');
+  a = card(s, MX, y11, half, h11, 'الدخل والمصروف والربح (ر.س)'); cols(s, a, f.months, [['دخل PDC', f.income, K.A], ['استشاري + PMSS', f.expense, K.S], ['الربح', f.profitM, K.C]], 'الدخل والمصروف والربح', f.profitM.some(v => v < 0) ? MONEYN : MONEY);
 
   /* ---------- 12 المستهدفات والتوصيات ---------- */
   const t = D.tg; s = newSlide('مستهدفات الشهر القادم والتوصيات', 'مستهدفات مقترحة من اتجاه الأشهر السابقة — للاعتماد');
-  const wt = CW * 0.6; a = card(s, MX + CW - wt, TOP, wt, BH, 'المستهدفات');
-  table(s, a.x, a.y, a.w, [{t:'المؤشر', w:3, r:1}, {t:D.prev, w:1.1}, {t:D.month, w:1.1}, {t:'مستهدف الشهر القادم', w:1.3}, {t:'الأساس', w:1.8}, {t:'الحالة', w:1.3}],
-    t.rows.map(r => [r.t, N(r.a), N(r.b), {t:N(r.target), big:1}, r.basis, {t:r.ok ? '✓ تحقق' : '✗ لم يتحقق', b:1, c:r.ok ? K.pos : K.neg}]), {rh:Math.min(0.85, a.h / (t.rows.length + 1)), fs:12.5, name:'المستهدفات'});
-  a = card(s, MX, TOP, CW - wt - G, BH, 'التوصيات');
-  const rh = a.h / t.recs.length;
-  t.recs.forEach((x, i) => { const y = a.y + i * rh; s.addShape(pres.ShapeType.ellipse, {x:a.x + a.w - 0.42, y:y + rh / 2 - 0.21, w:0.42, h:0.42, fill:{color:K.ink}, line:{color:K.ink, width:0}});
-    T(s, String(i + 1), a.x + a.w - 0.42, y + rh / 2 - 0.21, 0.42, 0.42, {align:'center', fontSize:14, bold:true, color:K.white}); T(s, x, a.x, y, a.w - 0.6, rh, {fontSize:14}); });
+  const th12 = table(s, MX, TOP + 0.05, CW, [{t:'المؤشر', w:4, r:1}, {t:D.prev, w:1.4}, {t:D.month, w:1.4}, {t:'مستهدف الشهر القادم', w:1.7}, {t:'الأساس', w:2.2}, {t:'الحالة', w:1.5}],
+    t.rows.map(r => [r.t, N(r.a), N(r.b), {t:N(r.target), b:1}, r.basis, {t:r.ok ? '✓ تحقق' : '✗ لم يتحقق', b:1, c:r.ok ? K.pos : K.neg}]), {rh:0.42, fs:11, name:'المستهدفات'});
+  const y12 = TOP + 0.05 + th12 + 0.25, rh12 = 0.5, h12 = 0.76 + t.recs.length * rh12 + 0.1;
+  a = card(s, MX, y12, CW, h12, 'التوصيات');
+  t.recs.forEach((x, i) => { const y = a.y + i * rh12; s.addShape(pres.ShapeType.ellipse, {x:a.x + a.w - 0.3, y:y + rh12 / 2 - 0.15, w:0.3, h:0.3, fill:{color:K.navy}, line:{color:K.navy, width:0}});
+    T(s, String(i + 1), a.x + a.w - 0.3, y + rh12 / 2 - 0.15, 0.3, 0.3, {align:'center', fontSize:10, bold:true, color:K.white}); T(s, x, a.x, y, a.w - 0.45, rh12, {fontSize:11.5}); });
   return pres;
 }
 
