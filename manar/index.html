@@ -48,7 +48,7 @@ h1 .ln:nth-child(2) span{animation-delay:.12s}
 h1 .y{color:var(--y)}
 .lede{font-size:clamp(17px,2vw,20px);color:#d9d6ce;max-width:34em;opacity:0;animation:fade .8s .45s forwards}
 .lede b{color:#fff;background:var(--red);padding:0 6px;border-radius:4px;font-weight:700}
-.facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin-top:30px;border-top:1px solid #333;opacity:0;animation:fade .8s .6s forwards}
+.facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin-top:30px;border-top:1px solid #333;opacity:0;animation:fade .8s .6s forwards}
 .facts div{padding:12px 12px 0 0;min-width:0}
 [dir=rtl] .facts div{padding:12px 0 0 12px}
 .facts dt{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:#8d897f}
@@ -68,7 +68,7 @@ h1 .y{color:var(--y)}
 .lk{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;color:var(--muted);display:block}
 [dir=rtl] .lk{font-family:var(--body);letter-spacing:0;font-size:11px}
 .lv{font-weight:700;font-size:14.5px;line-height:1.35;display:block;margin-top:1px}
-.lfull{padding:10px 16px;border-bottom:1.5px solid var(--ink)}
+.lfull{padding:12px 16px 16px}
 .lfull .lv{font-weight:500;font-size:13.5px}
 .bc{padding:12px 16px 10px;display:grid;gap:4px}
 .bc svg{width:100%;height:54px;display:block}
@@ -296,7 +296,6 @@ footer p{color:#bdb9ae;max-width:40em;font-size:17px}
         <p class="lede" data-i="lede"></p>
         <dl class="facts">
           <div><dt data-i="f1k"></dt><dd data-i="f1v"></dd></div>
-          <div><dt data-i="f2k"></dt><dd data-i="f2v"></dd></div>
           <div><dt data-i="f3k"></dt><dd data-i="f3v"></dd></div>
           <div><dt data-i="f4k"></dt><dd data-i="f4v"></dd></div>
         </dl>
@@ -305,9 +304,6 @@ footer p{color:#bdb9ae;max-width:40em;font-size:17px}
         <div class="lh"><span class="wm">DHL</span><span class="svc" data-i="lSvc"></span></div>
         <div class="lrow"><div><span class="lk" data-i="lFromK"></span><span class="lv" data-i="lFrom"></span></div><div><span class="lk" data-i="lToK"></span><span class="lv" data-i="lTo"></span></div></div>
         <div class="lfull"><span class="lk" data-i="lContK"></span><span class="lv" data-i="lCont"></span></div>
-        <div class="lrow"><div><span class="lk" data-i="lWtK"></span><span class="lv" data-i="lWt"></span></div><div><span class="lk" data-i="lHandK"></span><span class="lv" data-i="lHand"></span></div></div>
-        <div class="bc"><svg id="barcode" viewBox="0 0 300 54" preserveAspectRatio="none"></svg><span class="num">MA 2025 1008 · JED · 2027</span></div>
-        <div class="stamp" data-i="stamp"></div>
       </div>
     </div>
   </div>
@@ -341,22 +337,8 @@ footer p{color:#bdb9ae;max-width:40em;font-size:17px}
     </div></article>
   </section>
 
-  <section id="accounts">
-    <div class="sh rv"><span class="k"><bdi dir="ltr">04 / ACCOUNTS</bdi></span><h2 data-i="accH"></h2><p data-i="accP"></p></div>
-    <div class="two">
-      <article class="acc dark rv">
-        <div class="ic"><svg viewBox="0 0 24 24"><path d="M3 7h11v9H3z M14 10h4l3 3v3h-7z" fill="none" stroke="#121212" stroke-width="1.8" stroke-linejoin="round"/><circle cx="7" cy="17.5" r="1.8" fill="#121212"/><circle cx="17" cy="17.5" r="1.8" fill="#121212"/></svg></div>
-        <h3 data-i="a1H"></h3><p data-i="a1P"></p><ul data-i="a1L"></ul><span class="ghost">D2D</span>
-      </article>
-      <article class="acc rv">
-        <div class="ic"><svg viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1 M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1" fill="none" stroke="#121212" stroke-width="1.8" stroke-linecap="round"/></svg></div>
-        <h3 data-i="a2H"></h3><p data-i="a2P"></p><ul data-i="a2L"></ul><span class="ghost">SAL</span>
-      </article>
-    </div>
-  </section>
-
   <section id="next">
-    <div class="sh rv"><span class="k"><bdi dir="ltr">05 / 2027</bdi></span><h2 data-i="nxH"></h2><p data-i="nxP"></p></div>
+    <div class="sh rv"><span class="k"><bdi dir="ltr">04 / 2027</bdi></span><h2 data-i="nxH"></h2><p data-i="nxP"></p></div>
     <div class="next" id="nextList"></div>
     <div class="support rv" id="support"></div>
   </section>
@@ -385,11 +367,11 @@ const T={
 en:{status:"IN TRANSIT · JEDDAH",eyebrow:"Import Operations · DHL Saudi Arabia",
 name:["Manar","Alshreef"],
 lede:"I run import shipments end to end in Jeddah: seven months on the D2A consol, 400+ delivery orders issued, and a door-to-door account taken over mid-stream with <b>zero loss</b>.",
-f1k:"Now",f1v:"EXW · Kerry D2D",f2k:"Based in",f2v:"Jeddah",f3k:"With DHL since",f3v:"Oct 2025",f4k:"Review period",f4v:"2025 – 2026",
+f1k:"Now",f1v:"EXW · Kerry D2D",f2k:"Based in",f2v:"Jeddah",f3k:"With DHL since",f3v:"21 Sep 2025",f4k:"Review period",f4v:"2025 – 2026",
 lSvc:"PRIORITY<br>DOOR-TO-DOOR",lFromK:"FROM",lFrom:"Import Ops<br>Jeddah, KSA",lToK:"TO",lTo:"2027<br>The next leg",
-lContK:"CONTENTS",lCont:"400+ DOs · 63+ DAP/DDP · D2A consol · Kerry D2D account · SAL network",
+lContK:"CONTENTS",lCont:"400+ DOs · 63+ DAP/DDP · D2A consol · Kerry D2D account",
 lWtK:"WEIGHT",lWt:"Heavy-weight ready",lHandK:"HANDLING",lHand:"Sensitive cargo",stamp:"READY FOR<br>2027",
-mq:["400+ DELIVERY ORDERS","63+ DAP & DDP SHIPMENTS","7 MONTHS D2A CONSOL","0 LOSS ON HANDOVER","KERRY DOOR-TO-DOOR","SAL RELATIONSHIPS","6 OF 11 INCOTERMS","READY FOR 2027"],
+mq:["400+ DELIVERY ORDERS","63+ DAP & DDP SHIPMENTS","7 MONTHS D2A CONSOL","0 LOSS ON HANDOVER","KERRY DOOR-TO-DOOR","AIR FREIGHT IMPORT","6 OF 11 INCOTERMS","READY FOR 2027"],
 impH:"One year, in numbers",impP:"What twelve months of import operations in Jeddah added up to.",
 stats:[["400","+","Delivery orders (DO) issued",1],["63","+","DAP & DDP shipments handled",.63],["7","","Months running the Jeddah D2A consol",.7],["0","","Loss on the door-to-door account handover",1],["6","/11","Incoterms handled hands-on",.545]],
 routeH:"My route so far",routeP:"Drawn like a shipment’s tracking line. Each checkpoint added responsibility, and the live end is where I work now. Tap a checkpoint.",
@@ -398,21 +380,21 @@ route:[
  {d:"Feb 2026",t:"Door-to-door account",k:"FEB 2026 → NOW",big:"0",h:"Took over a door-to-door account mid-stream",p:"I picked up a live door-to-door account from February and continued it without losing any business during the handover."},
  {d:"May 2026",t:"Consol completed",k:"7 MONTHS",big:"400+",h:"Consol assignment completed",p:"Seven months on the D2A consol, alongside 400+ delivery orders and 63+ DAP and DDP shipments."},
  {d:"Now",t:"EXW · Kerry account",k:"CURRENT",big:"EXW",h:"EXW shipments and the Kerry door-to-door account",p:"My current scope is EXW work, led by the Kerry door-to-door account, the most important account I handle today."}],
-incH:"Incoterms I work with",incP:"Hands-on import experience in six of the eleven Incoterms 2020 rules. Pick any term to see who carries each leg, and where the risk changes hands.",
+incH:"Incoterms in air freight import",incP:"As part of the Air Freight team, I have hands-on import experience in six of the eleven Incoterms 2020 rules. Pick any term to see who carries each leg of an air shipment, and where the risk changes hands.",
 legOn:"Handled hands-on",legOff:"Next to learn",
-stages:["Export clearance","Main carriage","Transit risk","Import clearance & duties","Unloading at destination"],
-seller:"SELLER",buyer:"BUYER",risk:"Risk passes here",done:"Handled hands-on",todo:"Next to learn",anyMode:"Any mode of transport",seaMode:"Sea and inland waterway only",
-desc:{EXW:"Ex Works. Goods are made available at the seller’s premises; the buyer arranges everything else, including export clearance.",
-FCA:"Free Carrier. The seller clears export and hands the goods to the buyer’s carrier at the named place.",
-CPT:"Carriage Paid To. The seller pays carriage to the destination, but risk passes when goods reach the first carrier.",
-CIP:"Carriage and Insurance Paid To. As CPT, plus the seller buys all-risks cargo insurance for the buyer.",
-DAP:"Delivered at Place. The seller delivers to the named place, ready for unloading; the buyer clears import and pays duties.",
-DPU:"Delivered at Place Unloaded. As DAP, but the seller also unloads at destination.",
-DDP:"Delivered Duty Paid. The seller carries everything to the door, including import clearance and duties.",
-FAS:"Free Alongside Ship. The seller places export-cleared goods alongside the vessel at the port of loading.",
-FOB:"Free On Board. The seller clears export and loads the goods on board the vessel named by the buyer.",
-CFR:"Cost and Freight. The seller pays sea freight to the destination port; risk passes once goods are on board.",
-CIF:"Cost, Insurance and Freight. As CFR, plus the seller buys minimum cargo insurance."},
+stages:["Export clearance at origin","Air freight","Transit risk","Import clearance & duties","Delivery to consignee"],
+seller:"SELLER",buyer:"BUYER",risk:"Risk passes here",done:"Handled hands-on",todo:"Next to learn",anyMode:"Air freight · Import",
+desc:{EXW:"Ex Works. Cargo is made available at the shipper’s premises; the consignee arranges everything else, including export clearance and the air freight.",
+FCA:"Free Carrier. The shipper clears export and hands the cargo to the consignee’s nominated forwarder or airline at origin.",
+FAS:"Free Alongside. The shipper delivers export-cleared cargo to the carrier’s terminal at origin; the consignee books and pays the freight.",
+FOB:"Free On Board. The shipper clears export and delivers the cargo to the carrier nominated by the consignee; freight is collect.",
+CPT:"Carriage Paid To. The shipper pays air freight to the destination airport, but risk passes once the airline receives the cargo.",
+CFR:"Cost and Freight. The shipper pays freight to destination; risk passes when the cargo is handed over at origin.",
+CIP:"Carriage and Insurance Paid To. As CPT, plus the shipper buys all-risks cargo insurance for the consignee.",
+CIF:"Cost, Insurance and Freight. As CFR, plus the shipper buys cargo insurance.",
+DAP:"Delivered at Place. The shipper delivers to the named place in KSA; the consignee clears import and pays duties.",
+DPU:"Delivered at Place Unloaded. As DAP, but the shipper also unloads the cargo at destination.",
+DDP:"Delivered Duty Paid. The shipper covers everything to the door in KSA, including import clearance and duties."},
 accH:"Accounts and relationships",accP:"Where I add value beyond the shipment count.",
 a1H:"Kerry door-to-door account",a1P:"My most important account today, run end to end on EXW terms.",
 a1L:["Full ownership from pickup to delivery","Built on the door-to-door account I took over in February 2026","Zero loss since the handover"],
@@ -424,15 +406,15 @@ supK:"SUPPORT I AM ASKING FOR",
 support:["Sensitive-cargo and dangerous-goods training","Mentoring from a key-account owner","Assignment to shipments on new Incoterms"],
 askK:"MY ASK FOR 2027",askH:"Contract conversion, and <em>a larger account.</em>",
 askP:"One year in, I have shown I can carry volume, protect accounts and solve problems at release. I am ready for the next leg.",
-note:"Figures are from my own shipment and delivery-order records for October 2025 to November 2026."},
+note:"Figures are from my own shipment and delivery-order records for September 2025 to November 2026."},
 ar:{status:"قيد الشحن · جدة",eyebrow:"عمليات الاستيراد · "+L("DHL")+" السعودية",
 name:["منار","الشريف"],
 lede:"أتولى شحنات الاستيراد في جدة من البداية للنهاية: سبعة أشهر على كونسول "+L("D2A")+"، وأكثر من 400 إذن تسليم، وحساب دور تو دور استلمته أثناء التشغيل <b>دون أي خسارة</b>.",
-f1k:"حالياً",f1v:L("EXW")+" · "+L("Kerry"),f2k:"المدينة",f2v:"جدة",f3k:"في "+L("DHL")+" منذ",f3v:"أكتوبر 2025",f4k:"فترة التقييم",f4v:L("2025 – 2026"),
+f1k:"حالياً",f1v:L("EXW")+" · "+L("Kerry"),f2k:"المدينة",f2v:"جدة",f3k:"في "+L("DHL")+" منذ",f3v:"21 سبتمبر 2025",f4k:"فترة التقييم",f4v:L("2025 – 2026"),
 lSvc:"أولوية<br>دور تو دور",lFromK:"من",lFrom:"عمليات الاستيراد<br>جدة",lToK:"إلى",lTo:"2027<br>المرحلة القادمة",
-lContK:"المحتويات",lCont:"أكثر من 400 إذن تسليم · 63 شحنة "+L("DAP/DDP")+" · كونسول "+L("D2A")+" · حساب "+L("Kerry")+" · علاقات سال",
+lContK:"المحتويات",lCont:"أكثر من 400 إذن تسليم · 63 شحنة "+L("DAP/DDP")+" · كونسول "+L("D2A")+" · حساب "+L("Kerry"),
 lWtK:"الوزن",lWt:"جاهزة للشحنات الثقيلة",lHandK:"المناولة",lHand:"شحنات حساسة",stamp:"جاهزة<br>لعام 2027",
-mq:["400+ DELIVERY ORDERS","63+ DAP & DDP SHIPMENTS","7 MONTHS D2A CONSOL","0 LOSS ON HANDOVER","KERRY DOOR-TO-DOOR","SAL RELATIONSHIPS","6 OF 11 INCOTERMS","READY FOR 2027"],
+mq:["400+ DELIVERY ORDERS","63+ DAP & DDP SHIPMENTS","7 MONTHS D2A CONSOL","0 LOSS ON HANDOVER","KERRY DOOR-TO-DOOR","AIR FREIGHT IMPORT","6 OF 11 INCOTERMS","READY FOR 2027"],
 impH:"عام واحد بالأرقام",impP:"حصيلة اثني عشر شهراً من عمليات الاستيراد في جدة.",
 stats:[["400","+","إذن تسليم "+L("DO")+" أصدرتها",1],["63","+","شحنة "+L("DAP & DDP"),.63],["7","","أشهر على كونسول "+L("D2A")+" جدة",.7],["0","","خسارة عند استلام حساب دور تو دور",1],["6","/11","من قواعد الإنكوترمز بخبرة عملية",.545]],
 routeH:"مساري حتى الآن",routeP:"مرسوم كخط تتبّع شحنة: كل نقطة أضافت مسؤولية جديدة، والطرف النشط هو موقعي الحالي. اضغط على أي نقطة.",
@@ -441,21 +423,21 @@ route:[
  {d:"Feb 2026",t:"حساب دور تو دور",k:"FEB 2026 → NOW",big:"0",h:"استلام حساب دور تو دور أثناء التشغيل",p:"استلمت حساب دور تو دور قائماً من فبراير، واستمر دون خسارة أي عمل أثناء التسليم."},
  {d:"May 2026",t:"إتمام الكونسول",k:"7 MONTHS",big:"400+",h:"إتمام مهمة الكونسول",p:"سبعة أشهر على كونسول "+L("D2A")+"، إلى جانب أكثر من 400 إذن تسليم و63 شحنة "+L("DAP & DDP")+"."},
  {d:"Now",t:L("EXW")+" · حساب "+L("Kerry"),k:"CURRENT",big:"EXW",h:"شحنات "+L("EXW")+" وحساب "+L("Kerry")+" دور تو دور",p:"نطاق عملي الحالي شحنات "+L("EXW")+"، وأهمها حساب "+L("Kerry")+" دور تو دور، وهو أهم حساب أتولاه اليوم."}],
-incH:"الإنكوترمز التي أعمل بها",incP:"خبرة استيراد عملية في ست من أصل إحدى عشرة قاعدة. اختر أي قاعدة لترى من يتحمّل كل مرحلة، وأين تنتقل المخاطر.",
+incH:"الإنكوترمز في استيراد الشحن الجوي",incP:"ضمن فريق الشحن الجوي، لدي خبرة استيراد عملية في ست من أصل إحدى عشرة قاعدة. اختر أي قاعدة لترى من يتحمّل كل مرحلة من الشحنة الجوية، وأين تنتقل المخاطر.",
 legOn:"خبرة عملية",legOff:"الخطوة القادمة",
-stages:["التخليص عند التصدير","النقل الرئيسي","مخاطر النقل","التخليص الجمركي والرسوم","التفريغ في الوجهة"],
-seller:"البائع",buyer:"المشتري",risk:"هنا تنتقل المخاطر",done:"خبرة عملية",todo:"الخطوة القادمة",anyMode:"لأي وسيلة نقل",seaMode:"للنقل البحري والنهري فقط",
-desc:{EXW:"تسليم في موقع البائع، ويتولى المشتري كل ما بعد ذلك بما فيه التخليص عند التصدير.",
-FCA:"يخلّص البائع التصدير ويسلّم البضاعة لناقل المشتري في المكان المحدد.",
-CPT:"يدفع البائع أجرة النقل حتى الوجهة، لكن المخاطر تنتقل عند التسليم لأول ناقل.",
-CIP:"مثل "+L("CPT")+" مع تأمين شامل يشتريه البائع لصالح المشتري.",
-DAP:"يسلّم البائع في المكان المحدد جاهزة للتفريغ، ويتولى المشتري التخليص ودفع الرسوم.",
-DPU:"مثل "+L("DAP")+" لكن البائع يتولى التفريغ في الوجهة أيضاً.",
-DDP:"يتولى البائع كل شيء حتى الباب، بما فيه التخليص الجمركي والرسوم.",
-FAS:"يضع البائع البضاعة مخلّصة للتصدير بجانب السفينة في ميناء الشحن.",
-FOB:"يخلّص البائع التصدير ويحمّل البضاعة على السفينة التي يحددها المشتري.",
-CFR:"يدفع البائع الشحن البحري حتى ميناء الوصول، والمخاطر تنتقل بعد التحميل على السفينة.",
-CIF:"مثل "+L("CFR")+" مع تأمين بالحد الأدنى يشتريه البائع."},
+stages:["التخليص في بلد التصدير","الشحن الجوي","مخاطر النقل","التخليص الجمركي والرسوم","التسليم للمستلم"],
+seller:"البائع",buyer:"المشتري",risk:"هنا تنتقل المخاطر",done:"خبرة عملية",todo:"الخطوة القادمة",anyMode:"الشحن الجوي · استيراد",
+desc:{EXW:"البضاعة جاهزة في موقع الشاحن، ويتولى المستلم كل ما بعد ذلك بما فيه التخليص في بلد التصدير والشحن الجوي.",
+FCA:"يخلّص الشاحن التصدير ويسلّم البضاعة للوكيل أو شركة الطيران التي يحددها المستلم في بلد التصدير.",
+FAS:"يسلّم الشاحن البضاعة مخلّصة للتصدير في محطة الناقل، ويحجز المستلم الشحن ويدفع أجرته.",
+FOB:"يخلّص الشاحن التصدير ويسلّم البضاعة للناقل الذي يحدده المستلم، والشحن على حساب المستلم.",
+CPT:"يدفع الشاحن الشحن الجوي حتى مطار الوصول، لكن المخاطر تنتقل عند استلام شركة الطيران للبضاعة.",
+CFR:"يدفع الشاحن الشحن حتى الوجهة، والمخاطر تنتقل عند تسليم البضاعة في بلد التصدير.",
+CIP:"مثل "+L("CPT")+" مع تأمين شامل يشتريه الشاحن لصالح المستلم.",
+CIF:"مثل "+L("CFR")+" مع تأمين على البضاعة يشتريه الشاحن.",
+DAP:"يسلّم الشاحن في المكان المحدد في المملكة، ويتولى المستلم التخليص الجمركي ودفع الرسوم.",
+DPU:"مثل "+L("DAP")+" لكن الشاحن يتولى تفريغ البضاعة في الوجهة أيضاً.",
+DDP:"يتولى الشاحن كل شيء حتى الباب في المملكة، بما فيه التخليص الجمركي والرسوم."},
 accH:"الحسابات والعلاقات",accP:"القيمة التي أضيفها بعيداً عن عدد الشحنات.",
 a1H:"حساب "+L("Kerry")+" دور تو دور",a1P:"أهم حساب أتولاه اليوم، بشروط "+L("EXW")+" ومن البداية للنهاية.",
 a1L:["مسؤولية كاملة من الاستلام حتى التسليم","امتداد لحساب دور تو دور الذي استلمته في فبراير 2026","صفر خسارة منذ الاستلام"],
@@ -467,7 +449,7 @@ supK:"الدعم الذي أطلبه",
 support:["تدريب على الشحنات الحساسة والبضائع الخطرة","إرشاد من مسؤول حسابات رئيسية","إسناد شحنات بقواعد إنكوترمز جديدة"],
 askK:"طلبي لعام 2027",askH:"تحويل العقد، <em>وتولّي حساب أكبر.</em>",
 askP:"خلال عام واحد أثبتّ قدرتي على تحمّل حجم العمل، وحماية الحسابات، وحل مشاكل الإفراج. وأنا جاهزة للمرحلة القادمة.",
-note:"الأرقام من سجلات شحناتي وأذونات التسليم للفترة من أكتوبر 2025 إلى نوفمبر 2026."}
+note:"الأرقام من سجلات شحناتي وأذونات التسليم للفترة من سبتمبر 2025 إلى نوفمبر 2026."}
 };
 const TERMS=["EXW","FCA","FAS","FOB","CPT","CFR","CIP","CIF","DAP","DPU","DDP"];
 const DONE=new Set(["EXW","CPT","CIP","DAP","DDP","CFR"]);
@@ -491,7 +473,7 @@ let lang="en",sel=3,term="DDP",counted=false;
 const $=id=>document.getElementById(id);
 
 // barcode
-(function(){let x=0,s=7,h="";while(x<296){s=(s*9301+49297)%233280;const w=1+Math.floor(s/233280*4);if(Math.floor(s/7)%2)h+='<rect x="'+x+'" y="0" width="'+w+'" height="54" fill="#121212"/>';x+=w+1}$("barcode").innerHTML=h})();
+false&&(function(){let x=0,s=7,h="";while(x<296){s=(s*9301+49297)%233280;const w=1+Math.floor(s/233280*4);if(Math.floor(s/7)%2)h+='<rect x="'+x+'" y="0" width="'+w+'" height="54" fill="#121212"/>';x+=w+1}$("barcode").innerHTML=h})();
 
 function render(){
   const t=T[lang];
@@ -520,7 +502,7 @@ function drawTerm(){
   const t=T[lang];
   $("terms").innerHTML=TERMS.map(c=>'<button class="'+(DONE.has(c)?"on":"")+'" aria-pressed="'+(c===term)+'" data-t="'+c+'">'+c+'</button>').join("");
   $("terms").querySelectorAll("button").forEach(b=>b.onclick=()=>{term=b.dataset.t;drawTerm()});
-  $("tdet").innerHTML='<div class="thead"><span class="code">'+term+'</span><span class="pill'+(DONE.has(term)?'':' no')+'">'+(DONE.has(term)?t.done:t.todo)+'</span><span class="mode">'+(SEA.has(term)?t.seaMode:t.anyMode)+'</span></div><p class="desc">'+t.desc[term]+'</p>';
+  $("tdet").innerHTML='<div class="thead"><span class="code">'+term+'</span><span class="pill'+(DONE.has(term)?'':' no')+'">'+(DONE.has(term)?t.done:t.todo)+'</span><span class="mode">'+t.anyMode+'</span></div><p class="desc">'+t.desc[term]+'</p>';
   $("jicons").innerHTML=t.stages.map((s,i)=>'<div><svg viewBox="0 0 24 24">'+JICON[i]+'</svg><span>'+s+'</span></div>').join("");
   const sp=SPLIT[term],tr=$("track");
   let cells=tr.querySelectorAll(".cell");
